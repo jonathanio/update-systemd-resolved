@@ -1,13 +1,17 @@
 # update-systemd-resolved
 
-This is a script designed to integrate OpenVPN with the `systemd-resolved`
-service via DBus instead of trying to override `/etc/resolv.conf` or manipulate
+This is a helper script designed to integrate OpenVPN with the `systemd-resolved`
+service via DBus instead of trying to override `/etc/resolv.conf`, or manipulate
 `systemd-networkd` configuration files.
 
-Since `systemd-229`, the `systemd-resolved` service has had an API available via
-DBus which allows direct manipulation of the DNS configuration for a link. This
-script makes use of `busctl` from `systemd` to send messages to
-`systemd-resolved` to update the DNS for the link created by OpenVPN.
+Since systemd-229, the `systemd-resolved` service has an API available via
+DBus which allows directly setting the DNS configuration for a link. This script
+makes use of `busctl` from systemd to send DBus messages to `systemd-resolved`
+to update the DNS for the link created by OpenVPN.
+
+*NOTE*: This is an alpha script. So long as you're using OpenVPN 2.1 or greater,
+iproute2, and have at least version 229 of systemd, then it should work.
+Nonetheless, if you do come across problems, fork and fix, or raise an issue.
 
 # How to use?
 
@@ -22,9 +26,9 @@ Then update your `/etc/nsswitch.conf` file to look up DNS via the `resolve`
 service:
 
 ```
-# Use systems-resolved first, then fall back to glibc and /etc/resolv.conf
+# Use systemd-resolved first, then fall back to /etc/resolv.conf
 hosts: files resolve dns myhostname
-# Use glibc and /etc/resolv.conf first, then fall back to systems-resolved
+# Use /etc/resolv.conf first, then fall back to systemd-resolved
 hosts: files dns resolve myhostname
 ```
 

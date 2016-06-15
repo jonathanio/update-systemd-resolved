@@ -46,9 +46,9 @@ function log() {
   logger -t update-systemd-resolved "${@}"
 }
 
-log "Called on ${script_type}"
 case $script_type in
   up)
+    log "Link coming up"
     for foreign_option in ${!foreign_option_*} ; do
       option="${!foreign_option}"
       [[ "${option// *}" == "dhcp-option" ]] || continue
@@ -98,9 +98,11 @@ case $script_type in
 
     ;;
   down)
-    log "${0} down"
+    log "Link going down"
     busctl call ${DBUS_DEST} ${DBUS_NODE} ${DBUS_DEST}.Manager \
       RevertLink i ${IF_INDEX}
     ;;
 
 esac
+
+exit 0

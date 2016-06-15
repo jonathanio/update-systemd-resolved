@@ -53,6 +53,7 @@ there are a number of areas this still needs work on, including:
   - [ ] Full IPv6 processing inside Bash? Need to convert any format of address into a 16-byte array
 - [ ] Manage the priority of the DNS settings for default routes?
 - [ ] Add error handling around `busctl` calls
+- [x] Revert the link settings on down state
 
 # How to help
 

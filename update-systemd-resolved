@@ -84,8 +84,8 @@ case $script_type in
     ;;
   down)
     log "${0} down"
-    # Do we need to do anything? If the link drops, systemd-resolved will
-    # remove all the settings for us anyway, so this may no longer be needed
+    busctl call ${DBUS_DEST} ${DBUS_NODE} ${DBUS_DEST}.Manager \
+      RevertLink i ${IF_INDEX}
     ;;
 
 esac

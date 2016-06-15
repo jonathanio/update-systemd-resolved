@@ -1,0 +1,137 @@
+#!/bin/bash
+#
+# Test Framework for update-systemd-resolved.
+# Copyright (C) 2016, Jonathan Wright <jon@than.io>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# Set colour escape sequences
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+ORANGE='\033[0;33m'
+GREEN='\033[0;32m'
+DARK='\033[1;30m'
+RESET='\033[0m'
+# Set Pass/Fail signatures
+PASS="✓"
+FAIL="✗"
+# Counters
+COUNT_PASS=0
+COUNT_FAIL=0
+
+function busctl {
+  shift 4
+  _log "busctl called with: ${@}"
+  # Set that busctl has been called
+  busctl_called=1
+
+  case "${1}" in
+    SetLinkDNS)
+      shift 2
+      if [[ "${TEST_BUSCTL_DNS}" == "" ]]; then
+        [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${@}" ]] || \
+          _fail "SetLinkDNS was called and should not be: '${@}'"
+      else
+        [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${@}" ]] && \
+          _pass "SetLinkDNS was called correctly" || \
+          _fail "SetLinkDNS was not given the correct arguments:\n" \
+                "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DNS}'\n" \
+                "     Received: '${@}'"
+      fi
+      ;;
+    SetLinkDomains)
+      shift 2
+      if [[ "${TEST_BUSCTL_DOMAINS}" == "" ]]; then
+        [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "${@}" ]] || \
+          _fail "SetLinkDomains was called and should not be: '${@}'"
+      else
+        [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "${@}" ]] && \
+          _pass "SetLinkDomains was called correctly" || \
+          _fail "SetLinkDomains was not given the correct arguments:\n" \
+                "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DOMAINS}'\n" \
+                "     Received: '${@}'"
+      fi
+      ;;
+  esac
+}
+
+function ip {
+  _log "ip called with: ${@}"
+
+  [[ "${1} ${2} ${3} ${4}" == "link show dev ${dev}" ]] && \
+    _pass "ip called with correct arguments" || \
+    _fail "ip not called with correct arguments"
+
+  # Return fake ip statement
+  echo -e "${ip_ifindex}: ${dev}: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP>" \
+    " mtu 1500 qdisc fq_codel state UNKNOWN mode DEFAULT group default qlen" \
+    " 100\n    link/none"
+}
+
+function logger {
+  # Remove standard options
+  shift 2
+  _log "-- ${@}"
+}
+
+function exit {
+  # Override
+  _log "exit called with status ${1}"
+}
+
+function _log {
+  ( >&2 echo -e "    ${DARK}${@}${RESET}" )
+}
+
+function _pass {
+  COUNT_PASS=$((COUNT_PASS+1))
+  ( >&2 echo -e "  ${GREEN}${PASS}${RESET} ${@}" )
+}
+
+function _fail {
+  COUNT_FAIL=$((COUNT_FAIL+1))
+  ( >&2 echo -e "  ${RED}${FAIL} ${@}${RESET}" )
+}
+
+echo "update-systemd-resolved Test Suite"
+echo
+
+for TEST in tests/*.sh; do
+  # Set/Reset loop variables
+  busctl_called=0
+  ip_ifindex=$((RANDOM%=64))
+  # Clear foreign_option_*
+  foreign_option_1=""
+  foreign_option_2=""
+  foreign_option_3=""
+  foreign_option_4=""
+  foreign_option_5=""
+
+  # Import the test configuration
+  source "${TEST}"
+  echo -e "${GREEN}- Testing ${TEST_TITLE}${RESET}"
+
+  # Source, don't run, so we don't need to export and internal functions override
+  # external calls out to system commands
+  source update-systemd-resolved
+
+  if [[ ${TEST_BUSCTL_CALLED} -eq 0 ]]; then
+    [[ ${busctl_called} -eq 0 ]] && \
+      _pass "busctl was not called, as expected" || \
+      _fail "busctl was called, not expected"
+  fi
+
+  echo
+
+done
+
+echo -e "  ${GREEN}${PASS} ${COUNT_PASS} Passed${RESET}"
+echo -e "  ${RED}${FAIL} ${COUNT_FAIL} Failed${RESET}"

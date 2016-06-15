@@ -53,6 +53,7 @@ case $script_type in
       option="${!foreign_option}"
       [[ "${option// *}" == "dhcp-option" ]] || continue
       setting="${option//dhcp-option }"
+      log "${setting}"
       case "${setting// *}" in
         DNS)
           address="${setting//DNS }"
@@ -86,14 +87,14 @@ case $script_type in
     done
 
     [[ ${dns_server_count} -gt 0 ]] && \
-      log "${DBUS_SETLINKDNS} with ${IF_INDEX} ${dns_server_count}${dns_servers}" && \
+      log "SetLinkDNS(${IF_INDEX} ${dns_server_count}${dns_servers})" && \
       busctl call ${DBUS_DEST} ${DBUS_NODE} ${DBUS_DEST}.Manager \
         SetLinkDNS "ia(iay)" ${IF_INDEX} ${dns_server_count}${dns_servers}
 
     [[ ${dns_domain_count} -gt 0 ]] && \
-      log "${DBUS_SETLINKDNS} with ${IF_INDEX} ${dns_domain_count}${dns_servers}" && \
+      log "SetLinkDomains(${IF_INDEX} ${dns_domain_count}${dns_domains})" && \
       busctl call ${DBUS_DEST} ${DBUS_NODE} ${DBUS_DEST}.Manager \
-        SetLinkDomains "ia(sb)" ${IF_INDEX} ${dns_domain_count}${dns_servers}
+        SetLinkDomains "ia(sb)" ${IF_INDEX} ${dns_domain_count}${dns_domains}
 
     ;;
   down)

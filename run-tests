@@ -134,8 +134,12 @@ for TEST in tests/*.sh; do
   fi
 
   echo
-
 done
 
 echo -e "  ${GREEN}${PASS} ${COUNT_PASS} Passed${RESET}"
 echo -e "  ${RED}${FAIL} ${COUNT_FAIL} Failed${RESET}"
+
+# Make sure we fail if there are failed tests
+[[ ${COUNT_FAIL} -eq 0 ]] \
+  && exit 0 \
+  || exit 1

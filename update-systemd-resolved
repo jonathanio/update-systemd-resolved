@@ -73,14 +73,14 @@ case $script_type in
           [[ -z "${domain}" ]] && continue
           dns_domain_count=$((dns_domain_count+1))
           log "Adding DNS Domain ${address}"
-          dns_domains="${dns_domains} ${domain} true"
+          dns_domains="${dns_domains} ${domain} false"
           ;;
         DOMAIN-SEARCH)
           domain="${setting//DOMAIN-SEARCH }"
           [[ -z "${domain}" ]] && continue
           dns_domain_count=$((dns_domain_count+1))
           log "Adding DNS Search Domain ${address}"
-          dns_domains="${dns_domains} ${domain} false"
+          dns_domains="${dns_domains} ${domain} true"
           ;;
       esac
     done

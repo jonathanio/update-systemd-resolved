@@ -2,7 +2,6 @@
 script_type="up"
 dev="tun01"
 
-TEST_IFINDEX="$((RANDOM%=64))"
 TEST_TITLE="No Updates"
 TEST_BUSCTL_CALLED=0
 TEST_BUSCTL_DNS=""

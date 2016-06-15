@@ -23,36 +23,40 @@ RESET='\033[0m'
 # Set Pass/Fail signatures
 PASS="✓"
 FAIL="✗"
+# Counters
+COUNT_PASS=0
+COUNT_FAIL=0
 
 function busctl {
-  # _log "busctl called with: ${@}"
+  shift 4
+  _log "busctl called with: ${@}"
   # Set that busctl has been called
   busctl_called=1
 
-  case "${5}" in
+  case "${1}" in
     SetLinkDNS)
-      shift 6
+      shift 2
       if [[ "${TEST_BUSCTL_DNS}" == "" ]]; then
-        [[ "${TEST_IFINDEX} ${TEST_BUSCTL_DNS}" == "${@}" ]] || \
+        [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${@}" ]] || \
           _fail "SetLinkDNS was called and should not be: '${@}'"
       else
-        [[ "${TEST_IFINDEX} ${TEST_BUSCTL_DNS}" == "${@}" ]] && \
+        [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${@}" ]] && \
           _pass "SetLinkDNS was called correctly" || \
           _fail "SetLinkDNS was not given the correct arguments:\n" \
-                "     Expected: '${TEST_IFINDEX} ${TEST_BUSCTL_DNS}'\n" \
+                "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DNS}'\n" \
                 "     Received: '${@}'"
       fi
       ;;
     SetLinkDomains)
-      shift 6
+      shift 2
       if [[ "${TEST_BUSCTL_DOMAINS}" == "" ]]; then
-        [[ "${TEST_IFINDEX} ${TEST_BUSCTL_DOMAINS}" == "${@}" ]] || \
+        [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "${@}" ]] || \
           _fail "SetLinkDomains was called and should not be: '${@}'"
       else
-        [[ "${TEST_IFINDEX} ${TEST_BUSCTL_DOMAINS}" == "${@}" ]] && \
+        [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "${@}" ]] && \
           _pass "SetLinkDomains was called correctly" || \
           _fail "SetLinkDomains was not given the correct arguments:\n" \
-                "     Expected: '${TEST_IFINDEX} ${TEST_BUSCTL_DOMAINS}'\n" \
+                "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DOMAINS}'\n" \
                 "     Received: '${@}'"
       fi
       ;;
@@ -60,14 +64,14 @@ function busctl {
 }
 
 function ip {
-  # _log "ip called with: ${@}"
+  _log "ip called with: ${@}"
 
   [[ "${1} ${2} ${3} ${4}" == "link show dev ${dev}" ]] && \
     _pass "ip called with correct arguments" || \
     _fail "ip not called with correct arguments"
 
   # Return fake ip statement
-  echo -e "${TEST_IFINDEX}: ${dev}: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP>" \
+  echo -e "${ip_ifindex}: ${dev}: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP>" \
     " mtu 1500 qdisc fq_codel state UNKNOWN mode DEFAULT group default qlen" \
     " 100\n    link/none"
 }
@@ -78,15 +82,22 @@ function logger {
   _log "-- ${@}"
 }
 
+function exit {
+  # Override
+  _log "exit called with status ${1}"
+}
+
 function _log {
   ( >&2 echo -e "    ${DARK}${@}${RESET}" )
 }
 
 function _pass {
+  COUNT_PASS=$((COUNT_PASS+1))
   ( >&2 echo -e "  ${GREEN}${PASS}${RESET} ${@}" )
 }
 
 function _fail {
+  COUNT_FAIL=$((COUNT_FAIL+1))
   ( >&2 echo -e "  ${RED}${FAIL} ${@}${RESET}" )
 }
 
@@ -96,6 +107,14 @@ echo
 for TEST in tests/*.sh; do
   # Set/Reset loop variables
   busctl_called=0
+  ip_ifindex=$((RANDOM%=64))
+  # Clear foreign_option_*
+  foreign_option_1=""
+  foreign_option_2=""
+  foreign_option_3=""
+  foreign_option_4=""
+  foreign_option_5=""
+
   # Import the test configuration
   source "${TEST}"
   echo -e "${GREEN}- Testing ${TEST_TITLE}${RESET}"
@@ -113,3 +132,6 @@ for TEST in tests/*.sh; do
   echo
 
 done
+
+echo -e "  ${GREEN}${PASS} ${COUNT_PASS} Passed${RESET}"
+echo -e "  ${RED}${FAIL} ${COUNT_FAIL} Failed${RESET}"

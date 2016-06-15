@@ -50,8 +50,12 @@ there are a number of areas this still needs work on, including:
 - [x] Set the DNS domain for the link
 - [x] Set one or more DNS search domains for the link
 - [ ] Set of one or more IPv6 DNS servers on the link
-  - [ ] Full IPv6 processing inside Bash? Need to convert any format of address into a 16-byte array
+  - Need to convert any format of address into a 16-byte array.
+  - Full IPv6 processing inside Bash?
 - [ ] Manage the priority of the DNS settings for default routes?
+  - This may no longer be needed as long as DOMAIN and/or DOMAIN-SEARCH are
+    configured, as `systemd-resolved` will route the DNS queries based on
+    the domain being requested and if it matches any of these options.
 - [ ] Add error handling around `busctl` calls
 - [x] Revert the link settings on down state
 

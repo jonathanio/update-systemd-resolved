@@ -33,13 +33,12 @@ hosts: files dns resolve myhostname
 ```
 
 Finally, update your OpenVPN configuration file and set the `up` and `down`
-options, and enable `up-restart`:
+options:
 
 ```
 script-security 2
 up /etc/openvpn/update-systemd-resolved
 down /etc/openvpn/update-systemd-resolved
-up-restart
 ```
 
 # Notes

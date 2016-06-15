@@ -22,10 +22,6 @@
 # or command-line argument. For example:
 #   up /etc/openvpn/update-systemd-resolved
 #   down /etc/openvpn/update-systemd-resolved
-#
-# NOTE: It is possible up-restart will be needed as well. If the link drops or
-#       the interface is removed, systemd-resolved will not retain the previous
-#       state. In that case, OpenVPN must re-add the settings for them to work.
 
 # Abort if the environment is missing
 [[ -z ${script_type} || -z "${dev}" ]] && exit 0

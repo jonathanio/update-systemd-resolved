@@ -61,9 +61,14 @@ case $script_type in
           dns_server_count=$((dns_server_count+1))
           if [[ "${address}" =~ ":" ]]; then
             log "Adding IPv6 DNS Server ${address}"
-            # The following is a placeholder. Will need a way to convert to
-            # full address and then break into a 16 byte array
-            #   dns_servers="2 16 ${address//:/ }"
+            # Add array count and byte count
+            dns_servers="${dns_servers} 2 16"
+            declare -a fields
+            fields=("${address//:/ }")
+            for field in ${fields[@]}; do
+              field_full="$(printf "%04x" "0x${field}")"
+              dns_servers="${dns_servers} $((16#${field_full:0:2})) $((16#${field_full:2:2}))"
+            done
           else
             log "Adding IPv4 DNS Server ${address}"
             dns_servers="${dns_servers} 2 4 ${address//./ }"

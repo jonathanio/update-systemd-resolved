@@ -60,6 +60,9 @@ function busctl {
                 "     Received: '${@}'"
       fi
       ;;
+    *)
+      _fail "Unknown command called on busctl: ${1}"
+      ;;
   esac
 }
 
@@ -68,7 +71,7 @@ function ip {
 
   [[ "${1} ${2} ${3} ${4}" == "link show dev ${dev}" ]] && \
     _pass "ip called with correct arguments" || \
-    _fail "ip not called with correct arguments"
+    _fail "ip called with incorrect or unknown arguments"
 
   # Return fake ip statement
   echo -e "${ip_ifindex}: ${dev}: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP>" \
@@ -107,6 +110,7 @@ echo
 for TEST in tests/*.sh; do
   # Set/Reset loop variables
   busctl_called=0
+  # Keep this random, as we will never know the ifindex up-front
   ip_ifindex=$((RANDOM%=64))
   # Clear foreign_option_*
   foreign_option_1=""

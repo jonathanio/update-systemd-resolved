@@ -127,6 +127,10 @@ for TEST in tests/*.sh; do
   # external calls out to system commands
   source update-systemd-resolved
 
+  [[ ${?} -eq 0 ]] &&
+    _pass "script exited with a 0 exit status" || \
+    _fail "script exited with a ${1} exit status"
+
   if [[ ${TEST_BUSCTL_CALLED} -eq 0 ]]; then
     [[ ${busctl_called} -eq 0 ]] && \
       _pass "busctl was not called, as expected" || \

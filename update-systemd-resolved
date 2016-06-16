@@ -64,6 +64,20 @@ case $script_type in
             # Add array count and byte count
             dns_servers="${dns_servers} 2 16"
             declare -a fields
+            if [[ "${address}" =~ "::" ]]; then
+              declare -a split
+              count_left=0; count_right=0
+              split=(${address//::/ })
+              [[ -z "${split[1]}" ]] && \
+                split[1]="${split[0]}" && split[0]="0"
+              address="${split[0]}"
+              fields=(${split[0]//:/ }); count_left=${#fields[@]}
+              fields=(${split[1]//:/ }); count_right=${#fields[@]}
+              for null in $(seq 1 $((8-(count_left+count_right)))); do
+                address+=":0"
+              done
+              address+=":${split[1]}"
+            fi
             fields=("${address//:/ }")
             for field in ${fields[@]}; do
               field_full="$(printf "%04x" "0x${field}")"

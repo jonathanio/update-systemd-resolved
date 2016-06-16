@@ -70,8 +70,8 @@ function ip {
   _log "ip called with: ${@}"
 
   [[ "${1} ${2} ${3} ${4}" == "link show dev ${dev}" ]] && \
-    _pass "ip called with correct arguments" || \
-    _fail "ip called with incorrect or unknown arguments"
+    _pass "ip was called correctly" || \
+    _fail "ip was called with incorrect or unknown arguments"
 
   # Return fake ip statement
   echo -e "${ip_ifindex}: ${dev}: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP>" \

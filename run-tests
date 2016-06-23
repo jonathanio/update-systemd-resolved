@@ -70,8 +70,8 @@ function ip {
   _log "ip called with: ${@}"
 
   [[ "${1} ${2} ${3} ${4}" == "link show dev ${dev}" ]] && \
-    _pass "ip called with correct arguments" || \
-    _fail "ip called with incorrect or unknown arguments"
+    _pass "ip was called correctly" || \
+    _fail "ip was called with incorrect or unknown arguments"
 
   # Return fake ip statement
   echo -e "${ip_ifindex}: ${dev}: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP>" \
@@ -127,6 +127,10 @@ for TEST in tests/*.sh; do
   # external calls out to system commands
   source update-systemd-resolved
 
+  [[ ${?} -eq 0 ]] &&
+    _pass "script exited with a 0 exit status" || \
+    _fail "script exited with a ${1} exit status"
+
   if [[ ${TEST_BUSCTL_CALLED} -eq 0 ]]; then
     [[ ${busctl_called} -eq 0 ]] && \
       _pass "busctl was not called, as expected" || \
@@ -134,8 +138,10 @@ for TEST in tests/*.sh; do
   fi
 
   echo
-
 done
 
 echo -e "  ${GREEN}${PASS} ${COUNT_PASS} Passed${RESET}"
 echo -e "  ${RED}${FAIL} ${COUNT_FAIL} Failed${RESET}"
+
+# Make sure we fail if there are failed tests
+[[ ${COUNT_FAIL} -eq 0 ]]

@@ -61,9 +61,28 @@ case $script_type in
           dns_server_count=$((dns_server_count+1))
           if [[ "${address}" =~ ":" ]]; then
             log "Adding IPv6 DNS Server ${address}"
-            # The following is a placeholder. Will need a way to convert to
-            # full address and then break into a 16 byte array
-            #   dns_servers="2 16 ${address//:/ }"
+            # Add array count and byte count
+            dns_servers="${dns_servers} 2 16"
+            declare -a fields
+            if [[ "${address}" =~ "::" ]]; then
+              declare -a split
+              count_left=0; count_right=0
+              split=(${address//::/ })
+              [[ -z "${split[1]}" ]] && \
+                split[1]="${split[0]}" && split[0]="0"
+              address="${split[0]}"
+              fields=(${split[0]//:/ }); count_left=${#fields[@]}
+              fields=(${split[1]//:/ }); count_right=${#fields[@]}
+              for null in $(seq 1 $((8-(count_left+count_right)))); do
+                address+=":0"
+              done
+              address+=":${split[1]}"
+            fi
+            fields=("${address//:/ }")
+            for field in ${fields[@]}; do
+              field_full="$(printf "%04x" "0x${field}")"
+              dns_servers="${dns_servers} $((16#${field_full:0:2})) $((16#${field_full:2:2}))"
+            done
           else
             log "Adding IPv4 DNS Server ${address}"
             dns_servers="${dns_servers} 2 4 ${address//./ }"
@@ -73,14 +92,14 @@ case $script_type in
           domain="${setting//DOMAIN }"
           [[ -z "${domain}" ]] && continue
           dns_domain_count=$((dns_domain_count+1))
-          log "Adding DNS Domain ${address}"
+          log "Adding DNS Domain ${domain}"
           dns_domains="${dns_domains} ${domain} false"
           ;;
         DOMAIN-SEARCH)
           domain="${setting//DOMAIN-SEARCH }"
           [[ -z "${domain}" ]] && continue
           dns_domain_count=$((dns_domain_count+1))
-          log "Adding DNS Search Domain ${address}"
+          log "Adding DNS Search Domain ${domain}"
           dns_domains="${dns_domains} ${domain} true"
           ;;
       esac

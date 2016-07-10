@@ -26,6 +26,10 @@ FAIL="✗"
 # Counters
 COUNT_PASS=0
 COUNT_FAIL=0
+# Flag for determining whether a test script called the `runtest' function
+RUNTEST_CALLED=0
+
+AUTOMATED_TESTING=1
 
 function busctl {
   shift 4
@@ -81,8 +85,8 @@ function ip {
 
 function logger {
   # Remove standard options
-  shift 2
-  _log "-- ${@}"
+  local message="$*"
+  _log "-- ${message##* -- }"
 }
 
 function exit {
@@ -104,11 +108,42 @@ function _fail {
   ( >&2 echo -e "  ${RED}${FAIL} ${@}${RESET}" )
 }
 
+function runtest {
+  # Increment counter so that we don't double-execute if a test script calls
+  # this function.
+  : ${RUNTEST_CALLED:=0}
+  (( RUNTEST_CALLED += 1 ))
+
+  echo -e "${GREEN}- Testing ${TEST_TITLE:-a nameless test}${RESET}"
+
+  # Source, don't run, so we don't need to export and internal functions override
+  # external calls out to system commands
+  source update-systemd-resolved
+  exit_status="$?"
+  exit_message="script exited with a ${exit_status} exit status"
+
+  if [[ "$(( exit_status > 0 ))" == "${EXPECT_FAILURE:-0}" ]]; then
+      _pass "$exit_message"
+  else
+      _fail "$exit_message"
+  fi
+
+  if [[ ${TEST_BUSCTL_CALLED} -eq 0 ]]; then
+    [[ ${busctl_called} -eq 0 ]] && \
+      _pass "busctl was not called, as expected" || \
+      _fail "busctl was called, not expected"
+  fi
+
+  echo
+}
+
 echo "update-systemd-resolved Test Suite"
 echo
 
 for TEST in tests/*.sh; do
   # Set/Reset loop variables
+  RUNTEST_CALLED=0
+  EXPECT_FAILURE=0
   busctl_called=0
   # Keep this random, as we will never know the ifindex up-front
   ip_ifindex=$((RANDOM%=64))
@@ -121,23 +156,8 @@ for TEST in tests/*.sh; do
 
   # Import the test configuration
   source "${TEST}"
-  echo -e "${GREEN}- Testing ${TEST_TITLE}${RESET}"
 
-  # Source, don't run, so we don't need to export and internal functions override
-  # external calls out to system commands
-  source update-systemd-resolved
-
-  [[ ${?} -eq 0 ]] &&
-    _pass "script exited with a 0 exit status" || \
-    _fail "script exited with a ${1} exit status"
-
-  if [[ ${TEST_BUSCTL_CALLED} -eq 0 ]]; then
-    [[ ${busctl_called} -eq 0 ]] && \
-      _pass "busctl was not called, as expected" || \
-      _fail "busctl was called, not expected"
-  fi
-
-  echo
+  (( RUNTEST_CALLED > 0 )) || runtest
 done
 
 echo -e "  ${GREEN}${PASS} ${COUNT_PASS} Passed${RESET}"

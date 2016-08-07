@@ -31,6 +31,7 @@ SCRIPT_NAME="${BASH_SOURCE[0]##*/}"
 
 log() {
   logger --id="$$" -t "$SCRIPT_NAME" "$@"
+  echo "$@"
 }
 
 for level in emerg err warning info debug; do
@@ -158,9 +159,10 @@ process_dns_ipv4() {
 }
 
 # Enforces RFC 5952:
-#   1. Don't shorted a single 0 field to '::'
+#   1. Don't shorten a single 0 field to '::'
 #   2. Only longest run of zeros should be compressed
 #   3. If there are multiple longest runs, the leftmost should be compressed
+#   4. Address must be maximally compressed, so no all-zero runs next to '::'
 #
 # ...
 #
@@ -177,6 +179,9 @@ parse_ipv6() {
 
   if [[ "$raw_address" == *::*::* ]]; then
     log_invalid_ipv6 "address cannot contain more than one \`::'"
+    return 1
+  elif [[ "$raw_address" =~ :0+:: ]] || [[ "$raw_address" =~ ::0+: ]]; then
+    log_invalid_ipv6 "address contains a 0-group adjacent to \`::' and is not maximally shortened"
     return 1
   fi
 
@@ -241,7 +246,7 @@ parse_ipv6() {
 
   if [[ "$raw_address" == *::* ]]; then
     if (( ${#tokenized_segments[*]} == length )); then
-      log_invalid_ipv6 "single \`0' fields should not be shortened"
+      log_invalid_ipv6 "single \`0' fields should not be compressed"
       return 1
     else
       local -i largest_run_i=0 largest_run=0

@@ -41,27 +41,8 @@ options:
 ```
 script-security 2
 up /etc/openvpn/update-systemd-resolved
-down /etc/openvpn/update-systemd-resolved
+pre-down /etc/openvpn/update-systemd-resolved
 ```
-
-# Notes
-
-This is an early release having managed to get it to successfully run. However
-there are a number of areas this still needs work on, including:
-
-- [x] Set of one or more IPv4 DNS servers on the link
-- [x] Set the DNS domain for the link
-- [x] Set one or more DNS search domains for the link
-- [ ] Set of one or more IPv6 DNS servers on the link
-  - Need to convert any format of address into a 16-byte array.
-  - Full IPv6 processing inside Bash?
-- [ ] Manage the priority of the DNS settings for default routes?
-  - This may no longer be needed as long as DOMAIN and/or DOMAIN-SEARCH are
-    configured, as `systemd-resolved` will route the DNS queries based on
-    the domain being requested and if it matches any of these options.
-- [ ] Add error handling around `busctl` calls
-- [x] Revert the link settings on down state
-- [x] Develop Unit Tests for development and regression testing
 
 # How to help
 

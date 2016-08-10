@@ -21,7 +21,7 @@ info:
 	@echo '  hosts: files dns resolve myhostname'
 	@echo
 	@echo 'You should also update your OpenVPN configuration:'
-	@printf '  script-security 2\n  up %s\n  pre-down %s\n' $(DEST) $(DEST)
+	@printf '  script-security 2\n  up %s\n  down-pre %s\n' $(DEST) $(DEST)
 
 test:
 	@./run-tests

@@ -35,13 +35,13 @@ hosts: files resolve dns myhostname
 hosts: files dns resolve myhostname
 ```
 
-Finally, update your OpenVPN configuration file and set the `up` and `down`
+Finally, update your OpenVPN configuration file and set the `up` and `down-pre`
 options:
 
 ```
 script-security 2
 up /etc/openvpn/update-systemd-resolved
-pre-down /etc/openvpn/update-systemd-resolved
+down-pre /etc/openvpn/update-systemd-resolved
 ```
 
 # How to help

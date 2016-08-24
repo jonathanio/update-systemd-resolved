@@ -153,6 +153,7 @@ for TEST in tests/*.sh; do
   foreign_option_3=""
   foreign_option_4=""
   foreign_option_5=""
+  foreign_option_6=""
 
   # Import the test configuration
   source "${TEST}"

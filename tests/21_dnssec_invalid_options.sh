@@ -5,9 +5,9 @@ TEST_BUSCTL_CALLED=0
 EXPECT_FAILURE=1
 
 declare -a test_invalids=(
-  'TRUE'
-  'FALSE'
-  'ALLOW-DOWNGRADE'
+  '1'
+  '0'
+  'DOWNGRADE'
 )
 
 for test_option in "${test_invalids[@]}"; do

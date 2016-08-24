@@ -130,7 +130,7 @@ up() {
       busctl_params=("$if_index" "${dns_sec}")
     fi
     info "SetLinkDNSSEC(${busctl_params[*]})"
-    busctl_call SetLinkDNSSEC 's' "${busctl_params[@]}" || return $?
+    busctl_call SetLinkDNSSEC 'is' "${busctl_params[@]}" || return $?
   fi
 }
 

@@ -145,6 +145,10 @@ for TEST in tests/*.sh; do
   RUNTEST_CALLED=0
   EXPECT_FAILURE=0
   busctl_called=0
+  # Set/Reset expected results
+  TEST_BUSCTL_DNS=""
+  TEST_BUSCTL_DOMAINS=""
+  TEST_BUSCTL_DNSSEC=""
   # Keep this random, as we will never know the ifindex up-front
   ip_ifindex=$((RANDOM%=64))
   # Clear foreign_option_*
@@ -153,6 +157,7 @@ for TEST in tests/*.sh; do
   foreign_option_3=""
   foreign_option_4=""
   foreign_option_5=""
+  foreign_option_6=""
 
   # Import the test configuration
   source "${TEST}"

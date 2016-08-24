@@ -4,7 +4,7 @@ dev="tun20"
 TEST_BUSCTL_CALLED=1
 
 declare -A test_options=(
-  ['default']=''
+  ['default']='""'
   ['true']='yes'
   ['True']='yes'
   ['yes']='yes'

@@ -8,16 +8,16 @@ TEST_BUSCTL_CALLED=0
 EXPECT_FAILURE=1
 
 declare -A test_attrs=(
-    ["has more than one \`::'"]='1234::567::89:ab'
-    ['too long']='1234:567:89:a:b:c:d:e:f'
-    ['single 0 shortened']='1234::567:89:ab:c:de:f'
-    ['zero-run in wrong location']='1234:0:0:567:89::ab'
-    ['compressed run not longest zero-run']='1234:0:0:0:567::89'
-    ['not maximally compressed']='2001:db8::0:1'
+  ["has more than one \`::'"]='1234::567::89:ab'
+  ['too long']='1234:567:89:a:b:c:d:e:f'
+  ['single 0 shortened']='1234::567:89:ab:c:de:f'
+  ['zero-run in wrong location']='1234:0:0:567:89::ab'
+  ['compressed run not longest zero-run']='1234:0:0:0:567::89'
+  ['not maximally compressed']='2001:db8::0:1'
 )
 
 for test_title in "${!test_attrs[@]}"; do
-    TEST_TITLE="DNS IPv6 address $test_title"
-    foreign_option_1="dhcp-option DNS ${test_attrs["$test_title"]}"
-    runtest
+  TEST_TITLE="DNS IPv6 address $test_title"
+  foreign_option_1="dhcp-option DNS ${test_attrs["$test_title"]}"
+  runtest
 done

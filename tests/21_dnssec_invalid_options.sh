@@ -11,7 +11,7 @@ declare -a test_invalids=(
   'ALLOW-DOWNGRADE'
 )
 
-for test_option in "${!test_invalids[@]}"; do
+for test_option in "${test_invalids[@]}"; do
   TEST_TITLE="DNSSEC Set to $test_option"
   foreign_option_1="dhcp-option DNSSEC $test_option"
   runtest

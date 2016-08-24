@@ -403,5 +403,5 @@ main() {
 if [[ "${BASH_SOURCE[0]}" == "$0" ]] || [[ "$AUTOMATED_TESTING" == 1 ]]; then
   set -o nounset
 
-  main "$script_type" "$dev" "$@"
+  main "${script_type:-}" "${dev:-}" "$@"
 fi

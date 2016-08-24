@@ -5,7 +5,6 @@ TEST_BUSCTL_CALLED=0
 EXPECT_FAILURE=1
 
 declare -a test_invalids=(
-  'Default'
   'TRUE'
   'FALSE'
   'ALLOW-DOWNGRADE'

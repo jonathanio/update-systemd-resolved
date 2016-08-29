@@ -1,5 +1,5 @@
 script_type="up"
-dev="tun05"
+dev="tun04"
 foreign_option_1="dhcp-option DOMAIN example.com"
 foreign_option_1="dhcp-option DOMAIN example.co"
 

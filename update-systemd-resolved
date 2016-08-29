@@ -316,7 +316,7 @@ process_domain_search() {
 
   info "Adding DNS Search Domain ${domain}"
   (( dns_domain_count += 1 ))
-  dns_domains+=("${domain}" true)
+  dns_domains+=("${domain}" false)
 }
 
 main() {

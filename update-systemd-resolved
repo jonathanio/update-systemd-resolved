@@ -80,8 +80,8 @@ up() {
 
   # Preset values for processing -- will be altered in the various process_*
   # functions.
-  local -a dns_servers=() dns_domains=()
-  local -i dns_server_count=0 dns_domain_count=0
+  local -a dns_servers=() dns_domain=() dns_search=()
+  local -i dns_server_count=0 dns_domain_count=0 dns_search_count=0
 
   while read -r setting; do
     setting_type="${setting%% *}"
@@ -103,8 +103,14 @@ up() {
     busctl_call SetLinkDNS 'ia(iay)' "${busctl_params[@]}" || return $?
   fi
 
-  if [[ "${#dns_domains[*]}" -gt 0 ]]; then
-    busctl_params=("$if_index" "$dns_domain_count" "${dns_domains[@]}")
+  if [[ "${#dns_domain[*]}" -gt 0 || "${#dns_search[*]}" -gt 0 ]]; then
+    busctl_params=("$if_index" "$((dns_domain_count+dns_search_count))")
+    if [[ "${#dns_domain[*]}" -gt 0 ]]; then
+      busctl_params+=("${dns_domain[@]}")
+    fi
+    if [[ "${#dns_search[*]}" -gt 0 ]]; then
+      busctl_params+=("${dns_search[@]}")
+    fi
     info "SetLinkDomains(${busctl_params[*]})"
     busctl_call SetLinkDomains 'ia(sb)' "${busctl_params[@]}" || return $?
   fi
@@ -305,9 +311,9 @@ process_domain() {
   local domain="$1"
   shift
 
-  info "Adding DNS Domain ${domain}"
+  info "Setting DNS Domain ${domain}"
   (( dns_domain_count += 1 ))
-  dns_domains+=("${domain}" false)
+  dns_domain=("${domain}" false)
 }
 
 process_domain_search() {
@@ -315,8 +321,8 @@ process_domain_search() {
   shift
 
   info "Adding DNS Search Domain ${domain}"
-  (( dns_domain_count += 1 ))
-  dns_domains+=("${domain}" false)
+  (( dns_search_count += 1 ))
+  dns_search+=("${domain}" false)
 }
 
 main() {

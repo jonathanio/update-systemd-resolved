@@ -9,4 +9,4 @@ foreign_option_5="dhcp-option DOMAIN-SEARCH example.com"
 TEST_TITLE="DNS IPv4 Servers, Domain, and Search"
 TEST_BUSCTL_CALLED=1
 TEST_BUSCTL_DNS="2 2 4 1 23 4 56 2 4 2 34 5 67"
-TEST_BUSCTL_DOMAINS="3 example.co.uk false example.co true example.com true"
+TEST_BUSCTL_DOMAINS="3 example.co.uk false example.co false example.com false"

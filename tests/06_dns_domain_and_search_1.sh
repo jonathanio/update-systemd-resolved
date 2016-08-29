@@ -5,4 +5,4 @@ foreign_option_2="dhcp-option DOMAIN-SEARCH example.org"
 
 TEST_TITLE="DNS Domain and Search (Part 1)"
 TEST_BUSCTL_CALLED=1
-TEST_BUSCTL_DOMAINS="2 example.com false example.org true"
+TEST_BUSCTL_DOMAINS="2 example.com false example.org false"

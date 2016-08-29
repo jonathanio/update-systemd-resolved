@@ -46,6 +46,7 @@ options:
 
 ```
 script-security 2
+setenv PATH /usr/bin
 up /etc/openvpn/update-systemd-resolved
 down-pre /etc/openvpn/update-systemd-resolved
 ```

@@ -16,7 +16,7 @@ iproute2, and have at least version 229 of systemd, then it should work.
 Nonetheless, if you do come across problems, fork and fix, or raise an issue.
 All are most welcome.
 
-# How to use?
+## How to Enable
 
 Make sure that you have `systemd-resolved` enabled and running:
 
@@ -44,7 +44,7 @@ up /etc/openvpn/update-systemd-resolved
 down-pre /etc/openvpn/update-systemd-resolved
 ```
 
-# How to help
+## How to help
 
 If you can help with any of these areas, or have bug fixes, please fork and
 raise a Pull Request for me.
@@ -60,10 +60,10 @@ langauge.
 TravisCI is enabled on this repository: Click the link at the top of this README
 to see the current state of the code and its tests.
 
-# Licence
+## Licence
 
 GPL
 
-# Author
+## Author
 
 Jonathan Wright <jon@than.io>

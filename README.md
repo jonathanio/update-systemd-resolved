@@ -16,7 +16,7 @@ iproute2, and have at least version 229 of systemd, then it should work.
 Nonetheless, if you do come across problems, fork and fix, or raise an issue.
 All are most welcome.
 
-# How to use?
+## How to Enable
 
 Make sure that you have `systemd-resolved` enabled and running:
 
@@ -29,22 +29,75 @@ Then update your `/etc/nsswitch.conf` file to look up DNS via the `resolve`
 service:
 
 ```
-# Use systemd-resolved first, then fall back to /etc/resolv.conf
-hosts: files resolve dns myhostname
 # Use /etc/resolv.conf first, then fall back to systemd-resolved
 hosts: files dns resolve myhostname
+# Use systemd-resolved first, then fall back to /etc/resolv.conf
+hosts: files resolve dns myhostname
+# Don't use /etc/resolv.conf at all
+hosts: files resolve myhostname
 ```
+
+*Note*: If you intend on using this script, the latter two are preferred
+otherwise the configuration provided by this script will only work on domains
+that cannot be resolved by the currently configured DNS servers (i.e. they must
+fall back after trying the ones set by your LAN's DHCP server).
 
 Finally, update your OpenVPN configuration file and set the `up` and `down-pre`
 options:
 
 ```
 script-security 2
+setenv PATH /usr/bin
 up /etc/openvpn/update-systemd-resolved
 down-pre /etc/openvpn/update-systemd-resolved
 ```
 
-# How to help
+## Usage
+
+`update-systemd-resolved` works by processing the `dhcp-option` commands set in
+OpenVPN, either through the server, or the client, configuration:
+
+| Option | Examples | Notes |
+|--:|---|---|
+| `DNS` | `0.0.0.0`<br />`::1` | This sets the DNS servers for the link and can take any IPv4 or IPv6 address. |
+| `DOMAIN` | `example.com` | The primary domain for this host. If set multiple times, the last provided is used. Will be the primary search domain for bare hostnames. All requests for this domain as well will be routed to the `DNS` servers provided on this link. |
+| `DOMAIN-SEARCH` | `example.com` | Secondary domains which will be used to search for bare hostnames (after any `DOMAIN`, if set) and in the order provided. All requests for this domain will be routed to the `DNS` servers provided on this link. |
+| `DOMAIN-ROUTE` | `example.com` | All requests for these domains will be routed to the `DNS` servers provided on this link. They will *not* be used to search for bare hostnames, only routed. |
+| `DNSSEC` | `yes`<br />`no`</br >`default` | Control of DNSSEC should be enabled (`yes`) or disabled (`no`) for any queries over this link only, or use the system default (`default`). |
+
+*Note*: There are no local or system options to be configured. All configuration
+for this script is handled though OpenVPN, including, for example, the name of
+the interface to be configured.
+
+### Example
+
+```
+push "dhcp-option DNS 10.62.3.2"
+push "dhcp-option DNS 10.62.3.3"
+push "dhcp-option DNS 2001:db8::a3:c15c:b56e:619a"
+push "dhcp-option DNS 2001:db8::a3:ffec:f61c:2e06"
+push "dhcp-option DOMAIN example.office"
+push "dhcp-option DOMAIN-SEARCH example.com"
+push "dhcp-option DOMAIN-ROUTE example.net"
+push "dhcp-option DOMAIN-ROUTE example.org"
+push "dhcp-option DNSSEC yes"
+```
+
+This, added to the OpenVPN server's configuration file will set two IPv4 DNS
+servers and two IPv6 and will set the primary domain for the link to be
+`example.office`. Therefore if you try to look up the bare address `mail` then
+`mail.example.office` will be attempted first. The domain `example.com` is also
+added as an additional search domain, so if `mail.example.office` fails, then
+`mail.example.com` will be tried next.
+
+Requests for `example.net` and `example.org` will also be routed though to the
+four DNS servers listed too, but they will *not* be appended (i.e.
+`mail.example.net` will not be attempted, nor `mail.example.org` if
+`mail.example.office` or `mail.example.com` do not exist).
+
+Finally, DNSSEC has been enabled for this link (and this link only).
+
+## How to help
 
 If you can help with any of these areas, or have bug fixes, please fork and
 raise a Pull Request for me.
@@ -60,10 +113,10 @@ langauge.
 TravisCI is enabled on this repository: Click the link at the top of this README
 to see the current state of the code and its tests.
 
-# Licence
+## Licence
 
 GPL
 
-# Author
+## Author
 
 Jonathan Wright <jon@than.io>

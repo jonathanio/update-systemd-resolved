@@ -29,11 +29,17 @@ Then update your `/etc/nsswitch.conf` file to look up DNS via the `resolve`
 service:
 
 ```
-# Use systemd-resolved first, then fall back to /etc/resolv.conf
-hosts: files resolve dns myhostname
 # Use /etc/resolv.conf first, then fall back to systemd-resolved
 hosts: files dns resolve myhostname
+# Use systemd-resolved first, then fall back to /etc/resolv.conf
+hosts: files resolve dns myhostname
+# Don't use /etc/resolv.conf at all
+hosts: files resolve myhostname
 ```
+
+*Note*: If you intend on using this script, the latter two are preferred
+otherwise the configuration provided by this script will only work on domains
+that cannot be resolved publically (i.e. they must fall back).
 
 Finally, update your OpenVPN configuration file and set the `up` and `down-pre`
 options:

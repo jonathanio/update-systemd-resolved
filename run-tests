@@ -132,6 +132,9 @@ function runtest {
     [[ ${busctl_called} -eq 0 ]] && \
       _pass "busctl was not called, as expected" || \
       _fail "busctl was called, not expected"
+  else
+    [[ ${busctl_called} -eq 0 ]] && \
+      _fail "busctl was not called, not expected"
   fi
 
   echo

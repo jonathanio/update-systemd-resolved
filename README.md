@@ -39,7 +39,8 @@ hosts: files resolve myhostname
 
 *Note*: If you intend on using this script, the latter two are preferred
 otherwise the configuration provided by this script will only work on domains
-that cannot be resolved publically (i.e. they must fall back).
+that cannot be resolved by the currently configured DNS servers (i.e. they must
+fall back after trying the ones set by your LAN's DHCP server).
 
 Finally, update your OpenVPN configuration file and set the `up` and `down-pre`
 options:

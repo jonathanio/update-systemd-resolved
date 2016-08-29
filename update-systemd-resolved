@@ -312,7 +312,7 @@ process_domain() {
   shift
 
   info "Setting DNS Domain ${domain}"
-  (( dns_domain_count += 1 ))
+  (( dns_domain_count = 1 ))
   dns_domain=("${domain}" false)
 }
 

@@ -18,10 +18,10 @@
 
 # This script will parse DHCP options set via OpenVPN (dhcp-option) to update
 # systemd-resolved directly via DBus, instead of updating /etc/resolv.conf. To
-# install, set as the 'up' and 'down' script in your OpenVPN configuration file
+# install, set as the 'up' and 'down-pre' script in your OpenVPN configuration file
 # or command-line argument. For example:
 #   up /etc/openvpn/update-systemd-resolved
-#   down /etc/openvpn/update-systemd-resolved
+#   down-pre /etc/openvpn/update-systemd-resolved
 
 # Define what needs to be called via DBus
 DBUS_DEST="org.freedesktop.resolve1"
@@ -82,6 +82,7 @@ up() {
   # functions.
   local -a dns_servers=() dns_domain=() dns_search=() dns_routed=()
   local -i dns_server_count=0 dns_domain_count=0 dns_search_count=0 dns_routed_count=0
+  local dns_sec=""
 
   while read -r setting; do
     setting_type="${setting%% *}"
@@ -119,6 +120,17 @@ up() {
     fi
     info "SetLinkDomains(${busctl_params[*]})"
     busctl_call SetLinkDomains 'ia(sb)' "${busctl_params[@]}" || return $?
+  fi
+
+  if [[ -n "${dns_sec}" ]]; then
+    if [[ "${dns_sec}" == "default" ]]; then
+      # We need to provide an empty string to use the default settings
+      busctl_params=("$if_index" '""')
+    else
+      busctl_params=("$if_index" "${dns_sec}")
+    fi
+    info "SetLinkDNSSEC(${busctl_params[*]})"
+    busctl_call SetLinkDNSSEC 'is' "${busctl_params[@]}" || return $?
   fi
 }
 
@@ -340,6 +352,29 @@ process_domain_route() {
   dns_routed+=("${domain}" true)
 }
 
+process_dnssec() {
+  local option="$1" setting=""
+  shift
+
+  case "${option,,}" in
+    yes|true)
+      setting="yes" ;;
+    no|false)
+      setting="no" ;;
+    default)
+      setting="default" ;;
+    allow-downgrade)
+      setting="allow-downgrade" ;;
+    *)
+      local message="\`$option' is not a valid DNSSEC option"
+      emerg "${message}"
+      return 1 ;;
+  esac
+
+  info "Setting DNSSEC to ${setting}"
+  dns_sec="${setting}"
+}
+
 main() {
   local script_type="$1"
   shift
@@ -368,5 +403,5 @@ main() {
 if [[ "${BASH_SOURCE[0]}" == "$0" ]] || [[ "$AUTOMATED_TESTING" == 1 ]]; then
   set -o nounset
 
-  main "$script_type" "$dev" "$@"
+  main "${script_type:-}" "${dev:-}" "$@"
 fi

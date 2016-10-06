@@ -316,8 +316,8 @@ process_dns_ipv6() {
   local -a segments=()
   segments=($(parse_ipv6 "$address")) || return $?
 
-  # Add array count and byte count
-  dns_servers+=(2 16)
+  # Add AF_INET6 and byte count
+  dns_servers+=(10 16)
   for segment in "${segments[@]}"; do
     dns_servers+=("$((16#${segment:0:2}))" "$((16#${segment:2:2}))")
   done

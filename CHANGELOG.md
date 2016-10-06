@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.1 (2016.10.06)
+
+### NOTES
+
+Thanks for @arjenschol for spotting this one: An error in the AF_INET value
+provided to SetLinkDNS prevented IPv6 DNS servers from being added.
+
+### BUG FIXES
+
+- Fix IPv6 DNS by specifying AF_INET6 value (10) insteadof array size (2)
+  (@arjenschol)
+
 ## 1.2.0 (2016.08.29)
 
 ### NOTES

@@ -42,14 +42,16 @@ otherwise the configuration provided by this script will only work on domains
 that cannot be resolved by the currently configured DNS servers (i.e. they must
 fall back after trying the ones set by your LAN's DHCP server).
 
-Finally, update your OpenVPN configuration file and set the `up` and `down-pre`
-options:
+Finally, update your OpenVPN configuration file and set the `up` and `down`
+options to point to the script, and `down-pre` to ensure that the script is run
+before the device is closed:
 
 ```
 script-security 2
 setenv PATH /usr/bin
 up /etc/openvpn/update-systemd-resolved
-down-pre /etc/openvpn/update-systemd-resolved
+down /etc/openvpn/update-systemd-resolved
+down-pre
 ```
 
 ## Usage

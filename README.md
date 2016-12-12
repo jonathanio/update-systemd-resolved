@@ -65,7 +65,7 @@ OpenVPN, either through the server, or the client, configuration:
 | `DOMAIN` | `example.com` | The primary domain for this host. If set multiple times, the last provided is used. Will be the primary search domain for bare hostnames. All requests for this domain as well will be routed to the `DNS` servers provided on this link. |
 | `DOMAIN-SEARCH` | `example.com` | Secondary domains which will be used to search for bare hostnames (after any `DOMAIN`, if set) and in the order provided. All requests for this domain will be routed to the `DNS` servers provided on this link. |
 | `DOMAIN-ROUTE` | `example.com` | All requests for these domains will be routed to the `DNS` servers provided on this link. They will *not* be used to search for bare hostnames, only routed. |
-| `DNSSEC` | `yes`<br />`no`</br >`default` | Control of DNSSEC should be enabled (`yes`) or disabled (`no`) for any queries over this link only, or use the system default (`default`). |
+| `DNSSEC` | `yes`<br />`no`</br >`allow-downgrade`</br >`default` | Control of DNSSEC should be enabled (`yes`) or disabled (`no`), or `allow-downgrade` to switch off DNSSEC only if the server doesn't support it, for any queries over this link only, or use the system default (`default`). |
 
 *Note*: There are no local or system options to be configured. All configuration
 for this script is handled though OpenVPN, including, for example, the name of

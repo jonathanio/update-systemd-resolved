@@ -48,7 +48,7 @@ busctl_call() {
   # Preserve busctl's exit status
   busctl call "$DBUS_DEST" "$DBUS_NODE" "${DBUS_DEST}.Manager" "$@" || {
     local -i status=$?
-    emerg "\`busctl' exited with status $status"
+    emerg "'busctl' exited with status $status"
     return $status
   }
 }
@@ -78,7 +78,7 @@ up() {
   local if_index="$1"
   shift
 
-  info "Link \`$link' coming up"
+  info "Link '$link' coming up"
 
   # Preset values for processing -- will be altered in the various process_*
   # functions.
@@ -96,7 +96,7 @@ up() {
     if declare -f "$process_setting_function" &>/dev/null; then
       "$process_setting_function" "$setting_value" || return $?
     else
-      warning "Not a recognized DHCP setting: \`${setting}'"
+      warning "Not a recognized DHCP setting: '${setting}'"
     fi
   done < <(dhcp_settings)
 
@@ -142,7 +142,7 @@ down() {
   local if_index="$1"
   shift
 
-  info "Link \`$link' going down"
+  info "Link '$link' going down"
   busctl_call RevertLink i "$if_index"
 }
 
@@ -155,7 +155,7 @@ process_dns() {
   elif looks_like_ipv4 "$address"; then
     process_dns_ipv4 "$address" || return $?
   else
-    err "Not a valid IPv6 or IPv4 address: \`$address'"
+    err "Not a valid IPv6 or IPv4 address: '$address'"
     return 1
   fi
 }
@@ -196,17 +196,17 @@ parse_ipv6() {
   local raw_address="$1"
 
   log_invalid_ipv6() {
-    local message="\`$raw_address' is not a valid IPv6 address"
+    local message="'$raw_address' is not a valid IPv6 address"
     emerg "${message}: $*"
   }
 
   trap -- 'unset -f log_invalid_ipv6' RETURN
 
   if [[ "$raw_address" == *::*::* ]]; then
-    log_invalid_ipv6 "address cannot contain more than one \`::'"
+    log_invalid_ipv6 "address cannot contain more than one '::'"
     return 1
   elif [[ "$raw_address" =~ :0+:: ]] || [[ "$raw_address" =~ ::0+: ]]; then
-    log_invalid_ipv6 "address contains a 0-group adjacent to \`::' and is not maximally shortened"
+    log_invalid_ipv6 "address contains a 0-group adjacent to '::' and is not maximally shortened"
     return 1
   fi
 
@@ -271,7 +271,7 @@ parse_ipv6() {
 
   if [[ "$raw_address" == *::* ]]; then
     if (( ${#tokenized_segments[*]} == length )); then
-      log_invalid_ipv6 "single \`0' fields should not be compressed"
+      log_invalid_ipv6 "single '0' fields should not be compressed"
       return 1
     else
       local -i largest_run_i=0 largest_run=0
@@ -368,7 +368,7 @@ process_dnssec() {
     allow-downgrade)
       setting="allow-downgrade" ;;
     *)
-      local message="\`$option' is not a valid DNSSEC option"
+      local message="'$option' is not a valid DNSSEC option"
       emerg "${message}"
       return 1 ;;
   esac
@@ -390,11 +390,11 @@ main() {
     usage 'No device name specified'
     return 1
   elif ! declare -f "${script_type}" &>/dev/null; then
-    usage "Invalid script type: \`${script_type}'"
+    usage "Invalid script type: '${script_type}'"
     return 1
   else
     if ! read -r link if_index _ < <(get_link_info "$dev"); then
-      usage "Invalid device name: \`$dev'"
+      usage "Invalid device name: '$dev'"
       return 1
     fi
 

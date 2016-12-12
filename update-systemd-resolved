@@ -127,12 +127,12 @@ up() {
   if [[ -n "${dns_sec}" ]]; then
     if [[ "${dns_sec}" == "default" ]]; then
       # We need to provide an empty string to use the default settings
-      busctl_params=("$if_index" '""')
+      info "SetLinkDNSSEC($if_index '')"
+      busctl_call SetLinkDNSSEC 'is' "$if_index" "" || return $?
     else
-      busctl_params=("$if_index" "${dns_sec}")
+      info "SetLinkDNSSEC($if_index ${dns_sec})"
+      busctl_call SetLinkDNSSEC 'is' "$if_index" "${dns_sec}" || return $?
     fi
-    info "SetLinkDNSSEC(${busctl_params[*]})"
-    busctl_call SetLinkDNSSEC 'is' "${busctl_params[@]}" || return $?
   fi
 }
 

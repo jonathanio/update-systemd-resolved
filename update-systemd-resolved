@@ -143,7 +143,12 @@ down() {
   shift
 
   info "Link '$link' going down"
-  busctl_call RevertLink i "$if_index"
+  if [[ "$(whoami 2>/dev/null)" != "root" ]]; then
+    # Cleanly handle the priviledge dropped case by not calling RevertLink
+    info "Priviledges dropped in the client: Cannot call RevertLink."
+  else
+    busctl_call RevertLink i "$if_index"
+  fi
 }
 
 process_dns() {

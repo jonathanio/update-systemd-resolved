@@ -66,16 +66,11 @@ function busctl {
       ;;
     SetLinkDNSSEC)
       shift 2
-      if [[ "${TEST_BUSCTL_DNSSEC}" == "" ]]; then
-        [[ "${ip_ifindex} ${TEST_BUSCTL_DNSSEC}" == "${@}" ]] || \
-          _fail "SetLinkDNSSEC was called and should not be: '${@}'"
-      else
-        [[ "${ip_ifindex} ${TEST_BUSCTL_DNSSEC}" == "${@}" ]] && \
-          _pass "SetLinkDNSSEC was called correctly" || \
-          _fail "SetLinkDNSSEC was not given the correct arguments:\n" \
-                "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DNSSEC}'\n" \
-                "     Received: '${@}'"
-      fi
+      [[ "${ip_ifindex} ${TEST_BUSCTL_DNSSEC}x" == "${@}x" ]] && \
+        _pass "SetLinkDNSSEC was called correctly" || \
+        _fail "SetLinkDNSSEC was not given the correct arguments:\n" \
+              "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DNSSEC}'\n" \
+              "     Received: '${@}'"
       ;;
     *)
       _fail "Unknown command called on busctl: ${1}"

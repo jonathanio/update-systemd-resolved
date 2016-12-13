@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.2.2 (2016.12.13)
+
+### NOTES
+
+This one is a thanks to @mikken and helps support OpenVPN 2.4 as well as fix
+an issue with `DNSSEC` handling on the `busctl` call.
+
+### BUG FIXES
+
+- The incorrect usage of `down-pre` which as of OpenVPN 2.4 is now a fatal error
+  when you pass it an argument (i.e. the script we were originally thought it
+  should be calling). (@mikken)
+- Issues with `busctl` and bash properly handling the "empty string" case to use
+  the default `DNSSEC` option. (@jonathanio)
+- Noise when `busctl` is called on the down case when privileges have been
+  dropped in the client. (@mikken)
+- Added documentation for `allow-downgrade` support in `DNSSEC` option (which
+  was supported, but not documented). (@jonathanio)
+
 ## 1.2.1 (2016.10.06)
 
 ### NOTES

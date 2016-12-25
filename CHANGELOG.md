@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.3 (2016.12.25)
+
+### NOTES
+
+@Nauxuron provided a patch to improve DESTDIR and PREFIX handling in Makefile.
+
+### IMPROVEMENTS
+
+- Improve handling of DESTDIR and PREFIX in the Makefile to follow the GNU
+  guidelines. (@Nauxuron)
+
 ## 1.2.2 (2016.12.13)
 
 ### NOTES

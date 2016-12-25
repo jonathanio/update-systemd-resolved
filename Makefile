@@ -1,8 +1,7 @@
-PREFIX := /etc/openvpn
-DESTDIR := $(PREFIX)/scripts
+PREFIX ?= /etc/openvpn/scripts
 
 SRC = update-systemd-resolved
-DEST = $(DESTDIR)/$(SRC)
+DEST = $(DESTDIR)$(PREFIX)/$(SRC)
 
 .PHONY: all install info
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.4 (2017.03.02)
+
+### NOTES
+
+@piotr-dobrogost, @mgu, and @aRkadeFR helped improve the documentation.
+
+### IMPROVEMENTS
+
+- It was noted that the PATH setting used in the documentation doesn't work on
+  all systems (sorry, my bad), so it has now been updated so it should now work.
+  (@aRkadeFR)
+
 ## 1.2.3 (2016.12.25)
 
 ### NOTES

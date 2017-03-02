@@ -48,7 +48,7 @@ before the device is closed:
 
 ```
 script-security 2
-setenv PATH /usr/bin
+setenv PATH /usr/bin:/bin
 up /etc/openvpn/update-systemd-resolved
 down /etc/openvpn/update-systemd-resolved
 down-pre

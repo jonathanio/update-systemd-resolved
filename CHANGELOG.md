@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.5 (2017.03.02)
+
+### IMPROVEMENTS
+
+- Updated to include a full list in PATH, including sbin paths. (@jonathanio)
+
 ## 1.2.4 (2017.03.02)
 
 ### NOTES

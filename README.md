@@ -16,6 +16,21 @@ iproute2, and have at least version 229 of systemd, then it should work.
 Nonetheless, if you do come across problems, fork and fix, or raise an issue.
 All are most welcome.
 
+## Installation
+
+If you are using a distribution of Linux with access to the Arch User Repository,
+the simplest way to install is by using the
+[openvpn-update-systemd-resolved](https://aur.archlinux.org/packages/openvpn-update-systemd-resolved/)
+AUR package as this will take care of any updates through your package manager.
+
+Alternatively, the package can be manually installed by running the following:
+
+```
+git clone https://github.com/jonathanio/update-systemd-resolved.git`
+cd update-systemd-resolved`
+make
+```
+
 ## How to Enable
 
 Make sure that you have `systemd-resolved` enabled and running:

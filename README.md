@@ -26,8 +26,8 @@ AUR package as this will take care of any updates through your package manager.
 Alternatively, the package can be manually installed by running the following:
 
 ```
-git clone https://github.com/jonathanio/update-systemd-resolved.git`
-cd update-systemd-resolved`
+git clone https://github.com/jonathanio/update-systemd-resolved.git
+cd update-systemd-resolved
 make
 ```
 

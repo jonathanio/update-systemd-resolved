@@ -69,10 +69,16 @@ down /etc/openvpn/scripts/update-systemd-resolved
 down-pre
 ```
 
-Alternatively if you don't want to edit your client configuration, you can add the following options to your openvpn command:
+Alternatively if you don't want to edit your client configuration, you can add
+the following options to your openvpn command:
 
 ```
---setenv PATH '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' --script-security 2 --up /etc/openvpn/update-systemd-resolved --down /etc/openvpn/update-systemd-resolved --down-pre
+openvpn \
+  --script-security 2 \
+  --setenv PATH '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
+  --up /etc/openvpn/scripts/update-systemd-resolved \
+  --down /etc/openvpn/scripts/update-systemd-resolved \
+  --down-pre
 ```
 
 ## Usage

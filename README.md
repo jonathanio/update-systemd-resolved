@@ -69,10 +69,16 @@ down /etc/openvpn/scripts/update-systemd-resolved
 down-pre
 ```
 
-Alternatively if you don't want to edit your client configuration, you can add the following options to your openvpn command:
+Alternatively if you don't want to edit your client configuration, you can add
+the following options to your openvpn command:
 
 ```
---setenv PATH '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' --script-security 2 --up /etc/openvpn/update-systemd-resolved --down /etc/openvpn/update-systemd-resolved --down-pre
+openvpn \
+  --script-security 2 \
+  --setenv PATH '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
+  --up /etc/openvpn/scripts/update-systemd-resolved \
+  --down /etc/openvpn/scripts/update-systemd-resolved \
+  --down-pre
 ```
 
 ## Usage
@@ -85,7 +91,7 @@ OpenVPN, either through the server, or the client, configuration:
 | `DNS` | `0.0.0.0`<br />`::1` | This sets the DNS servers for the link and can take any IPv4 or IPv6 address. |
 | `DOMAIN` | `example.com` | The primary domain for this host. If set multiple times, the last provided is used. Will be the primary search domain for bare hostnames. All requests for this domain as well will be routed to the `DNS` servers provided on this link. |
 | `DOMAIN-SEARCH` | `example.com` | Secondary domains which will be used to search for bare hostnames (after any `DOMAIN`, if set) and in the order provided. All requests for this domain will be routed to the `DNS` servers provided on this link. |
-| `DOMAIN-ROUTE` | `example.com` | All requests for these domains will be routed to the `DNS` servers provided on this link. They will *not* be used to search for bare hostnames, only routed. |
+| `DOMAIN-ROUTE` | `example.com` | All requests for these domains will be routed to the `DNS` servers provided on this link. They will *not* be used to search for bare hostnames, only routed. A `DOMAIN-ROUTE` option for `.` (single period) will instruct `systemd-resolved` to route the entire namespace through to the `DNS` servers configured for this connection (unless a more specifc route has been offered by another connection for a selected name/namespace). This is useful if you wish to prevent DNS leakage. |
 | `DNSSEC` | `yes`<br />`no`</br >`allow-downgrade`</br >`default` | Control of DNSSEC should be enabled (`yes`) or disabled (`no`), or `allow-downgrade` to switch off DNSSEC only if the server doesn't support it, for any queries over this link only, or use the system default (`default`). |
 
 *Note*: There are no local or system options to be configured. All configuration

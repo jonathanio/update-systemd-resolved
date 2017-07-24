@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.2.6 (2017.07.24)
+
+### NOTES
+
+Improvements made to the `logger` command to prevent issues with privilege
+dropping under the assistance of @dermarens, @terminalmage, @guruxu, and @benvh.
+Updated some documentation for consistency and clarity. Thanks to @flungo and
+@dawansv here.
+
+### IMPROVEMENTS
+
+- Updated to include a full list in PATH, including sbin paths. (@jonathanio)
+- Updated documentation regarding DNS leakage. (@jonathanio)
+- Updated all script locations to be consistent. (@jonathanio)
+- Add some installation instructions to README.md. (@flungo)
+- Update command-line parameters needed within Makefile/README.md. (@noraj1337)
+- Fix script nmae in command-line path within README.md. (@phR0ze)
+
 ## 1.2.5 (2017.03.02)
 
 ### IMPROVEMENTS

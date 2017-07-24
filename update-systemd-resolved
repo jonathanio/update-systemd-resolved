@@ -32,7 +32,7 @@ DBUS_NODE="/org/freedesktop/resolve1"
 SCRIPT_NAME="${BASH_SOURCE[0]##*/}"
 
 log() {
-  logger -s --id="$$" -t "$SCRIPT_NAME" "$@"
+  logger -s -t "$SCRIPT_NAME" "$@"
 }
 
 for level in emerg err warning info debug; do

@@ -341,6 +341,13 @@ process_domain() {
   dns_domain=("${domain}" false)
 }
 
+process_adapter_domain_suffix() {
+  # This enables support for ADAPTER_DOMAIN_SUFFIX which is a Microsoft standard
+  # which works in the same way as DOMAIN to set the primary search domain on
+  # this specific link.
+  process_domain "$@"
+}
+
 process_domain_search() {
   local domain="$1"
   shift

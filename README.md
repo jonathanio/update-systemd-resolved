@@ -69,6 +69,21 @@ down /etc/openvpn/scripts/update-systemd-resolved
 down-pre
 ```
 
+*Note*: The `down` and `down-pre` options here will not work as expected where
+the `openvpn` daemon drops privileges after establishing the connection (i.e.
+when using the `user` and `group` options). This is because only the `root` user
+will have the privileges required to talk to `systemd-resolved.service` over
+DBus. The `openvpn-plugin-down-root.so` plugin does provide support for
+enabling the `down` script to be run as the `root` user, but this has been known
+to be unreliable.
+
+Ultimately this shouldn't affect normal operation as `systemd-resolved.service`
+will remove all settings associated with the link (and therefore naturally
+update `/etc/resolv.conf`, if you have it symlinked) when the TUN or TAP device
+is closed. The option for `down` and `down-pre` just make this step explicit
+before the device is torn down rather than implicit on the change in
+environment.
+
 Alternatively if you don't want to edit your client configuration, you can add
 the following options to your openvpn command:
 

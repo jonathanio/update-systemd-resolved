@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.2.7 (2017.11.12)
+
+### NOTES
+
+Following a request by @JoshDobbin, support has been added for passing
+`ADAPTER_DOMAIN_SUFFIX` via `dhcp-options` to work with the Microsoft standard.
+Also included some additional notes in README.md about using `down` in dropped
+privilege situations for clarification.
+
+### IMPROVEMENTS
+
+- Added support for ADAPTER_DOMAIN_SUFFIX (@jonathanio)
+- Added notes in README.md about `down` with dropped privileges (@jonathanio)
+
 ## 1.2.6 (2017.07.24)
 
 ### NOTES

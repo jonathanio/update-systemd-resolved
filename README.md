@@ -11,7 +11,7 @@ DBus which allows directly setting the DNS configuration for a link. This script
 makes use of `busctl` from systemd to send DBus messages to `systemd-resolved`
 to update the DNS for the link created by OpenVPN.
 
-*NOTE*: This is an beta script. So long as you're using OpenVPN 2.1 or greater,
+*NOTE*: This is a beta script. So long as you're using OpenVPN 2.1 or greater,
 iproute2, and have at least version 229 of systemd, then it should work.
 Nonetheless, if you do come across problems, fork and fix, or raise an issue.
 All are most welcome.
@@ -152,7 +152,7 @@ variables available to it at run-time. Please add a test for any new features
 you may wish to add, or update any which are wrong, and test your code by
 running `./run-tests` from the root of the repository. There are no dependencies
 on `run-tests` - it runs 100% bash and doesn't call out ot any other program or
-langauge.
+language.
 
 TravisCI is enabled on this repository: Click the link at the top of this README
 to see the current state of the code and its tests.

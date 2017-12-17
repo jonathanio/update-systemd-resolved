@@ -30,7 +30,7 @@ Updated some documentation for consistency and clarity. Thanks to @flungo and
 - Updated all script locations to be consistent. (@jonathanio)
 - Add some installation instructions to README.md. (@flungo)
 - Update command-line parameters needed within Makefile/README.md. (@noraj1337)
-- Fix script nmae in command-line path within README.md. (@phR0ze)
+- Fix script name in command-line path within README.md. (@phR0ze)
 
 ## 1.2.5 (2017.03.02)
 

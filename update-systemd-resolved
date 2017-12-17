@@ -144,8 +144,8 @@ down() {
 
   info "Link '$link' going down"
   if [[ "$(whoami 2>/dev/null)" != "root" ]]; then
-    # Cleanly handle the priviledge dropped case by not calling RevertLink
-    info "Priviledges dropped in the client: Cannot call RevertLink."
+    # Cleanly handle the privilege dropped case by not calling RevertLink
+    info "Privileges dropped in the client: Cannot call RevertLink."
   else
     busctl_call RevertLink i "$if_index"
   fi

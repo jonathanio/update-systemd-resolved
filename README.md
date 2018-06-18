@@ -25,7 +25,7 @@ AUR package as this will take care of any updates through your package manager.
 
 Alternatively, the package can be manually installed by running the following:
 
-```
+```bash
 git clone https://github.com/jonathanio/update-systemd-resolved.git
 cd update-systemd-resolved
 make
@@ -35,7 +35,7 @@ make
 
 Make sure that you have `systemd-resolved` enabled and running:
 
-```
+```bash
 systemctl enable systemd-resolved.service
 systemctl start systemd-resolved.service
 ```
@@ -43,7 +43,7 @@ systemctl start systemd-resolved.service
 Then update your `/etc/nsswitch.conf` file to look up DNS via the `resolve`
 service:
 
-```
+```conf
 # Use /etc/resolv.conf first, then fall back to systemd-resolved
 hosts: files dns resolve myhostname
 # Use systemd-resolved first, then fall back to /etc/resolv.conf
@@ -61,7 +61,7 @@ Finally, update your OpenVPN configuration file and set the `up` and `down`
 options to point to the script, and `down-pre` to ensure that the script is run
 before the device is closed:
 
-```
+```conf
 script-security 2
 setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 up /etc/openvpn/scripts/update-systemd-resolved
@@ -87,7 +87,7 @@ environment.
 Alternatively if you don't want to edit your client configuration, you can add
 the following options to your openvpn command:
 
-```
+```bash
 openvpn \
   --script-security 2 \
   --setenv PATH '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
@@ -115,7 +115,7 @@ the interface to be configured.
 
 ### Example
 
-```
+```conf
 push "dhcp-option DNS 10.62.3.2"
 push "dhcp-option DNS 10.62.3.3"
 push "dhcp-option DNS 2001:db8::a3:c15c:b56e:619a"

@@ -390,11 +390,6 @@ process_dnssec() {
 }
 
 main() {
-  local script_type="$1"
-  shift
-  local dev="$1"
-  shift
-
   if [[ -z "$script_type" ]]; then
     usage 'No script type specified'
     return 1

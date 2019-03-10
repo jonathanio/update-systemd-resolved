@@ -141,7 +141,6 @@ up() {
 down() {
   # Flush DNS cache
   systemd-resolve --flush-caches
-  
   local link="$1"
   shift
   local if_index="$1"

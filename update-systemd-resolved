@@ -340,9 +340,9 @@ process_domain() {
   local domain="$1"
   shift
 
-  info "Setting DNS Domain ${domain}"
-  (( dns_domain_count = 1 ))
-  dns_domain=("${domain}" false)
+  info "Adding DNS Domain ${domain}"
+  (( dns_domain_count += 1 ))
+  dns_domain+=("${domain}" false)
 }
 
 process_adapter_domain_suffix() {

@@ -394,9 +394,9 @@ process_dnssec() {
 }
 
 main() {
-  local script_type="$1"
+  local script_type="${1}"
   shift
-  local dev="$1"
+  local dev="${1:-$dev}"
   shift
 
   if [[ -z "$script_type" ]]; then
@@ -421,5 +421,5 @@ main() {
 if [[ "${BASH_SOURCE[0]}" == "$0" ]] || [[ "$AUTOMATED_TESTING" == 1 ]]; then
   set -o nounset
 
-  main "${script_type:-}" "${dev:-}" "$@"
+  main "${script_type:-down}" "$@"
 fi

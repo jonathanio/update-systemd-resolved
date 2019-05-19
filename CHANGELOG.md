@@ -11,6 +11,9 @@ features.
 
 - Added support for DNS6 option which can take only IPv6 addresses
   (@thecodingrobot)
+- Based on some feedback by (@tbaumann), alter the handling of script_type and
+  dev within the body in the main() function to allow it to work more
+  effectively between the environment and command-line parameters.
 
 ## 1.2.7 (2017.11.12)
 

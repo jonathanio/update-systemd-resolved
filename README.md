@@ -141,13 +141,13 @@ OpenVPN, either through the server, or the client, configuration:
 [resolved]:https://www.freedesktop.org/wiki/Software/systemd/resolved/
 
 | Option | Examples | Notes | DBus Call |
-|--:|---|---|
+|--:|---|---|---|
 | `DNS` | `0.0.0.0`<br />`::1` | This sets the DNS servers for the link and can take any IPv4 or IPv6 address. | [SetLinkDNS][resolved] |
 | `DNS6` | `::1` | This sets the DNS servers for the link and can take only IPv6 addresses. | [SetLinkDNS][resolved] |
 | `DOMAIN` or `ADAPTER_DOMAIN_SUFFIX` | `example.com` | The primary domain for this host. If set multiple times, the first provided is used as the primary search domain for bare hostnames. Any subsequent `DOMAIN` options will be added as the equivalent of `DOMAIN-SEARCH` options. All requests for this domain as well will be routed to the `DNS` servers provided on this link. | [SetLinkDomains][resolved] |
-| `DOMAIN-SEARCH` | `example.com` | Secondary domains which will be used to search for bare hostnames (after any `DOMAIN`, if set) and in the order provided. All requests for this domain will be routed to the `DNS` servers provided on this link. | [SetLinkDomains][resolved] ||
-| `DOMAIN-ROUTE` | `example.com` | All requests for these domains will be routed to the `DNS` servers provided on this link. They will *not* be used to search for bare hostnames, only routed. A `DOMAIN-ROUTE` option for `.` (single period) will instruct `systemd-resolved` to route the entire DNS name-space through to the `DNS` servers configured for this connection (unless a more specific route has been offered by another connection for a selected name/name-space). This is useful if you wish to prevent [DNS leakage](#dns-leakage). | [SetLinkDomains][resolved] ||
-| `DNSSEC` | `yes`</br >`default` | Control of DNSSEC should be enabled (`yes`) or disabled (`no`), or `allow-downgrade` to switch off DNSSEC only if the server doesn't support it, for any queries over this link only, or use the system default (`default`). | [SetLinkDNSSEC][resolved] ||
+| `DOMAIN-SEARCH` | `example.com` | Secondary domains which will be used to search for bare hostnames (after any `DOMAIN`, if set) and in the order provided. All requests for this domain will be routed to the `DNS` servers provided on this link. | [SetLinkDomains][resolved] |
+| `DOMAIN-ROUTE` | `example.com` | All requests for these domains will be routed to the `DNS` servers provided on this link. They will *not* be used to search for bare hostnames, only routed. A `DOMAIN-ROUTE` option for `.` (single period) will instruct `systemd-resolved` to route the entire DNS name-space through to the `DNS` servers configured for this connection (unless a more specific route has been offered by another connection for a selected name/name-space). This is useful if you wish to prevent [DNS leakage](#dns-leakage). | [SetLinkDomains][resolved] |
+| `DNSSEC` | `yes`</br >`default` | Control of DNSSEC should be enabled (`yes`) or disabled (`no`), or `allow-downgrade` to switch off DNSSEC only if the server doesn't support it, for any queries over this link only, or use the system default (`default`). | [SetLinkDNSSEC][resolved] |
 
 **Note**: There are no local or system options to be configured. All configuration
 for this script is handled through OpenVPN, including, for example, the name of

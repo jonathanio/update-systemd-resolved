@@ -26,6 +26,7 @@ info:
 	@printf '  setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n'
 	@echo   '  script-security 2'
 	@printf '  up %s\n' $(DEST)
+	@echo   '  up-restart'
 	@printf '  down %s\n' $(DEST)
 	@echo   '  down-pre'
 	@echo

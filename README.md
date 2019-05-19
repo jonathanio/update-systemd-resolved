@@ -86,13 +86,24 @@ down /etc/openvpn/scripts/update-systemd-resolved
 down-pre
 ```
 
-**Note**: The `down` and `down-pre` options here will not work as expected where
-the `openvpn` daemon drops privileges after establishing the connection (i.e.
-when using the `user` and `group` options). This is because only the `root` user
+### up-restart
+
+It is recommended to use `up-restart` in your configuration to ensure that
+`upate-systemd-resolved` is run on restarts - where the connection is
+re-established but the TUN/TAP device remained open (for example, where the
+original connection has timed out and `persist-tun` is enabled). If you do not
+have `persist-tun` set, or you use `ping-exit` instead of `ping-timeout`, you
+most likely will not need this.
+
+### down/pre-down with user/group
+
+The `down` and `down-pre` options here will not work as expected where the
+`openvpn` daemon drops privileges after establishing the connection (i.e.  when
+using the `user` and `group` options). This is because only the `root` user
 will have the privileges required to talk to `systemd-resolved.service` over
 DBus. The `openvpn-plugin-down-root.so` plug-in does provide support for
-enabling the `down` script to be run as the `root` user, but this has been known
-to be unreliable.
+enabling the `down` script to be run as the `root` user, but this has been
+known to be unreliable.
 
 Ultimately this shouldn't affect normal operation as `systemd-resolved.service`
 will remove all settings associated with the link (and therefore naturally
@@ -101,6 +112,8 @@ is closed. The option for `down` and `down-pre` just make this step explicit
 before the device is torn down rather than implicit on the change in
 environment.
 
+### Command Line Settings
+
 Alternatively if you don't want to edit your client configuration, you can add
 the following options to your `openvpn` command:
 
@@ -108,9 +121,8 @@ the following options to your `openvpn` command:
 openvpn \
   --script-security 2 \
   --setenv PATH '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
-  --up /etc/openvpn/scripts/update-systemd-resolved \
-  --down /etc/openvpn/scripts/update-systemd-resolved \
-  --down-pre
+  --up /etc/openvpn/scripts/update-systemd-resolved --up-restart \
+  --down /etc/openvpn/scripts/update-systemd-resolved --down-pre
 ```
 
 Or, you can add the following argument to the command-line arguments of

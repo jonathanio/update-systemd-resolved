@@ -19,8 +19,8 @@ features.
 - Change the handling of DOMAIN to support mutiple class, with a change in the
   way the values are processed and added to systemd-resolved (@adq)
 - Updated the documentation in a number of areas, including a new section
-  specifically on DNS Leakage, links to the DBus commands, and spelling
-  corrections, etc.
+  specifically on DNS Leakage, links to the DBus commands, NetworkManager and
+  DNSSEC issues, and spelling corrections, etc.
 - Now recommended using the `up-restart` option in the configuration files to
   ensure that `update-systemd-resolved` is re-run when the connection only
   partially restarts (i.e connection restarts, but not the TUN/TAP device).

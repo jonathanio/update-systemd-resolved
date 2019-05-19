@@ -16,11 +16,12 @@ features.
   effectively between the environment and command-line parameters.
 - The DNS caches are now flushed when the script as made the configuration
   changes for the link (@Edu4rdSHL)
-- Change the handling of DOMAIN to support mutiple class, with a change in the
+- Change the handling of DOMAIN to support multiple options, with a change in the
   way the values are processed and added to systemd-resolved (@adq)
 - Updated the documentation in a number of areas, including a new section
   specifically on DNS Leakage, links to the DBus commands, NetworkManager and
-  DNSSEC issues, and spelling corrections, etc.
+  DNSSEC issues, and spelling corrections, etc. (Thanks to @bohlstry and
+  @dannyk81 for the help with a script for NetworkManager)
 - Now recommended using the `up-restart` option in the configuration files to
   ensure that `update-systemd-resolved` is re-run when the connection only
   partially restarts (i.e connection restarts, but not the TUN/TAP device).

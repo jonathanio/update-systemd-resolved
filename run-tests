@@ -91,6 +91,10 @@ function ip {
     " 100\n    link/none"
 }
 
+function systemd-resolve {
+  _log "systemd-resolve called with: ${@}"
+}
+
 function logger {
   # Remove standard options
   local message="$*"

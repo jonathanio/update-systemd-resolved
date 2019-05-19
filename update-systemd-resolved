@@ -414,7 +414,7 @@ main() {
       return 1
     fi
 
-    "$script_type" "$link" "$if_index" "$@"
+    "$script_type" "$link" "$if_index" "$@" || return 1
     # Flush the DNS cache
     systemd-resolve --flush-caches
   fi

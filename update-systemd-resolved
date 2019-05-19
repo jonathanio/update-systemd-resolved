@@ -165,6 +165,10 @@ process_dns() {
   fi
 }
 
+process_dns6() {
+  process_dns $1
+}
+
 looks_like_ipv4() {
   [[ -n "$1" ]] && {
     local dots="${1//[^.]}"

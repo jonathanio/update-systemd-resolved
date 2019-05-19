@@ -133,7 +133,7 @@ OpenVPN, either through the server, or the client, configuration:
 | `DNS6` | `::1` | This sets the DNS servers for the link and can take only IPv6 addresses. | [SetLinkDNS][resolved] |
 | `DOMAIN` or `ADAPTER_DOMAIN_SUFFIX` | `example.com` | The primary domain for this host. If set multiple times, the first provided is used as the primary search domain for bare hostnames. Any subsequent `DOMAIN` options will be added as the equivalent of `DOMAIN-SEARCH` options. All requests for this domain as well will be routed to the `DNS` servers provided on this link. | [SetLinkDomains][resolved] |
 | `DOMAIN-SEARCH` | `example.com` | Secondary domains which will be used to search for bare hostnames (after any `DOMAIN`, if set) and in the order provided. All requests for this domain will be routed to the `DNS` servers provided on this link. | [SetLinkDomains][resolved] ||
-| `DOMAIN-ROUTE` | `example.com` | All requests for these domains will be routed to the `DNS` servers provided on this link. They will *not* be used to search for bare hostnames, only routed. A `DOMAIN-ROUTE` option for `.` (single period) will instruct `systemd-resolved` to route the entire namespace through to the `DNS` servers configured for this connection (unless a more specifc route has been offered by another connection for a selected name/namespace). This is useful if you wish to prevent DNS leakage. | [SetLinkDomains][resolved] ||
+| `DOMAIN-ROUTE` | `example.com` | All requests for these domains will be routed to the `DNS` servers provided on this link. They will *not* be used to search for bare hostnames, only routed. A `DOMAIN-ROUTE` option for `.` (single period) will instruct `systemd-resolved` to route the entire DNS name-space through to the `DNS` servers configured for this connection (unless a more specific route has been offered by another connection for a selected name/name-space). This is useful if you wish to prevent [DNS leakage](#dns-leakage). | [SetLinkDomains][resolved] ||
 | `DNSSEC` | `yes`</br >`default` | Control of DNSSEC should be enabled (`yes`) or disabled (`no`), or `allow-downgrade` to switch off DNSSEC only if the server doesn't support it, for any queries over this link only, or use the system default (`default`). | [SetLinkDNSSEC][resolved] ||
 
 *Note*: There are no local or system options to be configured. All configuration
@@ -169,6 +169,87 @@ four DNS servers listed, but they will *not* be appended (i.e.
 `mail.example.office` or `mail.example.com` do not exist).
 
 Finally, DNSSEC has been enabled for this link (and this link only).
+
+## DNS Leakage
+
+DNS Leakage is something to be careful of when using any VPN or untrusted
+network, and it can heavily depend on how you configure your normal DNS
+settings as well as how you configure the DNS on your VPN connection.
+
+By default, `systemd-resolved` will send **all** DNS queries to at least one
+DNS server on **every** link configured with DNS servers. The first to reply
+back with a valid query is the one returned to the client, and the last to
+return back a failure (assuming all other queries also failed) will also be
+returned to the client.
+
+The changes in this handling come in when you start using the `DOMAIN`,
+`DOMAIN-SEARCH` and `DOMAIN-ROUTE` options.  The three differ in how domains
+are treated for searching bare domains, but all three work exactly the same
+when it comes to how it routes domains to specific DNS servers.
+
+Any domain added using `DOMAIN`, `DOMAIN-SEARCH`, or `DOMAIN-ROUTE` will be
+added explicitly to the VPN link and therefore any queries for domain suffixes
+which match these will be routed through this link, and only this link.  Any
+other domains which do not match these will revert back to distributing the
+queries across all links.
+
+There are two ways to override this:
+
+### Preventing Leakage in on untrusted networks
+
+If you want to prevent DNS queries leaking over untrusted networks (for
+example, over public WiFi hotspots), then you need to tell `systemd-resolved`
+to send **all** DNS queries over the VPN link. To do this, add the following to
+your server or client VPN configurations respectively:
+
+```
+# Server Configuration
+push "dhcp-option DOMAIN-ROUTE ."
+```
+
+```
+# Client Configuration
+dhcp-option DOMAIN-ROUTE .
+```
+
+All DNS queries (which do not match a more explicit entry on another link) will
+now be routed over the VPN only.
+
+### Preventing Leakage to Corporate networks
+
+In an alternate situation, you may want to have DNS queries specifically routed
+over the VPN for corporate or private network access, but you don't want your
+general DNS queries to be visible to anyone who has access to the logs of the
+corporate DNS servers.
+
+This option cannot be directly managed by `update-systemd-resolved` as you need
+to configure the network settings of other links to send all queries by default
+to your nominated DNS server (e.g. over `ens0` or `wlp2s0` for your Ethernet or
+Wireless network cards). This needs to be configured under the `[Network]`
+section of your `.network` file for your interface in `/etc/systemd/network`.
+For example:
+
+```
+[Network]
+DHCP=yes
+DNS=8.8.8.8
+DNS=8.8.4.4
+Domains=.
+```
+
+When you connect, all domains except those explicitly listed using the `DOMAIN`,
+`DOMAIN-SEARCH`, or `DOMAIN-ROUTE` options of your VPN link will be sent to the
+DNS server of your nominated link.
+
+### Concurrent Configuration
+
+Note that these two options are mutually exclusive, as if you establish a VPN
+link with `DOMAIN-ROUTE` set to `.` while you have also configured it inside a
+`.network` file via `systemd-networkd`, then you will have two links
+responsible for routing all queries, and so both links will get all requests.
+
+How to manage the DNS settings of other links while the VPN is operational is
+outside the scope of this script at this time.
 
 ## How to help
 

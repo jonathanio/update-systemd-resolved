@@ -2,12 +2,12 @@
 
 [![Build Status](https://travis-ci.org/jonathanio/update-systemd-resolved.svg?branch=features%2Funit-tests)](https://travis-ci.org/jonathanio/update-systemd-resolved)
 
-This is a helper script designed to integrate OpenVPN with the `systemd-resolved`
-service via DBus instead of trying to override `/etc/resolv.conf`, or manipulate
-`systemd-networkd` configuration files.
+This is a helper script designed to integrate OpenVPN with the
+`systemd-resolved` service via DBus instead of trying to override
+`/etc/resolv.conf`, or manipulate `systemd-networkd` configuration files.
 
-Since systemd-229, the `systemd-resolved` service has an API available via
-DBus which allows directly setting the DNS configuration for a link. This script
+Since systemd-229, the `systemd-resolved` service has an API available via DBus
+which allows directly setting the DNS configuration for a link. This script
 makes use of `busctl` from systemd to send DBus messages to `systemd-resolved`
 to update the DNS for the link created by OpenVPN.
 
@@ -18,9 +18,10 @@ All are most welcome.
 
 ## Installation
 
-If you are using a distribution of Linux with access to the Arch User Repository,
-the simplest way to install is by using the
-[openvpn-update-systemd-resolved](https://aur.archlinux.org/packages/openvpn-update-systemd-resolved/)
+[aur]:https://aur.archlinux.org/packages/openvpn-update-systemd-resolved/
+
+If you are using a distribution of Linux with uses the Arch User Repository, the
+simplest way to install is by using the [openvpn-update-systemd-resolved][aur]
 AUR package as this will take care of any updates through your package manager.
 
 Alternatively, the package can be manually installed by running the following:
@@ -41,7 +42,7 @@ systemctl start systemd-resolved.service
 ```
 
 Then update your `/etc/nsswitch.conf` file to look up DNS via the `resolve`
-service (you may need to install the NSS library which connectes libnss to
+service (you may need to install the NSS library which connects libnss to
 `systemd-resolved`):
 
 ```conf
@@ -58,10 +59,11 @@ otherwise the configuration provided by this script will only work on domains
 that cannot be resolved by the currently configured DNS servers (i.e. they must
 fall back after trying the ones set by your LAN's DHCP server).
 
+[LP1685045]:https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1685045
+
 *Note*: The NSS interface for `systemd-resolved` may be deprecated and has
-already been flagged for deprecation in Ubuntu (see
-[LP#1685045](https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1685045)
-for details). In this case, you should set your `nameserver` in your
+already been flagged for deprecation in Ubuntu (see [LP#1685045][LP1685045] for
+details). In this case, you should set your `nameserver` in your
 `/etc/resolv.conf` to `127.0.0.53`, which will interact with the stub resolver
 (introduced in systemd-231) giving you the improved configuration and routing
 support, without having to worry about trying to manage your `/etc/resolv.conf`
@@ -83,7 +85,7 @@ down-pre
 the `openvpn` daemon drops privileges after establishing the connection (i.e.
 when using the `user` and `group` options). This is because only the `root` user
 will have the privileges required to talk to `systemd-resolved.service` over
-DBus. The `openvpn-plugin-down-root.so` plugin does provide support for
+DBus. The `openvpn-plugin-down-root.so` plug-in does provide support for
 enabling the `down` script to be run as the `root` user, but this has been known
 to be unreliable.
 
@@ -95,7 +97,7 @@ before the device is torn down rather than implicit on the change in
 environment.
 
 Alternatively if you don't want to edit your client configuration, you can add
-the following options to your openvpn command:
+the following options to your `openvpn` command:
 
 ```bash
 openvpn \
@@ -104,6 +106,14 @@ openvpn \
   --up /etc/openvpn/scripts/update-systemd-resolved \
   --down /etc/openvpn/scripts/update-systemd-resolved \
   --down-pre
+```
+
+Or, you can add the following argument to the command-line arguments of
+`openvpn`, which will use the `update-systemd-resolve.conf` file instead:
+
+```bash
+openvpn \
+  --config /etc/openvpn/scripts/update-systemd-resolved.conf
 ```
 
 ## Usage
@@ -164,7 +174,7 @@ monitor and validate the calls made by the script based on the environment
 variables available to it at run-time. Please add a test for any new features
 you may wish to add, or update any which are wrong, and test your code by
 running `./run-tests` from the root of the repository. There are no dependencies
-on `run-tests` - it runs 100% bash and doesn't call out ot any other program or
+on `run-tests` - it runs 100% bash and doesn't call out to any other program or
 language.
 
 TravisCI is enabled on this repository: Click the link at the top of this README

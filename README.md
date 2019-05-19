@@ -108,6 +108,14 @@ openvpn \
   --down-pre
 ```
 
+Or, you can add the following argument to the command-line arguments of
+`openvpn`, which will use the `update-systemd-resolve.conf` file instead:
+
+```bash
+openvpn \
+  --config /etc/openvpn/scripts/update-systemd-resolved.conf
+```
+
 ## Usage
 
 `update-systemd-resolved` works by processing the `dhcp-option` commands set in

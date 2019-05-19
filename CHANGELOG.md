@@ -14,6 +14,8 @@ features.
 - Based on some feedback by (@tbaumann), alter the handling of script_type and
   dev within the body in the main() function to allow it to work more
   effectively between the environment and command-line parameters.
+- The DNS caches are now flushed when the script as made the configuration
+  changes for the link (@Edu4rdSHL)
 
 ## 1.2.7 (2017.11.12)
 

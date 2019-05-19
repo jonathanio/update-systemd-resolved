@@ -73,8 +73,6 @@ dhcp_settings() {
 }
 
 up() {
-  # Flush DNS cache
-  systemd-resolve --flush-caches
   local link="$1"
   shift
   local if_index="$1"
@@ -139,8 +137,6 @@ up() {
 }
 
 down() {
-  # Flush DNS cache
-  systemd-resolve --flush-caches
   local link="$1"
   shift
   local if_index="$1"
@@ -419,6 +415,8 @@ main() {
     fi
 
     "$script_type" "$link" "$if_index" "$@"
+    # Flush the DNS cache
+    systemd-resolve --flush-caches
   fi
 }
 

@@ -341,8 +341,13 @@ process_domain() {
   shift
 
   info "Adding DNS Domain ${domain}"
-  (( dns_domain_count += 1 ))
-  dns_domain+=("${domain}" false)
+  if [[ $dns_domain_count -eq 1 ]]; then
+    (( dns_search_count += 1 ))
+    dns_search+=("${domain}" false)
+  else
+    (( dns_domain_count = 1 ))
+    dns_domain+=("${domain}" false)
+  fi
 }
 
 process_adapter_domain_suffix() {

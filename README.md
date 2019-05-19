@@ -54,14 +54,14 @@ hosts: files resolve dns myhostname
 hosts: files resolve myhostname
 ```
 
-*Note*: If you intend on using this script, the latter two are preferred
+**Note**: If you intend on using this script, the latter two are preferred
 otherwise the configuration provided by this script will only work on domains
 that cannot be resolved by the currently configured DNS servers (i.e. they must
 fall back after trying the ones set by your LAN's DHCP server).
 
 [LP1685045]:https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1685045
 
-*Note*: The NSS interface for `systemd-resolved` may be deprecated and has
+**Note**: The NSS interface for `systemd-resolved` may be deprecated and has
 already been flagged for deprecation in Ubuntu (see [LP#1685045][LP1685045] for
 details). In this case, you should set your `nameserver` in your
 `/etc/resolv.conf` to `127.0.0.53`, which will interact with the stub resolver
@@ -81,11 +81,12 @@ before the device is closed:
 script-security 2
 setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 up /etc/openvpn/scripts/update-systemd-resolved
+up-restart
 down /etc/openvpn/scripts/update-systemd-resolved
 down-pre
 ```
 
-*Note*: The `down` and `down-pre` options here will not work as expected where
+**Note**: The `down` and `down-pre` options here will not work as expected where
 the `openvpn` daemon drops privileges after establishing the connection (i.e.
 when using the `user` and `group` options). This is because only the `root` user
 will have the privileges required to talk to `systemd-resolved.service` over
@@ -136,7 +137,7 @@ OpenVPN, either through the server, or the client, configuration:
 | `DOMAIN-ROUTE` | `example.com` | All requests for these domains will be routed to the `DNS` servers provided on this link. They will *not* be used to search for bare hostnames, only routed. A `DOMAIN-ROUTE` option for `.` (single period) will instruct `systemd-resolved` to route the entire DNS name-space through to the `DNS` servers configured for this connection (unless a more specific route has been offered by another connection for a selected name/name-space). This is useful if you wish to prevent [DNS leakage](#dns-leakage). | [SetLinkDomains][resolved] ||
 | `DNSSEC` | `yes`</br >`default` | Control of DNSSEC should be enabled (`yes`) or disabled (`no`), or `allow-downgrade` to switch off DNSSEC only if the server doesn't support it, for any queries over this link only, or use the system default (`default`). | [SetLinkDNSSEC][resolved] ||
 
-*Note*: There are no local or system options to be configured. All configuration
+**Note**: There are no local or system options to be configured. All configuration
 for this script is handled through OpenVPN, including, for example, the name of
 the interface to be configured.
 

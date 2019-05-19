@@ -67,7 +67,11 @@ details). In this case, you should set your `nameserver` in your
 `/etc/resolv.conf` to `127.0.0.53`, which will interact with the stub resolver
 (introduced in systemd-231) giving you the improved configuration and routing
 support, without having to worry about trying to manage your `/etc/resolv.conf`
-file.
+file. This can be done by linking to `stub-resolv.conf`:
+
+```bash
+ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+```
 
 Finally, update your OpenVPN configuration file and set the `up` and `down`
 options to point to the script, and `down-pre` to ensure that the script is run

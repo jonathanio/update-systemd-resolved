@@ -34,15 +34,22 @@ make
 
 ## How to Enable
 
-Make sure that you have `systemd-resolved` enabled and running:
+Make sure that you have `systemd-resolved` enabled and running. First, make sure
+that `systemd-resolved.service` is enabled and started:
 
 ```bash
 systemctl enable systemd-resolved.service
 systemctl start systemd-resolved.service
 ```
 
-Then update your `/etc/nsswitch.conf` file to look up DNS via the `resolve`
-service (you may need to install the NSS library which connects libnss to
+Next, you can either configure the system libraries to talk to it using NSS, or
+you can override the `resolv.conf` file to use `systemd-resolved` as a stub
+resolver (or both):
+
+### NSS and nssswitch.conf
+
+Update your `/etc/nsswitch.conf` file to look up DNS via the `resolve` service
+(you may need to install the NSS library which connects libnss to
 `systemd-resolved`):
 
 ```conf
@@ -54,24 +61,41 @@ hosts: files resolve dns myhostname
 hosts: files resolve myhostname
 ```
 
-**Note**: If you intend on using this script, the latter two are preferred
-otherwise the configuration provided by this script will only work on domains
-that cannot be resolved by the currently configured DNS servers (i.e. they must
-fall back after trying the ones set by your LAN's DHCP server).
+The changes will be applied as soon as the file is saved.
 
-[LP1685045]:https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1685045
+### Stub Resolver
 
-**Note**: The NSS interface for `systemd-resolved` may be deprecated and has
-already been flagged for deprecation in Ubuntu (see [LP#1685045][LP1685045] for
-details). In this case, you should set your `nameserver` in your
-`/etc/resolv.conf` to `127.0.0.53`, which will interact with the stub resolver
-(introduced in systemd-231) giving you the improved configuration and routing
-support, without having to worry about trying to manage your `/etc/resolv.conf`
-file. This can be done by linking to `stub-resolv.conf`:
+The `systemd-resolved` service (since systemd-231) also listens on `127.0.0.53`
+via the `lo` interface, providing a stub resolver which any client can call to
+request DNS, whether or not it uses the system libraries to resolve DNS, and
+you no longer have to worry about trying to manage your `/etc/resolv.conf`
+file. This set up can be installed by linking to `stub-resolv.conf`:
 
 ```bash
 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 ```
+
+### Usage and Ubuntu and Fedora
+
+#### Ubuntu
+
+[LP1685045]:https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1685045
+
+The NSS interface for `systemd-resolved` may be deprecated and has
+already been flagged for deprecation in Ubuntu (see [LP#1685045][LP1685045] for
+details). In this case, you should use the Stub Resolver method now.
+
+#### Fedora
+
+[authselect]:https://github.com/pbrezina/authselect
+
+Fedora 28 makes use of `authselect` to manage the NSS settings on the system.
+Directly editing `nsswitch.conf` is not recommended as it may be overwritten at
+any time if `authselect` is run. Proper overrides may not yet be possible - see
+[pbrezina/authselect][authselect] for details. However, like Ubuntu, the [Stub
+Resolver](#stub-resolver) method is recommended here too.
+
+### OpenVPN Configuration
 
 Finally, update your OpenVPN configuration file and set the `up` and `down`
 options to point to the script, and `down-pre` to ensure that the script is run
@@ -86,7 +110,7 @@ down /etc/openvpn/scripts/update-systemd-resolved
 down-pre
 ```
 
-### up-restart
+#### up-restart
 
 It is recommended to use `up-restart` in your configuration to ensure that
 `upate-systemd-resolved` is run on restarts - where the connection is
@@ -95,7 +119,7 @@ original connection has timed out and `persist-tun` is enabled). If you do not
 have `persist-tun` set, or you use `ping-exit` instead of `ping-timeout`, you
 most likely will not need this.
 
-### down/pre-down with user/group
+#### down/pre-down with user/group
 
 The `down` and `down-pre` options here will not work as expected where the
 `openvpn` daemon drops privileges after establishing the connection (i.e.  when

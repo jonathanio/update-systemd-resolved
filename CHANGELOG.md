@@ -16,6 +16,15 @@ features.
   effectively between the environment and command-line parameters.
 - The DNS caches are now flushed when the script as made the configuration
   changes for the link (@Edu4rdSHL)
+- Change the handling of DOMAIN to support mutiple class, with a change in the
+  way the values are processed and added to systemd-resolved (@adq)
+
+### BACKWARDS INCOMPATIBILITIES
+
+- The DOMAIN option now supports multiple calls, and rather than the last
+  provided version being the primary domain for the link, the first value is the
+  primary domain, and all subsequent calls are added as the equivalent of
+  DOMAIN-SEARCH.
 
 ## 1.2.7 (2017.11.12)
 

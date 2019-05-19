@@ -7,4 +7,4 @@ foreign_option_4="dhcp-option DOMAIN-SEARCH example.net"
 
 TEST_TITLE="DNS Dual Domain and Dual Search (with Order Check)"
 TEST_BUSCTL_CALLED=1
-TEST_BUSCTL_DOMAINS="3 example.com false example.org false example.net false"
+TEST_BUSCTL_DOMAINS="4 example.co false example.org false example.com false example.net false"

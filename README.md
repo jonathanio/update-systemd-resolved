@@ -114,6 +114,7 @@ OpenVPN, either through the server, or the client, configuration:
 | Option | Examples | Notes |
 |--:|---|---|
 | `DNS` | `0.0.0.0`<br />`::1` | This sets the DNS servers for the link and can take any IPv4 or IPv6 address. |
+| `DNS6` | `::1` | This sets the DNS servers for the link and can take only IPv6 addresses. |
 | `DOMAIN` or `ADAPTER_DOMAIN_SUFFIX` | `example.com` | The primary domain for this host. If set multiple times, the last provided is used. Will be the primary search domain for bare hostnames. All requests for this domain as well will be routed to the `DNS` servers provided on this link. |
 | `DOMAIN-SEARCH` | `example.com` | Secondary domains which will be used to search for bare hostnames (after any `DOMAIN`, if set) and in the order provided. All requests for this domain will be routed to the `DNS` servers provided on this link. |
 | `DOMAIN-ROUTE` | `example.com` | All requests for these domains will be routed to the `DNS` servers provided on this link. They will *not* be used to search for bare hostnames, only routed. A `DOMAIN-ROUTE` option for `.` (single period) will instruct `systemd-resolved` to route the entire namespace through to the `DNS` servers configured for this connection (unless a more specifc route has been offered by another connection for a selected name/namespace). This is useful if you wish to prevent DNS leakage. |
@@ -128,8 +129,8 @@ the interface to be configured.
 ```conf
 push "dhcp-option DNS 10.62.3.2"
 push "dhcp-option DNS 10.62.3.3"
-push "dhcp-option DNS 2001:db8::a3:c15c:b56e:619a"
-push "dhcp-option DNS 2001:db8::a3:ffec:f61c:2e06"
+push "dhcp-option DNS6 2001:db8::a3:c15c:b56e:619a"
+push "dhcp-option DNS6 2001:db8::a3:ffec:f61c:2e06"
 push "dhcp-option DOMAIN example.office"
 push "dhcp-option DOMAIN-SEARCH example.com"
 push "dhcp-option DOMAIN-ROUTE example.net"

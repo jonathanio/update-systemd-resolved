@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.0 (2019.05.19)
+
+### NOTES
+
+A number of pull-requests and updates added, fixing some bugs and adding new
+features.
+
+### IMPROVEMENTS
+
+- Added support for DNS6 option which can take only IPv6 addresses
+  (@thecodingrobot)
+
 ## 1.2.7 (2017.11.12)
 
 ### NOTES

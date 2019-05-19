@@ -264,6 +264,25 @@ responsible for routing all queries, and so both links will get all requests.
 How to manage the DNS settings of other links while the VPN is operational is
 outside the scope of this script at this time.
 
+## DNSSEC Issues
+
+```shell
+$ systemd-resolve eu-central-1.console.aws.amazon.com
+eu-central-1.console.aws.amazon.com: resolve call failed: DNSSEC validation failed: no-signature
+# or
+$ systemd-resolve eu-central-1.console.aws.amazon.com
+eu-central-1.console.aws.amazon.com: resolve call failed: DNSSEC validation failed: incompatible-server
+```
+
+If you are seeing failed queries in your logs due to DNSSEC issues, support may be
+partially or fully enabled and you are now working with a server which does not
+support this extension. You may therefore need to set `DNSSEC` to `no` (or
+maybe just `allow-downgrade`) in your VPN configuration.
+
+```
+dhcp-option DNSSEC allow-downgrade
+```
+
 ## How to help
 
 If you can help with any of these areas, or have bug fixes, please fork and

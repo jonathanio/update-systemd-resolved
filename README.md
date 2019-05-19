@@ -135,7 +135,7 @@ OpenVPN, either through the server, or the client, configuration:
 | `DNSSEC` | `yes`</br >`default` | Control of DNSSEC should be enabled (`yes`) or disabled (`no`), or `allow-downgrade` to switch off DNSSEC only if the server doesn't support it, for any queries over this link only, or use the system default (`default`). |
 
 *Note*: There are no local or system options to be configured. All configuration
-for this script is handled though OpenVPN, including, for example, the name of
+for this script is handled through OpenVPN, including, for example, the name of
 the interface to be configured.
 
 ### Example
@@ -161,9 +161,9 @@ servers and two IPv6 and will set the primary domain for the link to be
 `mail.example.office` fails, then `mail.example.lan` will be tried next,
 followed by `mail.example.com`.
 
-Requests for `example.net` and `example.org` will also be routed though to the
-four DNS servers listed too, but they will *not* be appended (i.e.
-`mail.example.net` will not be attempted, nor `mail.example.org` if
+Requests for `example.net` and `example.org` will also be routed through to the
+four DNS servers listed, but they will *not* be appended (i.e.
+`mail.example.net` will not be attempted, nor `mail.example.org`, if
 `mail.example.office` or `mail.example.com` do not exist).
 
 Finally, DNSSEC has been enabled for this link (and this link only).

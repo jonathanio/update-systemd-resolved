@@ -11,10 +11,18 @@ which allows directly setting the DNS configuration for a link. This script
 makes use of `busctl` from systemd to send DBus messages to `systemd-resolved`
 to update the DNS for the link created by OpenVPN.
 
-*NOTE*: This is a beta script. So long as you're using OpenVPN 2.1 or greater,
-iproute2, and have at least version 229 of systemd, then it should work.
-Nonetheless, if you do come across problems, fork and fix, or raise an issue.
-All are most welcome.
+## NetworkManager
+
+[nm-helper]:https://git.launchpad.net/ubuntu/+source/network-manager-openvpn/tree/src/nm-openvpn-service-openvpn-helper.c?h=debian/sid
+
+This script may not be compatible with recent versions of NetworkManager. It
+seems that NetworkManager overrides the `up` command to use its own helper
+script ([nm-openvpn-service-openvpn-helper][nm-helper]). This script only
+supports `DNS` and `DOMAIN` options (not `DNS6`, `DOMAIN-SEARCH` and
+`DOMAIN-ROUTE`, nor `DNSSEC` overrides). It will also set the main network
+interface to route `~.` DNS queries (i.e the whole name-space) to the LAN or ISP
+DNS servers - see [DNS Leakage](#dns-leakage) below, making it difficult to
+override using `DOMAIN`.
 
 ## Installation
 

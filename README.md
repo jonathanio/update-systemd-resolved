@@ -83,7 +83,7 @@ file. This set up can be installed by linking to `stub-resolv.conf`:
 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 ```
 
-### Usage and Ubuntu and Fedora
+### Issues with Ubuntu and Fedora
 
 #### Ubuntu
 

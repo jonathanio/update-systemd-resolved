@@ -21,8 +21,8 @@ script ([nm-openvpn-service-openvpn-helper][nm-helper]). This script only
 supports `DNS` and `DOMAIN` options (not `DNS6`, `DOMAIN-SEARCH` and
 `DOMAIN-ROUTE`, nor `DNSSEC` overrides). It will also set the main network
 interface to route `~.` DNS queries (i.e the whole name-space) to the LAN or ISP
-DNS servers - see [DNS Leakage](#dns-leakage) below, making it difficult to
-override using `DOMAIN`.
+DNS servers, making it difficult to override using `DOMAIN` - see [DNS
+Leakage](#dns-leakage) below.
 
 ## Installation
 

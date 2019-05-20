@@ -295,8 +295,8 @@ services:
 
 ### NetworkManager
 
-LP1671606:https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/1671606
-LP1688018:https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/1688018
+[LP1671606]:https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/1671606
+[LP1688018]:https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/1688018
 
 There is currently a regression with versions of NetworkManager 1.2.6 or later
 (see [LP#1671606][LP1671606] and [LP#1688018][LP1688018]) which means that it
@@ -304,7 +304,7 @@ will automatically set all normal network interfaces with `~.` for DNS routing.
 This means that even if you set `dhcp-option DOMAIN-ROUTE .` for your VPN
 connection, you will still leak DNS queries over potentially insecure networks.
 
-issue-59:https://github.com/jonathanio/update-systemd-resolved/issues/59
+[issue-59]:https://github.com/jonathanio/update-systemd-resolved/issues/59
 
 If you are concerned by potentially leaking DNS on systems which use
 NetworkManager, you may need to configure an [additional script][issue-59]

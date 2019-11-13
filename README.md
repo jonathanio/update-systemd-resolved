@@ -17,12 +17,12 @@ to update the DNS for the link created by OpenVPN.
 
 This script may not be compatible with recent versions of NetworkManager. It
 seems that NetworkManager overrides the `up` command to use its own helper
-script ([nm-openvpn-service-openvpn-helper][nm-helper]). This script only
-supports `DNS` and `DOMAIN` options (not `DNS6`, `DOMAIN-SEARCH` and
-`DOMAIN-ROUTE`, nor `DNSSEC` overrides). It will also set the main network
-interface to route `~.` DNS queries (i.e the whole name-space) to the LAN or ISP
-DNS servers, making it difficult to override using `DOMAIN` - see [DNS
-Leakage](#dns-leakage) below.
+script ([nm-openvpn-service-openvpn-helper][nm-helper]). The script that ships
+with NetworkManager only supports `DNS` and `DOMAIN` options (not `DNS6`, 
+`DOMAIN-SEARCH` and `DOMAIN-ROUTE`, nor `DNSSEC` overrides). It will also set
+the main network interface to route `~.` DNS queries (i.e the whole name-space)
+to the LAN or ISP DNS servers, making it difficult to override using `DOMAIN` -
+see [DNS Leakage](#dns-leakage) below.
 
 ## Installation
 

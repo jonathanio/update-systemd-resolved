@@ -170,7 +170,7 @@ openvpn \
 `update-systemd-resolved` works by processing the `dhcp-option` commands set in
 OpenVPN, either through the server, or the client, configuration:
 
-[resolved]:https://www.freedesktop.org/wiki/Software/systemd/resolved/
+[resolved]:https://www.freedesktop.org/software/systemd/man/org.freedesktop.resolve1.html
 
 | Option | Examples | Notes | DBus Call |
 |--:|---|---|---|

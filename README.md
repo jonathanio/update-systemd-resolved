@@ -180,6 +180,7 @@ OpenVPN, either through the server, or the client, configuration:
 | `DOMAIN-SEARCH` | `example.com` | Secondary domains which will be used to search for bare hostnames (after any `DOMAIN`, if set) and in the order provided. All requests for this domain will be routed to the `DNS` servers provided on this link. | [SetLinkDomains][resolved] |
 | `DOMAIN-ROUTE` | `example.com` | All requests for these domains will be routed to the `DNS` servers provided on this link. They will *not* be used to search for bare hostnames, only routed. A `DOMAIN-ROUTE` option for `.` (single period) will instruct `systemd-resolved` to route the entire DNS name-space through to the `DNS` servers configured for this connection (unless a more specific route has been offered by another connection for a selected name/name-space). This is useful if you wish to prevent [DNS leakage](#dns-leakage). | [SetLinkDomains][resolved] |
 | `DNSSEC` | `yes`</br >`default` | Control of DNSSEC should be enabled (`yes`) or disabled (`no`), or `allow-downgrade` to switch off DNSSEC only if the server doesn't support it, for any queries over this link only, or use the system default (`default`). | [SetLinkDNSSEC][resolved] |
+| `DNS-OVER-TLS` | `no`<br>`opportunistic`<br>`yes` | DNS over TLS setting for the link, overriding the global setting. Typically useful when using DoT but the VPN has a DNS server without support. | [SetLinkDNSOverTLS][resolved] |
 
 **Note**: There are no local or system options to be configured. All configuration
 for this script is handled through OpenVPN, including, for example, the name of
@@ -198,6 +199,7 @@ push "dhcp-option DOMAIN-SEARCH example.com"
 push "dhcp-option DOMAIN-ROUTE example.net"
 push "dhcp-option DOMAIN-ROUTE example.org"
 push "dhcp-option DNSSEC yes"
+push "dhcp-option DNS-OVER-TLS no"
 ```
 
 This, added to the OpenVPN server's configuration file will set two IPv4 DNS
@@ -213,7 +215,7 @@ four DNS servers listed, but they will *not* be appended (i.e.
 `mail.example.net` will not be attempted, nor `mail.example.org`, if
 `mail.example.office` or `mail.example.com` do not exist).
 
-Finally, DNSSEC has been enabled for this link (and this link only).
+Finally, DNSSEC has been enabled and DNS over TLS disabled for this link (and this link only).
 
 ## DNS Leakage
 

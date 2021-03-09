@@ -85,6 +85,7 @@ up() {
   local -a dns_servers=() dns_domain=() dns_search=() dns_routed=()
   local -i dns_server_count=0 dns_domain_count=0 dns_search_count=0 dns_routed_count=0
   local dns_sec=""
+  local dns_over_tls=""
 
   while read -r setting; do
     setting_type="${setting%% *}"
@@ -133,6 +134,11 @@ up() {
       info "SetLinkDNSSEC($if_index ${dns_sec})"
       busctl_call SetLinkDNSSEC 'is' "$if_index" "${dns_sec}" || return $?
     fi
+  fi
+
+  if [[ -n "${dns_over_tls}" ]]; then
+      info "SetLinkDNSOverTLS($if_index ${dns_over_tls})"
+      busctl_call SetLinkDNSOverTLS 'is' "$if_index" "${dns_over_tls}" || return $?
   fi
 }
 
@@ -396,6 +402,27 @@ process_dnssec() {
 
   info "Setting DNSSEC to ${setting}"
   dns_sec="${setting}"
+}
+
+process_dns_over_tls() {
+  local option="$1" setting=""
+  shift
+
+  case "${option,,}" in
+    yes|true)
+      setting="yes" ;;
+    no|false)
+      setting="no" ;;
+    opportunistic)
+      setting="opportunistic" ;;
+    *)
+      local message="'$option' is not a valid DNSOverTLS option"
+      emerg "${message}"
+      return 1 ;;
+  esac
+
+  info "Setting DNSOverTLS to ${setting}"
+  dns_over_tls="${setting}"
 }
 
 main() {

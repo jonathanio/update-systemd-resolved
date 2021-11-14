@@ -2,14 +2,26 @@ PREFIX ?= /usr/local/bin
 
 SRC = update-systemd-resolved
 DEST = $(DESTDIR)$(PREFIX)/$(SRC)
+RULES = $(DESTDIR)/etc/polkit-1/rules.d/10-$(SRC).rules
+RULES_OPTIONS ?= --polkit-allowed-user=openvpn --polkit-allowed-group=network
 
-.PHONY: all install info
+.PHONY: all install info rules
 
 all: install info
 
-install:
-	@install -Dm750 $(SRC) $(DEST)
-	@install -Dm644 $(SRC).conf $(DEST).conf
+$(DEST): $(SRC)
+	@install -Dm750 $< $@
+
+$(DEST).conf: $(SRC).conf
+	@install -Dm644 $< $@
+
+$(RULES): $(SRC)
+	@mkdir -p $$(dirname $@)
+	@./$(SRC) print-polkit-rules $(RULES_OPTIONS) > $@
+
+install: $(DEST) $(DEST).conf $(TEMPLATE_RULES_DEST)
+
+rules: $(RULES)
 
 info:
 	@printf 'Successfully installed %s to %s.\n' $(SRC) $(DEST)
@@ -32,5 +44,6 @@ info:
 	@echo
 	@printf 'or pass --config %s.conf\n' $(DEST)
 	@echo 'in addition to any other --config arguments to your openvpn command.'
+
 test:
 	@./run-tests

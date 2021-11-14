@@ -99,6 +99,77 @@ hosts: files resolve myhostname
 
 The changes will be applied as soon as the file is saved.
 
+### Polkit Rules
+
+If you run the OpenVPN client as an unprivileged user, you may need to add
+polkit rules authorizing that user to perform the various DBus calls that
+`update-systemd-resolved` makes.  Some installation methods bundle these rules;
+for instance, on Arch Linux, where `openvpn-client@<name>.service` instances
+run as the unprivileged `openvpn` user, the
+[openvpn-update-systemd-resolved][aur] AUR package ships suitable rules in the
+file `/etc/polkit-1/rules.d/10-update-systemd-resolved.rules`.
+
+#### Generating Polkit Rules
+
+> **Note**
+> `update-systemd-resolved` strives to generate polkit rules with the smallest
+> scope consistent with its proper functioning.  Nonetheless, in order to avoid
+> security risks, you are encouraged to review the generated polkit rules
+> before installing them.
+
+You can also generate suitable rules with (some variation on) the following
+commands:
+
+```shell-session
+$ update-systemd-resolved print-polkit-rules --polkit-allowed-user some-user --polkit-allowed-user another-user > ./10-custom-update-systemd-resolved.rules
+$ sudo install -Dm0640 ./10-custom-update-systemd-resolved.rules /etc/polkit-1/rules.d/10-custom-update-systemd-resolved.rules
+```
+
+This will allow `update-systemd-resolved` to successfully make its DBus calls
+when invoked from OpenVPN client services that run as the users `some-user` or
+`another-user`.
+
+You can also authorize members of specified groups with:
+
+```shell-session
+$ update-systemd-resolved print-polkit-rules --polkit-allowed-group some-group --polkit-allowed-group another-group > ./10-custom-update-systemd-resolved.rules
+$ sudo install -Dm0640 ./10-custom-update-systemd-resolved.rules /etc/polkit-1/rules.d/10-custom-update-systemd-resolved.rules
+```
+
+This will allow `update-systemd-resolved` to successfully make its DBus calls
+when invoked from OpenVPN client services that run under the groups
+`some-group` or `another-group`.
+
+Finally, you can generate rules that pull appropriate user and group values
+from OpenVPN systemd units with:
+
+```shell-session
+$ update-systemd-resolved print-polkit-rules --polkit-systemd-openvpn-unit my-openvpn-client.service
+$ sudo install -Dm0640 ./10-custom-update-systemd-resolved.rules /etc/polkit-1/rules.d/10-custom-update-systemd-resolved.rules
+```
+
+Given:
+
+```shell-session
+$ systemctl show -P User my-openvpn-client.service
+myuser
+$ systemctl show -P Group my-openvpn-client.service
+mygroup
+```
+
+The generated `10-custom-update-systemd-resolved.rules` file will contain rules
+allowing the `myuser` user and members of the `mygroup` group to perform the
+requisite DBus calls.
+
+You can run `update-systemd-resolved print-polkit-rules` with any combination
+of `--polkit-allowed-user`, `--polkit-allowed-group`, and
+`--polkit-systemd-openvpn-unit`.  If called without options,
+`update-systemd-resolved print-polkit-rules` will attempt to derive appropriate
+user and group authorizations from a systemd OpenVPN unit matching
+`openvpn-client@.service`, the [systemd service
+template](https://www.freedesktop.org/software/systemd/man/systemd.service.html#Service%20Templates)
+used for OpenVPN client services on distributions including Arch Linux.
+
 ### Stub Resolver
 
 The `systemd-resolved` service (since systemd-231) also listens on `127.0.0.53`
@@ -157,20 +228,24 @@ most likely will not need this.
 
 #### down/pre-down with user/group
 
-The `down` and `down-pre` options here will not work as expected where the
+The `down` and `down-pre` options here may not work as expected where the
 `openvpn` daemon drops privileges after establishing the connection (i.e.  when
-using the `user` and `group` options). This is because only the `root` user
-will have the privileges required to talk to `systemd-resolved.service` over
-DBus. The `openvpn-plugin-down-root.so` plug-in does provide support for
-enabling the `down` script to be run as the `root` user, but this has been
-known to be unreliable.
+using the `user` and `group` options). This is because, by default, only the
+`root` user will have the privileges required to talk to
+`systemd-resolved.service` over DBus. The `openvpn-plugin-down-root.so` plug-in
+does provide support for enabling the `down` script to be run as the `root`
+user, but this has been known to be unreliable.
 
-Ultimately this shouldn't affect normal operation as `systemd-resolved.service`
-will remove all settings associated with the link (and therefore naturally
-update `/etc/resolv.conf`, if you have it symlinked) when the TUN or TAP device
-is closed. The option for `down` and `down-pre` just make this step explicit
-before the device is torn down rather than implicit on the change in
-environment.
+You can authorize unprivileged users or groups to revert the OpenVPN link's DNS
+settings during the "down" phase using the methods described in the ["Polkit
+Rules" section](#polkit-rules).
+
+Ultimately, dropping privileges shouldn't affect normal "down" operation, since
+`systemd-resolved.service` will remove all settings associated with the link
+(and therefore naturally update `/etc/resolv.conf`, if you have it symlinked)
+when the TUN or TAP device is closed. The option for `down` and `down-pre` just
+make this step explicit before the device is torn down rather than implicit on
+the change in environment.
 
 ### Command Line Settings
 

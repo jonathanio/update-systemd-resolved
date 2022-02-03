@@ -111,6 +111,7 @@ before the device is closed:
 
 ```conf
 script-security 2
+setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 up /usr/bin/update-systemd-resolved
 up-restart
 down /usr/bin/update-systemd-resolved

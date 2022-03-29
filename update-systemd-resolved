@@ -421,7 +421,7 @@ main() {
 
     "$script_type" "$link" "$if_index" "$@" || return 1
     # Flush the DNS cache
-    systemd-resolve --flush-caches
+    busctl_call FlushCaches
   fi
 }
 

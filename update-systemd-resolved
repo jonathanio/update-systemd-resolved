@@ -100,6 +100,17 @@ up() {
     fi
   done < <(dhcp_settings)
 
+  if [[ -n "${dns_sec}" ]]; then
+    if [[ "${dns_sec}" == "default" ]]; then
+      # We need to provide an empty string to use the default settings
+      info "SetLinkDNSSEC($if_index '')"
+      busctl_call SetLinkDNSSEC 'is' "$if_index" "" || return $?
+    else
+      info "SetLinkDNSSEC($if_index ${dns_sec})"
+      busctl_call SetLinkDNSSEC 'is' "$if_index" "${dns_sec}" || return $?
+    fi
+  fi
+
   if [[ "${#dns_servers[*]}" -gt 0 ]]; then
     busctl_params=("$if_index" "$dns_server_count" "${dns_servers[@]}")
     info "SetLinkDNS(${busctl_params[*]})"
@@ -122,17 +133,6 @@ up() {
     fi
     info "SetLinkDomains(${busctl_params[*]})"
     busctl_call SetLinkDomains 'ia(sb)' "${busctl_params[@]}" || return $?
-  fi
-
-  if [[ -n "${dns_sec}" ]]; then
-    if [[ "${dns_sec}" == "default" ]]; then
-      # We need to provide an empty string to use the default settings
-      info "SetLinkDNSSEC($if_index '')"
-      busctl_call SetLinkDNSSEC 'is' "$if_index" "" || return $?
-    else
-      info "SetLinkDNSSEC($if_index ${dns_sec})"
-      busctl_call SetLinkDNSSEC 'is' "$if_index" "${dns_sec}" || return $?
-    fi
   fi
 }
 

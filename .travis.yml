@@ -2,6 +2,7 @@
 # Don't need sudo access or to install anything
 arch:
     - amd64
+    - arm64
     - ppc64le
 sudo: false
 install: true

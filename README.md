@@ -322,10 +322,10 @@ interfaces.
 ### DNSSEC Issues
 
 ```shell
-$ systemd-resolve eu-central-1.console.aws.amazon.com
+$ resolvectl eu-central-1.console.aws.amazon.com
 eu-central-1.console.aws.amazon.com: resolve call failed: DNSSEC validation failed: no-signature
 # or
-$ systemd-resolve eu-central-1.console.aws.amazon.com
+$ resolvectl eu-central-1.console.aws.amazon.com
 eu-central-1.console.aws.amazon.com: resolve call failed: DNSSEC validation failed: incompatible-server
 ```
 

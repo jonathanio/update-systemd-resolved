@@ -112,9 +112,9 @@ before the device is closed:
 ```conf
 script-security 2
 setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-up /etc/openvpn/scripts/update-systemd-resolved
+up /usr/bin/update-systemd-resolved
 up-restart
-down /etc/openvpn/scripts/update-systemd-resolved
+down /usr/bin/update-systemd-resolved
 down-pre
 ```
 
@@ -153,8 +153,8 @@ the following options to your `openvpn` command:
 openvpn \
   --script-security 2 \
   --setenv PATH '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
-  --up /etc/openvpn/scripts/update-systemd-resolved --up-restart \
-  --down /etc/openvpn/scripts/update-systemd-resolved --down-pre
+  --up /usr/bin/update-systemd-resolved --up-restart \
+  --down /usr/bin/update-systemd-resolved --down-pre
 ```
 
 Or, you can add the following argument to the command-line arguments of
@@ -162,7 +162,7 @@ Or, you can add the following argument to the command-line arguments of
 
 ```bash
 openvpn \
-  --config /etc/openvpn/scripts/update-systemd-resolved.conf
+  --config /usr/bin/update-systemd-resolved.conf
 ```
 
 ## Usage

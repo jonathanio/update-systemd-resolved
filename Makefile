@@ -1,4 +1,4 @@
-PREFIX ?= /etc/openvpn/scripts
+PREFIX ?= /usr/bin
 
 SRC = update-systemd-resolved
 DEST = $(DESTDIR)$(PREFIX)/$(SRC)

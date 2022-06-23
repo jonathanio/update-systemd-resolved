@@ -35,7 +35,7 @@ log() {
   logger -s -t "$SCRIPT_NAME" "$@"
 }
 
-for level in emerg err warning info debug; do
+for level in err warning info debug; do
   printf -v functext -- '%s() { log -p user.%s -- "$@" ; }' "$level" "$level"
   eval "$functext"
 done
@@ -48,7 +48,7 @@ busctl_call() {
   # Preserve busctl's exit status
   busctl call "$DBUS_DEST" "$DBUS_NODE" "${DBUS_DEST}.Manager" "$@" || {
     local -i status=$?
-    emerg "'busctl' exited with status $status"
+    err "'busctl' exited with status $status"
     return $status
   }
 }
@@ -206,7 +206,7 @@ parse_ipv6() {
 
   log_invalid_ipv6() {
     local message="'$raw_address' is not a valid IPv6 address"
-    emerg "${message}: $*"
+    err "${message}: $*"
   }
 
   trap -- 'unset -f log_invalid_ipv6' RETURN
@@ -390,7 +390,7 @@ process_dnssec() {
       setting="allow-downgrade" ;;
     *)
       local message="'$option' is not a valid DNSSEC option"
-      emerg "${message}"
+      err "${message}"
       return 1 ;;
   esac
 

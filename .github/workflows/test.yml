@@ -1,0 +1,29 @@
+name: Run update-systemd-resolved tests
+on:
+  pull_request:
+  push:
+jobs:
+  native:
+    name: Run tests on native architecture
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run tests
+        run: ./run-tests
+  cross:
+    name: Run tests on ${{ matrix.arch }} architecture
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch:
+          - aarch64
+          - ppc64le
+    steps:
+      - uses: actions/checkout@v3
+      # https://github.com/marketplace/actions/run-on-architecture
+      - uses: uraimo/run-on-arch-action@v2
+        name: Run tests
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ubuntu20.04
+          run: ./run-tests

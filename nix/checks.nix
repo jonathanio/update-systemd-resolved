@@ -338,8 +338,9 @@
           wait_for_unit_with_output(client, '${serviceName}')
 
           # Block until we can reach the resolver (or until we hit the retry
-          # timeout).  Pass `-u` flag to check UDP port.
+          # timeout).  Pass `-u` flag to check UDP port; also check TCP port.
           wait_for_open_host_port(client, '${resolverIP}', 53, extra=['-u'])
+          wait_for_open_host_port(client, '${resolverIP}', 53)
 
           assert_hostname_match(client, '${resolverIP}', 'resolver-cname.${vpnDomain}')
           assert_hostname_match(client, '${serverIP}', 'server-cname.${vpnDomain}')

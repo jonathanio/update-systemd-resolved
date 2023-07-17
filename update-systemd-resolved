@@ -31,9 +31,17 @@ DBUS_NODE="/org/freedesktop/resolve1"
 
 SCRIPT_NAME="${BASH_SOURCE[0]##*/}"
 
-log() {
-  logger -s -t "$SCRIPT_NAME" "$@"
-}
+if [[ -t 2 ]]; then
+  log() {
+    logger -s -t "$SCRIPT_NAME" "$@"
+  }
+else
+  # Suppress output on stderr when not attached to a (p|t)ty.
+  # https://github.com/jonathanio/update-systemd-resolved/issues/81
+  log() {
+    logger -t "$SCRIPT_NAME" "$@"
+  }
+fi
 
 for level in err warning info debug; do
   printf -v functext -- '%s() { log -p user.%s -- "$@" ; }' "$level" "$level"

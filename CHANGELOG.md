@@ -7,6 +7,12 @@
 - Flush caches with `busctl` rather than with `resolvectl --flush-caches`
   (@cmadamsgit, [#99](https://github.com/jonathanio/update-systemd-resolved/pull/99)).
 
+### BACKWARDS INCOMPATIBILITIES
+
+- `update-systemd-resolved` no longer uses the `emerg` log level with the
+  for logging with the `logger` command, so certain messages are no longer
+  broadcast to `(p|t)ty`s ([#109](https://github.com/jonathanio/update-systemd-resolved/pull/109])).
+
 ## 1.3.0 (2019.05.19)
 
 ### NOTES

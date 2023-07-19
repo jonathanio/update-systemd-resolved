@@ -1,6 +1,6 @@
 # update-systemd-resolved
 
-[![Build Status](https://travis-ci.org/jonathanio/update-systemd-resolved.svg?branch=features%2Funit-tests)](https://travis-ci.org/jonathanio/update-systemd-resolved)
+[![Build Status](https://github.com/jonathanio/update-systemd-resolved/actions/workflows/test.yml/badge.svg)](https://github.com/jonathanio/update-systemd-resolved/actions)
 
 This is a helper script designed to integrate OpenVPN with the
 `systemd-resolved` service via DBus instead of trying to override

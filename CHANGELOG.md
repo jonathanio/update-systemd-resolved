@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### IMPROVEMENTS
+
+- Flush caches with `busctl` rather than with `resolvectl --flush-caches`
+  (@cmadamsgit, [#99](https://github.com/jonathanio/update-systemd-resolved/pull/99)).
+
 ## 1.3.0 (2019.05.19)
 
 ### NOTES

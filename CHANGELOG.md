@@ -7,8 +7,17 @@
 - Flush caches with `busctl` rather than with `resolvectl --flush-caches`
   (@cmadamsgit, [#99](https://github.com/jonathanio/update-systemd-resolved/pull/99)).
 
+### BUG FIXES
+
+- `update-systemd-resolved` now accepts IPv6 addresses that do not conform to
+  [RFC5952](https://tools.ietf.org/html/rfc5952), rather than complaining and
+  bailing out (reported in
+  [#76](https://github.com/jonathanio/update-systemd-resolved/pull/76), fixed
+  in [#104](https://github.com/jonathanio/update-systemd-resolved/pull/104)).
+
 ### BACKWARDS INCOMPATIBILITIES
 
+- `update-systemd-resolved` now requires Bash >= 4.3.
 - `update-systemd-resolved` no longer uses the `emerg` log level with the
   for logging with the `logger` command, so certain messages are no longer
   broadcast to `(p|t)ty`s ([#109](https://github.com/jonathanio/update-systemd-resolved/pull/109])).

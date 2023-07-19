@@ -208,7 +208,7 @@ split_on_separator_into() {
 
 # Print the supplied arguments as a string joined with the specified separator
 print_with_separator() {
-  usage 1 - "$#" '<separator> [<arg> <arg> ...]' || return
+  usage_for 1 - "$#" '<separator> [<arg> <arg> ...]' || return
 
   local sep="$1"
   shift
@@ -225,7 +225,7 @@ print_with_separator() {
 
 # Like "print_with_separator", but adds a final newline
 puts_with_separator() {
-  usage 1 - "$#" '<separator> [<arg> <arg> ...]' || return
+  usage_for 1 - "$#" '<separator> [<arg> <arg> ...]' || return
   print_with_separator "$@" || return
   printf -- '\n'
 }

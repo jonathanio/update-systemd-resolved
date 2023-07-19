@@ -72,6 +72,14 @@ function busctl {
               "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DNSSEC}'\n" \
               "     Received: '${@}'"
       ;;
+    FlushCaches)
+      shift 1
+      [[ -z "${@}" ]] && \
+        _pass "FlushCaches was called correctly" || \
+        _fail "FlushCaches was given arguments:\n" \
+              "     Expected: '(none)'\n" \
+              "     Received: '${@}'"
+      ;;
     *)
       _fail "Unknown command called on busctl: ${1}"
       ;;

@@ -3,4 +3,4 @@ script_type="up"
 dev="tun01"
 
 TEST_TITLE="No Updates"
-TEST_BUSCTL_CALLED=0
+TEST_BUSCTL_CALLED=1

@@ -421,6 +421,7 @@ main() {
 
     "$script_type" "$link" "$if_index" "$@" || return 1
     # Flush the DNS cache
+    busctl_call FlushCaches
     resolvectl flush-caches
   fi
 }

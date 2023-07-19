@@ -21,8 +21,8 @@
 # install, set as the 'up' and 'down' script in your OpenVPN configuration file
 # or via the command-line arguments, alongside setting the 'down-pre' option to
 # run the 'down' script before the device is closed. For example:
-#   up /etc/openvpn/scripts/update-systemd-resolved
-#   down /etc/openvpn/scripts/update-systemd-resolved
+#   up /usr/bin/update-systemd-resolved
+#   down /usr/bin/update-systemd-resolved
 #   down-pre
 
 # Define what needs to be called via DBus
@@ -100,6 +100,17 @@ up() {
     fi
   done < <(dhcp_settings)
 
+  if [[ -n "${dns_sec}" ]]; then
+    if [[ "${dns_sec}" == "default" ]]; then
+      # We need to provide an empty string to use the default settings
+      info "SetLinkDNSSEC($if_index '')"
+      busctl_call SetLinkDNSSEC 'is' "$if_index" "" || return $?
+    else
+      info "SetLinkDNSSEC($if_index ${dns_sec})"
+      busctl_call SetLinkDNSSEC 'is' "$if_index" "${dns_sec}" || return $?
+    fi
+  fi
+
   if [[ "${#dns_servers[*]}" -gt 0 ]]; then
     busctl_params=("$if_index" "$dns_server_count" "${dns_servers[@]}")
     info "SetLinkDNS(${busctl_params[*]})"
@@ -122,17 +133,6 @@ up() {
     fi
     info "SetLinkDomains(${busctl_params[*]})"
     busctl_call SetLinkDomains 'ia(sb)' "${busctl_params[@]}" || return $?
-  fi
-
-  if [[ -n "${dns_sec}" ]]; then
-    if [[ "${dns_sec}" == "default" ]]; then
-      # We need to provide an empty string to use the default settings
-      info "SetLinkDNSSEC($if_index '')"
-      busctl_call SetLinkDNSSEC 'is' "$if_index" "" || return $?
-    else
-      info "SetLinkDNSSEC($if_index ${dns_sec})"
-      busctl_call SetLinkDNSSEC 'is' "$if_index" "${dns_sec}" || return $?
-    fi
   fi
 }
 
@@ -422,6 +422,7 @@ main() {
     "$script_type" "$link" "$if_index" "$@" || return 1
     # Flush the DNS cache
     busctl_call FlushCaches
+    resolvectl flush-caches
   fi
 }
 

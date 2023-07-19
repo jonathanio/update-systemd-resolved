@@ -17,12 +17,12 @@ to update the DNS for the link created by OpenVPN.
 
 This script may not be compatible with recent versions of NetworkManager. It
 seems that NetworkManager overrides the `up` command to use its own helper
-script ([nm-openvpn-service-openvpn-helper][nm-helper]). This script only
-supports `DNS` and `DOMAIN` options (not `DNS6`, `DOMAIN-SEARCH` and
-`DOMAIN-ROUTE`, nor `DNSSEC` overrides). It will also set the main network
-interface to route `~.` DNS queries (i.e the whole name-space) to the LAN or ISP
-DNS servers, making it difficult to override using `DOMAIN` - see [DNS
-Leakage](#dns-leakage) below.
+script ([nm-openvpn-service-openvpn-helper][nm-helper]). The script that ships
+with NetworkManager only supports `DNS` and `DOMAIN` options (not `DNS6`, 
+`DOMAIN-SEARCH` and `DOMAIN-ROUTE`, nor `DNSSEC` overrides). It will also set
+the main network interface to route `~.` DNS queries (i.e the whole name-space)
+to the LAN or ISP DNS servers, making it difficult to override using `DOMAIN` -
+see [DNS Leakage](#dns-leakage) below.
 
 ## Installation
 
@@ -112,9 +112,9 @@ before the device is closed:
 ```conf
 script-security 2
 setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-up /etc/openvpn/scripts/update-systemd-resolved
+up /usr/bin/update-systemd-resolved
 up-restart
-down /etc/openvpn/scripts/update-systemd-resolved
+down /usr/bin/update-systemd-resolved
 down-pre
 ```
 
@@ -153,8 +153,8 @@ the following options to your `openvpn` command:
 openvpn \
   --script-security 2 \
   --setenv PATH '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
-  --up /etc/openvpn/scripts/update-systemd-resolved --up-restart \
-  --down /etc/openvpn/scripts/update-systemd-resolved --down-pre
+  --up /usr/bin/update-systemd-resolved --up-restart \
+  --down /usr/bin/update-systemd-resolved --down-pre
 ```
 
 Or, you can add the following argument to the command-line arguments of
@@ -162,7 +162,7 @@ Or, you can add the following argument to the command-line arguments of
 
 ```bash
 openvpn \
-  --config /etc/openvpn/scripts/update-systemd-resolved.conf
+  --config /usr/bin/update-systemd-resolved.conf
 ```
 
 ## Usage
@@ -322,10 +322,10 @@ interfaces.
 ### DNSSEC Issues
 
 ```shell
-$ systemd-resolve eu-central-1.console.aws.amazon.com
+$ resolvectl eu-central-1.console.aws.amazon.com
 eu-central-1.console.aws.amazon.com: resolve call failed: DNSSEC validation failed: no-signature
 # or
-$ systemd-resolve eu-central-1.console.aws.amazon.com
+$ resolvectl eu-central-1.console.aws.amazon.com
 eu-central-1.console.aws.amazon.com: resolve call failed: DNSSEC validation failed: incompatible-server
 ```
 

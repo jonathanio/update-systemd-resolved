@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Test Framework for update-systemd-resolved.
 # Copyright (C) 2016, Jonathan Wright <jon@than.io>
@@ -99,8 +99,8 @@ function ip {
     " 100\n    link/none"
 }
 
-function systemd-resolve {
-  _log "systemd-resolve called with: ${@}"
+function resolvectl {
+  _log "resolvectl called with: ${@}"
 }
 
 function logger {

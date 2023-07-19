@@ -30,7 +30,7 @@ This script requires:
 
 - Bash 4.3 or above.
 - [coreutils](https://www.gnu.org/software/coreutils/) or
-  [busybox](https://www.busybox.net/) (for the `whoami` command).
+  [busybox](https://www.busybox.net/) (for the `id` command).
 - [iproute2](https://wiki.linuxfoundation.org/networking/iproute2) (for the
   `ip` command).
 - [systemd](https://systemd.io/) (for the `busctl` and `resolvectl` commands).

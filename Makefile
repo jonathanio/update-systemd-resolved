@@ -47,3 +47,10 @@ info:
 
 test:
 	@./run-tests
+
+nixos-test:
+	@nix build -L ".#checks.$$(nix eval --impure --raw --expr builtins.currentSystem).update-systemd-resolved"
+
+# Enter a console with NixOS test machines available
+nixos-test-driver:
+	@$$(nix-build --no-out-link -A update-systemd-resolved.nixosTest.driver ./nix)/bin/nixos-test-driver --keep-vm-state

@@ -1,3 +1,8 @@
 .*.sw[a-z0-9]
 .sw[a-z0-9]
 *~
+
+# Nix build results
+result
+result-*
+repl-result-*

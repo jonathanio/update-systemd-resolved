@@ -8,8 +8,11 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
+      - name: Install testing dependencies
+        run: sudo apt-get -y install python3 sipcalc
       - name: Run tests
         run: ./run-tests
+
   cross:
     name: Run tests on ${{ matrix.arch }} architecture
     runs-on: ubuntu-latest
@@ -26,4 +29,8 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
           distro: ubuntu20.04
+          githubToken: ${{ github.token }}
+          install: |
+            apt-get -y update
+            apt-get -y install python3 sipcalc
           run: ./run-tests

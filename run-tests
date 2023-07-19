@@ -31,6 +31,18 @@ RUNTEST_CALLED=0
 
 AUTOMATED_TESTING=1
 
+if ! toplevel="$(git rev-parse --show-toplevel 2>/dev/null)"; then
+  if ! toplevel="$(readlink -f "${BASH_SOURCE[0]%/*}/.." 2>/dev/null)"; then
+    toplevel="${PWD:-$(pwd)}"
+  fi
+fi
+
+# Ensure that things like "source update-systemd-resolved" pick up the script
+# in this repository's toplevel rather than, say,
+# /usr/bin/update-systemd-resolved.
+export PATH="${toplevel}${PATH:+:${PATH}}"
+unset toplevel
+
 function busctl {
   shift 4
   _log "busctl called with: ${@}"
@@ -43,6 +55,8 @@ function busctl {
       if [[ "${TEST_BUSCTL_DNS}" == "" ]]; then
         [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${@}" ]] || \
           _fail "SetLinkDNS was called and should not be: '${@}'"
+      elif [[ "${TEST_BUSCTL_DNS}" == SKIP ]]; then
+          :
       else
         [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${@}" ]] && \
           _pass "SetLinkDNS was called correctly" || \
@@ -105,13 +119,36 @@ function resolvectl {
 
 function logger {
   # Remove standard options
-  local message="$*"
-  _log "-- ${message##* -- }"
+  if [[ "$*" == *' --' ]]; then
+    set --
+  else
+    while (( "$#" > 0 )); do
+      case "$1" in
+        --)
+          shift
+          break
+          ;;
+        *)
+          shift
+          ;;
+      esac
+    done
+  fi
+
+  if (( "$#" == 0 )) && ! [[ -t 0 ]]; then
+    local message
+    while read -r message; do
+      _log "-- ${message}"
+    done
+  else
+    _log "-- $*"
+  fi
 }
 
 function exit {
-  # Override
-  _log "exit called with status ${1}"
+  # Override "exit" builtin.  Note that "exit" is equivalent to "exit $?", so
+  # handle that case.
+  _log "exit called with status ${1:-$?}"
 }
 
 function _log {
@@ -128,7 +165,7 @@ function _fail {
   ( >&2 echo -e "  ${RED}${FAIL} ${@}${RESET}" )
 }
 
-function runtest {
+function checktest() {
   # Increment counter so that we don't double-execute if a test script calls
   # this function.
   : ${RUNTEST_CALLED:=0}
@@ -136,10 +173,14 @@ function runtest {
 
   echo -e "${GREEN}- Testing ${TEST_TITLE:-a nameless test}${RESET}"
 
+  if (( $# < 1 )); then
+    set -- source update-systemd-resolved
+  fi
+
   # Source, don't run, so we don't need to export and internal functions override
   # external calls out to system commands
-  source update-systemd-resolved
-  exit_status="$?"
+  exit_status=0
+  "$@" || exit_status="$?"
   exit_message="script exited with a ${exit_status} exit status"
 
   if [[ "$(( exit_status > 0 ))" == "${EXPECT_FAILURE:-0}" ]]; then
@@ -147,8 +188,12 @@ function runtest {
   else
       _fail "$exit_message"
   fi
+}
 
-  if [[ ${TEST_BUSCTL_CALLED} -eq 0 ]]; then
+function runtest {
+  checktest
+
+  if [[ "${TEST_BUSCTL_CALLED:-}" = 0 ]]; then
     [[ ${busctl_called} -eq 0 ]] && \
       _pass "busctl was not called, as expected" || \
       _fail "busctl was called, not expected"
@@ -160,10 +205,9 @@ function runtest {
   echo
 }
 
-echo "update-systemd-resolved Test Suite"
-echo
+evaltest() {
+  TEST="${1?}"
 
-for TEST in tests/*.sh; do
   # Set/Reset loop variables
   RUNTEST_CALLED=0
   EXPECT_FAILURE=0
@@ -186,6 +230,25 @@ for TEST in tests/*.sh; do
   source "${TEST}"
 
   (( RUNTEST_CALLED > 0 )) || runtest
+}
+
+echo "update-systemd-resolved Test Suite"
+echo
+
+if (( "$#" < 1 )); then
+  set -- ./tests
+fi
+
+for path in "$@"; do
+  if [[ -d "$path" ]]; then
+    for test in "$path"/*.sh; do
+      if [[ -f "$test" ]]; then
+        evaltest "$test"
+      fi
+    done
+  else
+    evaltest "$path"
+  fi
 done
 
 echo -e "  ${GREEN}${PASS} ${COUNT_PASS} Passed${RESET}"

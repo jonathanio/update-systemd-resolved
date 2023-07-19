@@ -18,11 +18,36 @@ to update the DNS for the link created by OpenVPN.
 This script may not be compatible with recent versions of NetworkManager. It
 seems that NetworkManager overrides the `up` command to use its own helper
 script ([nm-openvpn-service-openvpn-helper][nm-helper]). The script that ships
-with NetworkManager only supports `DNS` and `DOMAIN` options (not `DNS6`, 
+with NetworkManager only supports `DNS` and `DOMAIN` options (not `DNS6`,
 `DOMAIN-SEARCH` and `DOMAIN-ROUTE`, nor `DNSSEC` overrides). It will also set
 the main network interface to route `~.` DNS queries (i.e the whole name-space)
 to the LAN or ISP DNS servers, making it difficult to override using `DOMAIN` -
 see [DNS Leakage](#dns-leakage) below.
+
+## Prerequisites
+
+This script requires:
+
+- Bash 4.3 or above.
+- [coreutils](https://www.gnu.org/software/coreutils/) or
+  [busybox](https://www.busybox.net/) (for the `whoami` command).
+- [iproute2](https://wiki.linuxfoundation.org/networking/iproute2) (for the
+  `ip` command).
+- [systemd](https://systemd.io/) (for the `busctl` and `resolvectl` commands).
+- [util-linux](https://en.wikipedia.org/wiki/Util-linux) (for the `logger`
+  command).
+
+Optional dependencies:
+
+- [`python`](https://python.org) or
+  [`sipcalc`](https://github.com/sii/sipcalc).  If available, these will be
+  used for IP address parsing and validation;[^iphandling] otherwise
+  `update-systemd-resolved` will use native Bash routines for this.
+
+[^iphandling]: Required for translating numerical labels like `1.2.3.4` to the
+               byte arrays recognized by [the `SetLinkDNS()` function on
+               `systemd-resolved`'s `org.freedesktop.resolve1.Manager` D-Bus
+               interface](https://www.freedesktop.org/software/systemd/man/org.freedesktop.resolve1.html)).
 
 ## Installation
 

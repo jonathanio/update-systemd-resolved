@@ -904,23 +904,73 @@ process_dnssec() {
   dns_sec="${setting}"
 }
 
-if command -v jq &>/dev/null; then
-  to_json_array() {
-    jq --compact-output --null-input '$ARGS.positional' --args -- "$@"
+to_json_array_jq() {
+  jq --compact-output --null-input '$ARGS.positional' --args -- "$@"
+}
+
+to_json_array_perl() {
+  perl -MModule::Load -wle '
+foreach my $mod ( qw(Cpanel::JSON::XS JSON::MaybeXS JSON::XS JSON::PP JSON) ) {
+  if ( eval { load $mod; $mod->import(qw(encode_json)); 1 } ) {
+    print encode_json(\@ARGV);
+    last;
   }
-else
-  to_json_array() {
-    printf -- '['
+}
+  ' -- "$@"
+}
 
-    while (( "$#" > 0 )); do
-      printf -- '"%s"' "${1//\"/\\\"}"
-      shift
-      if (( "$#" > 0 )); then
-        printf -- ','
-      fi
-    done
+to_json_array_python() {
+  python -c "
+import sys
 
-    printf -- ']'
+try:
+  import json
+except ImportError:
+  import simplejson as json
+
+print(json.dumps(sys.argv[1:]))
+" "$@"
+}
+
+to_json_array_native() {
+  printf -- '['
+
+  while (( "$#" > 0 )); do
+    printf -- '"%s"' "${1//\"/\\\"}"
+    shift
+    if (( "$#" > 0 )); then
+      printf -- ','
+    fi
+  done
+
+  printf -- ']'
+}
+
+test_to_json_array_func() {
+  local expanded
+  expanded="$("${1?}" foo bar baz)" && [[ "$expanded" =~ ^\['"foo",'[[:space:]]*'"bar",'[[:space:]]*'"baz"'\]$ ]]
+}
+
+set_up_to_json_array_func() {
+  local expansion_func_impl
+  local impl
+
+  for impl in jq perl python native; do
+    expansion_func_impl="to_json_array_${impl}"
+    if test_to_json_array_func "$expansion_func_impl" 2>/dev/null; then
+      eval "to_json_array() { $expansion_func_impl \"\$@\"; }"
+      return
+    fi
+  done
+
+  return 1
+}
+
+
+if ! set_up_to_json_array_func; then
+  to_json_array_func() {
+    printf -- 'Unable to serialize arguments to a JSON array'
+    return 127
   }
 fi
 

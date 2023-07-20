@@ -37,17 +37,42 @@ This script requires:
 
 Optional dependencies:
 
-- [`python`](https://python.org) or
-  [`sipcalc`](https://github.com/sii/sipcalc).  If available, these will be
-  used for IP address parsing and validation;[^iphandling] otherwise
-  `update-systemd-resolved` will use native Bash routines for this.
-- [util-linux](https://en.wikipedia.org/wiki/Util-linux) (for the `logger`
-  command).
+### IP Parsing and Validation
+
+- [`python`](https://python.org).
+**or**
+-  [`sipcalc`](https://github.com/sii/sipcalc).
+
+If available, these will be used for IP address parsing and
+validation;[^iphandling] otherwise `update-systemd-resolved` will use native
+Bash routines for this.
 
 [^iphandling]: Required for translating numerical labels like `1.2.3.4` to the
                byte arrays recognized by [the `SetLinkDNS()` function on
                `systemd-resolved`'s `org.freedesktop.resolve1.Manager` D-Bus
                interface](https://www.freedesktop.org/software/systemd/man/org.freedesktop.resolve1.html)).
+
+### Logging
+
+- [util-linux](https://en.wikipedia.org/wiki/Util-linux)
+
+If available, the `logger` command included in the `util-linux` distribution
+will be used for logging.  Otherwise, all logs will go to standard error using
+Bash's `printf` builtin.
+
+### Polkit Rules Generation
+
+- [`jq`](https://jqlang.github.io/jq/).
+**or**
+- [`perl`](https://www.perl.org/), or
+**or**
+- [`python`](https://python.org).
+
+If available, these will be used for serializing the [names of the users and
+groups allowed to call `systemd-resolved`'s DBus methods](#polkit-rules) to
+JSON lists for use within the [generated polkit
+rules](#generating-polkit-rules).  Otherwise, `update-systemd-resolved` will
+fall back to native Bash routines for generating these lists.
 
 ## Installation
 

@@ -196,9 +196,9 @@ split_on_separator_into() {
   local -n rvar="$1"
   shift
 
-  # "printf" rather than herestring ("<<<"); avoids introducing a newline
-  # Cannot count on "mapfile -d" in, e.g., Travis builds, so use a workaround
-  # that handles only a single line of input.
+  # "printf" rather than herestring ("<<<"); avoids introducing a newline.
+  # Cannot count on "mapfile -d", which was released in the relatively-recent
+  # Bash 5.0, so use a workaround that handles only a single line of input.
   IFS="$sep" read -r -a rvar < <(printf -- '%s' "$1") || :
 
   if [[ "$1" == *"$sep" ]]; then

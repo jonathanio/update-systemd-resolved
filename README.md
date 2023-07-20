@@ -376,8 +376,8 @@ running `./run-tests` from the root of the repository. There are no dependencies
 on `run-tests` - it runs 100% bash and doesn't call out to any other program or
 language.
 
-TravisCI is enabled on this repository: Click the link at the top of this README
-to see the current state of the code and its tests.
+GitHub Actions are enabled on this repository: Click the link at the top of this
+README to see the current state of the code and its tests.
 
 ## Licence
 

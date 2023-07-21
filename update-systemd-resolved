@@ -646,7 +646,11 @@ each_ip_expansion_func() {
 
   for impl in python sipcalc native; do
     expansion_func_impl="${expansion_func}_${impl}"
-    if "test_${type}_expansion_func" "$expansion_func_impl"; then
+
+    # Run in subshell with `logger` defined as a NOP to avoid issuing useless
+    # messages about (say) not being able to find the `python` or `sipcalc`
+    # programs.
+    if (logger() { : ; }; "test_${type}_expansion_func" "$expansion_func_impl"); then
       if "$cb" "$expansion_func_impl" 1; then
         return
       fi

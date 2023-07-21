@@ -4,6 +4,8 @@
 
 ### IMPROVEMENTS
 
+- Add links to Debian and Ubuntu packages (@perlun,
+  [#112](https://github.com/jonathanio/update-systemd-resolved/pull/112))
 - Flush caches with `busctl` rather than with `resolvectl --flush-caches`
   (@cmadamsgit, [#99](https://github.com/jonathanio/update-systemd-resolved/pull/99)).
 

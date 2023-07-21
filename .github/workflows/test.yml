@@ -2,6 +2,7 @@ name: Run update-systemd-resolved tests
 on:
   pull_request:
   push:
+  workflow_dispatch:
 jobs:
   native:
     name: Run tests on native architecture

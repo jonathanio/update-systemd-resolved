@@ -56,6 +56,9 @@ Optional dependencies:
 If you are using a distribution of Linux with uses the Arch User Repository, the
 simplest way to install is by using the [openvpn-update-systemd-resolved][aur]
 AUR package as this will take care of any updates through your package manager.
+[Debian](https://packages.debian.org/openvpn-systemd-resolved) and
+[Ubuntu](https://packages.ubuntu.com/openvpn-systemd-resolved) also provide a
+`.deb` package in their distributions.
 
 Alternatively, the package can be manually installed by running the following:
 

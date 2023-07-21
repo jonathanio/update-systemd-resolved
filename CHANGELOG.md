@@ -4,8 +4,11 @@
 
 ### IMPROVEMENTS
 
+- Improve FHS compliance by installing `update-systemd-resolved` to
+  `/usr/local/bin` by default, rather than to `/usr/local/bin`
+  (@bowlofeggs, [#106](https://github.com/jonathanio/update-systemd-resolved/pull/106)).
 - Add links to Debian and Ubuntu packages (@perlun,
-  [#112](https://github.com/jonathanio/update-systemd-resolved/pull/112))
+  [#112](https://github.com/jonathanio/update-systemd-resolved/pull/112)).
 - Flush caches with `busctl` rather than with `resolvectl --flush-caches`
   (@cmadamsgit, [#99](https://github.com/jonathanio/update-systemd-resolved/pull/99)).
 

@@ -1,4 +1,4 @@
-PREFIX ?= /usr/bin
+PREFIX ?= /usr/local/bin
 
 SRC = update-systemd-resolved
 DEST = $(DESTDIR)$(PREFIX)/$(SRC)

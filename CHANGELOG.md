@@ -4,6 +4,9 @@
 
 ### IMPROVEMENTS
 
+- Check that the `org.freedesktop.resolve1` endpoint is available and
+  short-circuit with an error message if not
+  ([#105](https://github.com/jonathanio/update-systemd-resolved/pull/105)).
 - Add a `print-polkit-rules` subcommand that generates a polkit rules
   specification allowing the specified users and/or groups to perform the DBus
   call necessary for `update-systemd-resolved`'s proper operation

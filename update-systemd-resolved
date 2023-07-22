@@ -669,7 +669,7 @@ each_ip_expansion_func() {
     # Run in subshell with `logger` defined as a NOP to avoid issuing useless
     # messages about (say) not being able to find the `python` or `sipcalc`
     # programs.
-    if (logger() { : ; }; "test_${type}_expansion_func" "$expansion_func_impl"); then
+    if (log() { : ; }; "test_${type}_expansion_func" "$expansion_func_impl"); then
       if "$cb" "$expansion_func_impl" 1; then
         return
       fi

@@ -4,6 +4,10 @@
 
 ### IMPROVEMENTS
 
+- Support logging without `/dev/log`/`logger` ([#115](https://github.com/jonathanio/update-systemd-resolved/pull/115)).
+- Avoid doubled log output in the system journal (reported by @VannTen in
+  [#81](https://github.com/jonathanio/update-systemd-resolved/issues/81),
+  fixed in [#115](https://github.com/jonathanio/update-systemd-resolved/pull/115)).
 - Improve FHS compliance by installing `update-systemd-resolved` to
   `/usr/local/bin` by default, rather than to `/usr/local/bin`
   (@bowlofeggs, [#106](https://github.com/jonathanio/update-systemd-resolved/pull/106)).

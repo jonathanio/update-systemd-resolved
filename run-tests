@@ -44,6 +44,22 @@ export PATH="${toplevel}${PATH:+:${PATH}}"
 unset toplevel
 
 function busctl {
+  # Short-circuit if we got "busctl status <...>".  If TEST_BUSCTL_STATUS_RC is
+  # unset or empty, assume this is the call from the "main" function in
+  # update-systemd-resolved, rather than an automated test checking the
+  # behaviour of "busctl status <...>".
+  case "${1:-}" in
+    status)
+      if [[ -n "${TEST_BUSCTL_STATUS_RC:-}" ]]; then
+        busctl_called=1
+        _log "busctl status: returning ${TEST_BUSCTL_STATUS_RC}"
+        return "$TEST_BUSCTL_STATUS_RC"
+      else
+        return 0
+      fi
+      ;;
+  esac
+
   shift 4
   _log "busctl called with: ${@}"
   # Set that busctl has been called
@@ -216,6 +232,7 @@ evaltest() {
   TEST_BUSCTL_DNS=""
   TEST_BUSCTL_DOMAINS=""
   TEST_BUSCTL_DNSSEC=""
+  TEST_BUSCTL_STATUS_RC=""
   # Keep this random, as we will never know the ifindex up-front
   ip_ifindex=$((RANDOM%=64))
   # Clear foreign_option_*

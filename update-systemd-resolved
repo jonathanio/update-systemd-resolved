@@ -31,22 +31,33 @@ DBUS_NODE="/org/freedesktop/resolve1"
 
 SCRIPT_NAME="${BASH_SOURCE[0]##*/}"
 
-if [[ -t 2 ]]; then
-  log() {
-    logger -s -t "$SCRIPT_NAME" "$@"
-  }
-else
-  # Suppress output on stderr when not attached to a (p|t)ty.
-  # https://github.com/jonathanio/update-systemd-resolved/issues/81
-  log() {
-    logger -t "$SCRIPT_NAME" "$@"
-  }
-fi
+if [[ -S /dev/log ]] && command -v logger &>/dev/null; then
+  if [[ -t 2 ]]; then
+    log() {
+      logger -s -t "$SCRIPT_NAME" "$@"
+    }
+  else
+    # Suppress output on stderr when not attached to a (p|t)ty.
+    # https://github.com/jonathanio/update-systemd-resolved/issues/81
+    log() {
+      logger -t "$SCRIPT_NAME" "$@"
+    }
+  fi
 
-for level in err warning info debug; do
-  printf -v functext -- '%s() { log -p user.%s -- "$@" ; }' "$level" "$level"
-  eval "$functext"
-done
+  for level in err warning info debug; do
+    printf -v functext -- '%s() { log -p user.%s -- "$@" ; }' "$level" "$level"
+    eval "$functext"
+  done
+else
+  log() {
+    printf 1>&2 -- '%s: %s\n' "$SCRIPT_NAME" "$*"
+  }
+
+  for level in err warning info debug; do
+    printf -v functext -- '%s() { log "%s:" "$@" ; }' "$level" "${level^^}"
+    eval "$functext"
+  done
+fi
 
 usage() {
   err "${1:?${1}. }. Usage: ${SCRIPT_NAME} up|down device_name."

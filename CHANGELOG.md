@@ -4,7 +4,12 @@
 
 ### IMPROVEMENTS
 
-- Support logging without `/dev/log`/`logger` ([#115](https://github.com/jonathanio/update-systemd-resolved/pull/115)).
+- Add a `print-polkit-rules` subcommand that generates a polkit rules
+  specification allowing the specified users and/or groups to perform the DBus
+  call necessary for `update-systemd-resolved`'s proper operation
+  ([#100](https://github.com/jonathanio/update-systemd-resolved/pull/100)).
+- Support logging without `/dev/log`/`logger`
+- ([#115](https://github.com/jonathanio/update-systemd-resolved/pull/115)).
 - Avoid doubled log output in the system journal (reported by @VannTen in
   [#81](https://github.com/jonathanio/update-systemd-resolved/issues/81),
   fixed in [#115](https://github.com/jonathanio/update-systemd-resolved/pull/115)).

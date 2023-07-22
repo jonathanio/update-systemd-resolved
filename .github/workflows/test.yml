@@ -35,3 +35,14 @@ jobs:
             apt-get -y update
             apt-get -y install python3 sipcalc
           run: ./run-tests
+  nixos:
+    name: Run NixOS system tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v22
+        with:
+          extra_nix_config: |
+            system-features = benchmark big-parallel kvm nixos-test uid-range
+      - name: run system tests
+        run: make nixos-test

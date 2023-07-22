@@ -34,8 +34,6 @@ This script requires:
 - [iproute2](https://wiki.linuxfoundation.org/networking/iproute2) (for the
   `ip` command).
 - [systemd](https://systemd.io/) (for the `busctl` and `resolvectl` commands).
-- [util-linux](https://en.wikipedia.org/wiki/Util-linux) (for the `logger`
-  command).
 
 Optional dependencies:
 
@@ -43,6 +41,8 @@ Optional dependencies:
   [`sipcalc`](https://github.com/sii/sipcalc).  If available, these will be
   used for IP address parsing and validation;[^iphandling] otherwise
   `update-systemd-resolved` will use native Bash routines for this.
+- [util-linux](https://en.wikipedia.org/wiki/Util-linux) (for the `logger`
+  command).
 
 [^iphandling]: Required for translating numerical labels like `1.2.3.4` to the
                byte arrays recognized by [the `SetLinkDNS()` function on

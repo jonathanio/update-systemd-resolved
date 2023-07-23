@@ -63,6 +63,10 @@ usage() {
   err "${1:?${1}. }. Usage: ${SCRIPT_NAME} up|down|print-polkit-rules [<options>]."
 }
 
+busctl_status() {
+  busctl status "$DBUS_DEST"
+}
+
 busctl_call() {
   # Preserve busctl's exit status
   busctl call "$DBUS_DEST" "$DBUS_NODE" "${DBUS_DEST}.Manager" "$@" || {
@@ -271,6 +275,15 @@ with_openvpn_script_handling() {
     usage "Invalid device name: '$dev'"
     return 1
   fi
+
+  busctl_status &>/dev/null || {
+    local -i status="$?"
+    err <<ERR
+systemd-resolved DBus interface (${DBUS_DEST}) is not available.
+$SCRIPT_NAME requires systemd version 229 or above.
+ERR
+    return "$status"
+  }
 
   if ! "$func" "$link" "$if_index" "$@"; then
     err 'Unable to configure systemd-resolved.'

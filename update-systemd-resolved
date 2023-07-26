@@ -298,9 +298,6 @@ ERR
     err 'Unable to configure systemd-resolved.'
     return 1
   fi
-
-  # Flush the DNS cache
-  busctl_call FlushCaches
 }
 
 _up() {
@@ -313,9 +310,11 @@ _up() {
 
   # Preset values for processing -- will be altered in the various process_*
   # functions.
-  local -a dns_servers=() dns_domain=() dns_search=() dns_routed=()
+  local -a dns_servers=() dns_domain=() dns_search=() dns_routed=() dnssec_negative_trust_anchors=()
   local -i dns_server_count=0
-  local dns_sec
+  local flush_caches=yes
+  local dns_sec reset_statistics reset_server_features default_route
+  local llmnr multicast_dns dns_over_tls
 
   _dispatch_dhcp_setting() {
     local setting_type="${1?}"
@@ -332,6 +331,16 @@ _up() {
   }
 
   each_dhcp_setting _dispatch_dhcp_setting || return
+
+  if [[ "${reset_statistics:-}" == yes ]]; then
+    info "ResetStatistics()"
+    busctl_call ResetStatistics || return $?
+  fi
+
+  if [[ "${reset_server_features:-}" == yes ]]; then
+    info 'ResetServerFeatures()'
+    busctl_call ResetServerFeatures || return $?
+  fi
 
   if [[ -n "${dns_sec+x}" ]]; then
     info "SetLinkDNSSEC(${if_index} '${dns_sec}')"
@@ -358,6 +367,42 @@ _up() {
     )
     info "SetLinkDomains(${busctl_params[*]})"
     busctl_call SetLinkDomains 'ia(sb)' "${busctl_params[@]}" || return $?
+  fi
+
+  if [[ -n "${default_route:-}" ]]; then
+    info "SetLinkDefaultRoute(${if_index} ${default_route})"
+    busctl_call SetLinkDefaultRoute 'ib' "$if_index" "$default_route" || return $?
+  fi
+
+  if [[ -n "${llmnr+x}" ]]; then
+    info "SetLinkLLMNR(${if_index} '${llmnr}')"
+    busctl_call SetLinkLLMNR 'is' "$if_index" "$llmnr"
+  fi
+
+  if [[ -n "${multicast_dns+x}" ]]; then
+    info "SetLinkMulticastDNS(${if_index} '${multicast_dns}')"
+    busctl_call SetLinkMulticastDNS 'is' "$if_index" "$multicast_dns"
+  fi
+
+  if [[ -n "${dns_over_tls+x}" ]]; then
+    info "SetLinkDNSOverTLS(${if_index} '${dns_over_tls}')"
+    busctl_call SetLinkDNSOverTLS 'is' "$if_index" "$dns_over_tls"
+  fi
+
+  if (( "${#dnssec_negative_trust_anchors[*]}" > 0 )); then
+    busctl_params=(
+      "$if_index"
+      "${#dnssec_negative_trust_anchors[*]}"
+      "${dnssec_negative_trust_anchors[@]}"
+    )
+
+    info "SetLinkDNSSECNegativeTrustAnchors(${busctl_params[*]})"
+    busctl_call SetLinkDNSSECNegativeTrustAnchors ias "${busctl_params[@]}"
+  fi
+
+  if [[ -n "${flush_caches:-}" ]]; then
+    info 'FlushCaches()'
+    busctl_call FlushCaches || return
   fi
 }
 
@@ -914,6 +959,118 @@ process_dnssec() {
   info "Setting DNSSEC to ${dns_sec:-default}"
 }
 
+process_reset_statistics() {
+  case "${1,,}" in
+    yes|true)
+      reset_statistics=yes ;;
+    no|false)
+      reset_statistics="" ;;
+    *)
+      err "'$1' is not a valid value for RESET-STATISTICS"
+      return 1 ;;
+  esac
+}
+
+process_flush_caches() {
+  case "${1,,}" in
+    yes|true)
+      flush_caches=yes ;;
+    no|false)
+      flush_caches="" ;;
+    *)
+      err "'$1' is not a valid value for FLUSH-CACHES"
+      return 1 ;;
+  esac
+}
+
+process_reset_server_features() {
+  case "${1,,}" in
+    yes|true)
+      reset_server_features=yes ;;
+    no|false)
+      reset_server_features="" ;;
+    *)
+      err "'$1' is not a valid value for RESET-SERVER-FEATURES"
+      return 1 ;;
+  esac
+}
+
+process_default_route() {
+  case "${1,,}" in
+    yes|true)
+      default_route=true ;;
+    no|false)
+      default_route=false ;;
+    *)
+      err "'$1' is not a valid value for DEFAULT-ROUTE"
+      return 1 ;;
+  esac
+
+  info "Setting DEFAULT-ROUTE to ${default_route}"
+}
+
+process_llmnr() {
+  case "${1,,}" in
+    yes|true)
+      llmnr=yes ;;
+    no|false)
+      llmnr=no ;;
+    resolve)
+      llmnr=resolve ;;
+    default)
+      llmnr="" ;;
+    *)
+      err "'$1' is not a valid value for LLMNR"
+      return 1 ;;
+  esac
+
+  info "Setting LLMNR to ${llmnr:-default}"
+}
+
+process_multicast_dns() {
+  case "${1,,}" in
+    yes|true)
+      multicast_dns=yes ;;
+    no|false)
+      multicast_dns=no ;;
+    resolve)
+      multicast_dns=resolve ;;
+    default)
+      multicast_dns="" ;;
+    *)
+      err "'$1' is not a valid value for MULTICAST-DNS"
+      return 1 ;;
+  esac
+
+  info "Setting MULTICAST-DNS to ${multicast_dns:-default}"
+}
+
+process_dns_over_tls() {
+  case "${1,,}" in
+    yes|true)
+      dns_over_tls=yes ;;
+    no|false)
+      dns_over_tls=no ;;
+    opportunistic)
+      dns_over_tls=opportunistic ;;
+    default)
+      dns_over_tls="" ;;
+    *)
+      err "'$1' is not a valid value for DNS-OVER-TLS"
+      return 1 ;;
+  esac
+
+  info "Setting DNS-OVER-TLS to ${dns_over_tls:-default}"
+}
+
+process_dnssec_negative_trust_anchors() {
+  local domain="$1"
+  shift
+
+  info "Adding DNSSEC negative trust anchor ${domain}"
+  dnssec_negative_trust_anchors+=("$domain")
+}
+
 to_json_array_jq() {
   jq --compact-output --null-input '$ARGS.positional' --args -- "$@"
 }
@@ -1105,8 +1262,13 @@ const updateSystemdResolved = {
   allowedSubactions: listToBoolMap([
     "set-dns-servers",
     "set-domains",
+    "set-default-route",
+    "set-llmnr",
+    "set-mdns",
+    "set-dns-over-tls",
     "set-dnssec",
-    "revert",
+    "set-dnssec-negative-trust-anchors",
+    "revert"
   ]),
 
   actionIsAllowed: function(action) {

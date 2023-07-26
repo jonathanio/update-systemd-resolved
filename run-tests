@@ -110,6 +110,9 @@ function busctl {
               "     Expected: '(none)'\n" \
               "     Received: '${@}'"
       ;;
+    RevertLink)
+      # Called upon `down` action
+      ;;
     *)
       _fail "Unknown command called on busctl: ${1}"
       ;;

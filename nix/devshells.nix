@@ -14,6 +14,23 @@
             exec ${config.treefmt.build.wrapper}/bin/treefmt "$@"
           '';
         }
+
+        {
+          name = "mkdotcert";
+          category = "maintenance";
+          help = "Generate the DNS-over-TLS keypair for use in system testing";
+          command = let
+            inherit (config.checks.update-systemd-resolved.nodes) resolver;
+          in ''
+            export CAROOT="''${PRJ_ROOT:-.}/nix"
+            ${pkgs.mkcert}/bin/mkcert -install || exit
+            ${pkgs.mkcert}/bin/mkcert \
+              -cert-file "''${CAROOT}/resolver.crt" \
+              -key-file "''${CAROOT}/resolver.key" \
+              ${resolver.networking.hostName} \
+              ${resolver.networking.hostName}.${resolver.networking.domain}
+          '';
+        }
       ];
 
       devshell = {

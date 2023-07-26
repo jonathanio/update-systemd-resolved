@@ -314,7 +314,7 @@ _up() {
   # Preset values for processing -- will be altered in the various process_*
   # functions.
   local -a dns_servers=() dns_domain=() dns_search=() dns_routed=()
-  local -i dns_server_count=0 dns_domain_count=0 dns_search_count=0 dns_routed_count=0
+  local -i dns_server_count=0
   local dns_sec
 
   _dispatch_dhcp_setting() {
@@ -344,20 +344,18 @@ _up() {
     busctl_call SetLinkDNS 'ia(iay)' "${busctl_params[@]}" || return $?
   fi
 
-  if [[ "${#dns_domain[*]}" -gt 0 \
-     || "${#dns_search[*]}" -gt 0 \
-     || "${#dns_routed[*]}" -gt 0 ]]; then
-    dns_count=$((dns_domain_count+dns_search_count+dns_routed_count))
-    busctl_params=("$if_index" "$dns_count")
-    if [[ "${#dns_domain[*]}" -gt 0 ]]; then
-      busctl_params+=("${dns_domain[@]}")
-    fi
-    if [[ "${#dns_search[*]}" -gt 0 ]]; then
-      busctl_params+=("${dns_search[@]}")
-    fi
-    if [[ "${#dns_routed[*]}" -gt 0 ]]; then
-      busctl_params+=("${dns_routed[@]}")
-    fi
+  # Divide by two to account for the boolean second argument
+  dns_count="$(( (${#dns_domain[*]} + ${#dns_search[*]} + ${#dns_routed[*]}) / 2 ))"
+  if (( dns_count > 0 )); then
+    busctl_params=(
+      "$if_index"
+      "$dns_count"
+
+      # Hack to work around pre-4.4 Bash `empty array == unset` bug
+      ${dns_domain:+"${dns_domain[@]}"}
+      ${dns_search:+"${dns_search[@]}"}
+      ${dns_routed:+"${dns_routed[@]}"}
+    )
     info "SetLinkDomains(${busctl_params[*]})"
     busctl_call SetLinkDomains 'ia(sb)' "${busctl_params[@]}" || return $?
   fi
@@ -865,12 +863,13 @@ process_domain() {
   shift
 
   info "Adding DNS Domain ${domain}"
-  if [[ $dns_domain_count -eq 1 ]]; then
-    (( dns_search_count += 1 ))
-    dns_search+=("${domain}" false)
-  else
-    (( dns_domain_count = 1 ))
+
+  # Make sure the first domain specified with "dhcp-option DOMAIN <domain>"
+  # appears at the head of the list we pass to SetLinkDNS.
+  if (( "${#dns_domain[*]}" == 0 )); then
     dns_domain+=("${domain}" false)
+  else
+    dns_search+=("${domain}" false)
   fi
 }
 
@@ -886,7 +885,6 @@ process_domain_search() {
   shift
 
   info "Adding DNS Search Domain ${domain}"
-  (( dns_search_count += 1 ))
   dns_search+=("${domain}" false)
 }
 
@@ -895,7 +893,6 @@ process_domain_route() {
   shift
 
   info "Adding DNS Routed Domain ${domain}"
-  (( dns_routed_count += 1 ))
   dns_routed+=("${domain}" true)
 }
 

@@ -310,8 +310,8 @@ _up() {
 
   # Preset values for processing -- will be altered in the various process_*
   # functions.
-  local -a dns_servers=() dns_domain=() dns_search=() dns_routed=() dnssec_negative_trust_anchors=()
-  local -i dns_server_count=0
+  local -a dns_servers=() dns_ex_servers=() dns_domain=() dns_search=() dns_routed=() dnssec_negative_trust_anchors=()
+  local -i dns_server_count=0 dns_ex_server_count=0
   local flush_caches=yes
   local dns_sec reset_statistics reset_server_features default_route
   local llmnr multicast_dns dns_over_tls
@@ -351,6 +351,12 @@ _up() {
     busctl_params=("$if_index" "$dns_server_count" "${dns_servers[@]}")
     info "SetLinkDNS(${busctl_params[*]})"
     busctl_call SetLinkDNS 'ia(iay)' "${busctl_params[@]}" || return $?
+  fi
+
+  if [[ "${#dns_ex_servers[*]}" -gt 0 ]]; then
+    busctl_params=("$if_index" "$dns_ex_server_count" "${dns_ex_servers[@]}")
+    info "SetLinkDNSEx(${busctl_params[*]})"
+    busctl_call SetLinkDNSEx 'ia(iayqs)' "${busctl_params[@]}" || return $?
   fi
 
   # Divide by two to account for the boolean second argument
@@ -854,16 +860,100 @@ parse_ipv6() {
   each_ipv6_segment "$expanded"
 }
 
-process_dns() {
-  address="$1"
+parse_dns_spec() {
+  usage_for 1 - "$#" '<dns-server-spec> [<address-var> <port-var> <server-name-var>]' || return
+
+  local spec="$1"
   shift
 
+  local -n address_ref="${1:-address}"
+  shift
+
+  local -n port_ref="${1:-port}"
+  shift
+
+  local -n server_name_ref="${1:-server_name}"
+  shift
+
+  local cursor="$spec"
+  while [[ -n "${cursor:-}" ]]; do
+    case "$cursor" in
+      *'#'?*)
+        server_name_ref="${cursor#*'#'}"
+        cursor="${cursor%%'#'*}"
+        ;;
+      *:?*)
+        if looks_like_ipv6 "$cursor" &>/dev/null; then
+          address_ref="$cursor"
+          break
+        else
+          case "$cursor" in
+            '['*']'*)
+              case "$cursor" in
+                '['*']:'?*)
+                  address_ref="${cursor#[}"
+                  address_ref="${address_ref#]}"
+                  port_ref="${cursor#*:}"
+                  break
+                  ;;
+                *)
+                  err "invalid DNS server specification '${spec}'"
+                  return 1
+                  ;;
+              esac
+              ;;
+            *)
+              address_ref="${cursor%%:*}"
+              port_ref="${cursor#*:}"
+              break
+              ;;
+          esac
+        fi
+        ;;
+      *)
+        address_ref="$cursor"
+        break
+        ;;
+    esac
+  done
+
+  # Ensure that port variable is defined if server name variable is. The
+  # default value is `0`, meaning "default port (53" when passed to
+  # `SetLinkDNSEx`.
+  #
+  # NOTE that we do not do any further input validation here; instead we let
+  # `SetLinkDNSEx` complain if the port is anything other than an unsigned
+  # integer < 2 ** 16.
+  if [[ -n "${server_name_ref:-}" ]]; then
+    port_ref="${port_ref:-0}"
+  fi
+
+  # Ensure that server name variable is defined if port variable is.  The
+  # default value is the empty string, meaning "no server name" when passed to
+  # `SetLinkDNSEx`.
+  if [[ -n "${port_ref:-}" ]]; then
+    server_name_ref="${server_name_ref:-}"
+  fi
+}
+
+process_dns() {
+  local spec="$1"
+  shift
+
+  local address port server_name
+  parse_dns_spec "$spec" address port server_name || return
+
+  local -a args=()
+  if [[ -n "${port:-}" ]] || [[ -n "${server_name:-}" ]]; then
+    args=("${port:-0}" "${server_name:-}")
+  fi
+
   if looks_like_ipv6 "$address"; then
-    process_dns_ipv6 "$address" || return
+    process_dns_ipv6 "$address" "${args[@]}" || return
   elif looks_like_ipv4 "$address"; then
-    process_dns_ipv4 "$address" || return
+    process_dns_ipv4 "$address" "${args[@]}" || return
   else
-    err "Not a valid IPv6 or IPv4 address: '$address'"
+    err "Not a valid IPv6 or IPv4 address: '${address}' (full specification: '${spec}')"
     return 1
   fi
 }
@@ -873,19 +963,28 @@ process_dns6() {
 }
 
 process_dns_ipv4() {
+  usage_for 1 3 "$#" '<address> [<port> <server-name>]' || return
+
   local address="$1"
   shift
 
   info "Adding IPv4 DNS Server ${address}"
-  (( dns_server_count += 1 ))
 
   local -a segments
   mapfile_from_command -t segments parse_ipv4 "$address" || return
 
-  dns_servers+=(2 4 "${segments[@]}")
+  if (( "$#" > 0 )); then
+    dns_ex_servers+=(2 4 "${segments[@]}" "${1:-0}" "${2:-}")
+    (( dns_ex_server_count += 1 ))
+  else
+    dns_servers+=(2 4 "${segments[@]}")
+    (( dns_server_count += 1 ))
+  fi
 }
 
 process_dns_ipv6() {
+  usage_for 1 3 "$#" '<address> [<port> <server-name>]' || return
+
   local address="$1"
   shift
 
@@ -894,13 +993,25 @@ process_dns_ipv6() {
   local -a segments
   mapfile_from_command -t segments parse_ipv6 "$address" || return
 
-  # Add AF_INET6 and byte count
-  dns_servers+=(10 16)
-  for segment in "${segments[@]}"; do
-    dns_servers+=("$((16#${segment:0:2}))" "$((16#${segment:2:2}))")
-  done
+  if (( "$#" > 0 )); then
+    # Add AF_INET6 and byte count
+    dns_ex_servers+=(10 16)
+    for segment in "${segments[@]}"; do
+      dns_ex_servers+=("$((16#${segment:0:2}))" "$((16#${segment:2:2}))")
+    done
 
-  (( dns_server_count += 1 ))
+    dns_ex_servers+=("${1:-0}" "${2:-}")
+
+    (( dns_ex_server_count += 1 ))
+  else
+    # Add AF_INET6 and byte count
+    dns_servers+=(10 16)
+    for segment in "${segments[@]}"; do
+      dns_servers+=("$((16#${segment:0:2}))" "$((16#${segment:2:2}))")
+    done
+
+    (( dns_server_count += 1 ))
+  fi
 }
 
 process_domain() {

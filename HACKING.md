@@ -64,8 +64,12 @@ and [linking them to Nix packages](https://nixos.org/manual/nixos/stable/index.h
 This project's NixOS test sets up three machines:
 
 1. An OpenVPN server,
-2. An OpenVPN client, and
-3. A DNS resolver running [Dnsmasq](https://thekelleys.org.uk/dnsmasq/doc.html).
+2. An OpenVPN client,
+3. A DNS resolver running an instance of
+   [dnsmasq](https://thekelleys.org.uk/dnsmasq/doc.html) bound only to the
+   loopback address, plus an instance of
+   [RouteDNS](https://github.com/folbricht/routedns) bound to an address
+   reachable by the other machines.
 
 The OpenVPN server and client run a [point-to-point configuration with a static
 key](https://openvpn.net/community-resources/static-key-mini-howto/).  The
@@ -76,6 +80,12 @@ starts all three machines, waits for certain systemd services to become active,
 and then asserts that certain hostnames are resolvable _from the client_ that
 would not be resolvable unless the client were configured to use the DNS
 settings specified in its OpenVPN configuration file.
+
+The resolver machine uses dnsmasq for actual name resolution, plus DNSSEC
+validation.  The RouteDNS instance running on the same machine terminates
+DNS-over-TLS and forwards queries to dnsmasq.  Dnsmasq handles DNSSEC (though
+we exempt the VPN domain from DNSSEC validation, as a test of the
+`SetLinkDNSSECNegativeTrustAnchors` feature).
 
 #### Extending the NixOS test
 

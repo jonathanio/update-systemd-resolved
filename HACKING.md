@@ -123,6 +123,20 @@ $ nix build -L '.#checks.x86_64-linux.update-systemd-resolved'
 [^supported-systems]: Run `nix flake show` to view flake outputs namespaced by
                       all supported systems.
 
+#### Maintaining NixOS test assets
+
+##### Regenerating the DNS-over-TLS keypair
+
+To regenerate the keypair used for testing DNS-over-TLS, [enter the
+devshell](#entering-the-nix-development-shell) and [run
+`mkdotcert`](#summary-of-available-commands).
+
+##### Regenerating the DNSSEC root anchors
+
+To regenerate the dnsmasq root anchor specification used for testing DNSSEC,
+[enter the devshell](#entering-the-nix-development-shell) and [run
+`mkanchor`](#summary-of-available-commands).
+
 ### Entering the Nix development shell
 
 To enter the Nix development shell, run the following command:
@@ -137,3 +151,7 @@ shell.
 #### Summary of available commands
 
 - `fmt`: format all Nix code in this project using [`alejandra`](https://github.com/kamadorueda/alejandra).
+- `mkdotcert`: regenerate the keypair used for encrypting DNS-over-TLS in the
+  NixOS system test.
+- `mkanchor`: regenerate the DNSSEC trust anchors configuration used with
+  dnsmasq in the NixOS system test.

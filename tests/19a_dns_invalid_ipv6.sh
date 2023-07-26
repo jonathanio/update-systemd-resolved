@@ -33,7 +33,7 @@ cases=(
   1.2.3.4::ffff
 
   # Leading garbage
-  $'\n'::1
+  @--@::1
 
   # Plain garbage
   :

@@ -37,8 +37,8 @@
       # dnsmasq settings.
       vpnDomain = "update.systemd.resolved";
 
-      # dnsmasq listening port
-      resolverPort = 53;
+      # RouteDNS listening port
+      resolverPort = 5353;
 
       # Try to infer the IP address assigned to a node in this NixOS test
       # scenario, falling back to the value of "default" if inference failed.
@@ -82,11 +82,17 @@
         nodes = {
           resolver = {
             networking.domain = vpnDomain;
+
+            networking.firewall = {
+              allowedTCPPorts = [resolverPort];
+              allowedUDPPorts = [resolverPort];
+            };
+
             services.dnsmasq = {
               enable = true;
               resolveLocalQueries = false;
               settings = {
-                port = resolverPort;
+                port = 53;
 
                 log-queries = "extra";
                 log-debug = true;
@@ -121,9 +127,42 @@
               };
             };
 
-            networking.firewall = {
-              allowedTCPPorts = [resolverPort];
-              allowedUDPPorts = [resolverPort];
+            services.routedns = {
+              enable = true;
+
+              settings = {
+                resolvers = {
+                  local-tcp = {
+                    address = "127.0.0.1:53";
+                    protocol = "tcp";
+                  };
+
+                  local-udp = {
+                    address = "127.0.0.1:53";
+                    protocol = "udp";
+                  };
+                };
+
+                listeners = let
+                  commonConfig = {
+                    address = ":${toString resolverPort}";
+
+                    # Generated with `mkcert`.
+                    server-crt = ./resolver.crt;
+                    server-key = ./resolver.key;
+                  };
+                in {
+                  local-dot = commonConfig // {
+                    protocol = "dot";
+                    resolver = "local-tcp";
+                  };
+
+                  local-dtls = commonConfig // {
+                    protocol = "dtls";
+                    resolver = "local-udp";
+                  };
+                };
+              };
             };
           };
 
@@ -224,7 +263,7 @@
 
                 config ${perSystem.config.packages.update-systemd-resolved}/libexec/openvpn/update-systemd-resolved.conf
 
-                dhcp-option DNS ${resolverIP}
+                dhcp-option DNS ${resolverIP}:${toString resolverPort}#resolver
                 dhcp-option DOMAIN ${vpnDomain}
 
                 dhcp-option FLUSH-CACHES yes
@@ -232,7 +271,7 @@
                 dhcp-option RESET-STATISTICS yes
 
                 dhcp-option DEFAULT-ROUTE yes
-                dhcp-option DNS-OVER-TLS no
+                dhcp-option DNS-OVER-TLS yes
                 dhcp-option LLMNR resolve
                 dhcp-option MULTICAST-DNS default
 
@@ -243,6 +282,9 @@
 
             # Add our generated ruleset to the system's polkit rules
             environment.etc."polkit-1/rules.d/10-update-systemd-resolved.rules".source = polkitRules;
+
+            # `mkcert` CA
+            security.pki.certificateFiles = [./rootCA.pem];
 
             security.polkit = {
               enable = true;
@@ -371,17 +413,19 @@
 
           resolver.start()
           wait_for_unit_with_output(resolver, 'dnsmasq')
+          wait_for_unit_with_output(resolver, 'routedns')
 
           server.start()
           wait_for_unit_with_output(server, '${serviceName}')
 
           client.start()
+
           wait_for_unit_with_output(client, '${serviceName}')
 
           # Block until we can reach the resolver (or until we hit the retry
           # timeout).  Pass `-u` flag to check UDP port; also check TCP port.
-          wait_for_open_host_port(client, '${resolverIP}', 53, extra=['-u'])
-          wait_for_open_host_port(client, '${resolverIP}', 53)
+          wait_for_open_host_port(client, '${resolverIP}', ${toString resolverPort}, extra=['-u'])
+          wait_for_open_host_port(client, '${resolverIP}', ${toString resolverPort})
 
           assert_hostname_match(client, '${resolverIP}', 'resolver-cname.${vpnDomain}')
           assert_hostname_match(client, '${serverIP}', 'server-cname.${vpnDomain}')
@@ -391,7 +435,7 @@
           assert_interface_property(client, '${interface}', 'default-route', 'yes')
           assert_interface_property(client, '${interface}', 'llmnr', 'resolve')
           assert_interface_property(client, '${interface}', 'mdns', 'no')
-          assert_interface_property(client, '${interface}', 'dnsovertls', 'no')
+          assert_interface_property(client, '${interface}', 'dnsovertls', 'yes')
           assert_interface_property(client, '${interface}', 'dnssec', 'opportunistic')
 
           client.succeed('systemctl restart ${serviceName}')

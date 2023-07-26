@@ -87,12 +87,21 @@ get_link_info() {
   echo "$dev" "${link%%:*}"
 }
 
-dhcp_settings() {
+each_dhcp_setting() {
+  local foreign_option foreign_option_value setting_type setting_value
+
   for foreign_option in "${!foreign_option_@}"; do
     foreign_option_value="${!foreign_option}"
 
-    [[ "$foreign_option_value" == *dhcp-option* ]] \
-      && echo "${foreign_option_value#dhcp-option }"
+    # Matches:
+    #
+    #   dhcp-option SOME-SETTING a-value
+    #   dhcp-option ANOTHER-SETTING
+    #
+    # In the second case, the setting value is the empty string.
+    if [[ "$foreign_option_value" =~ ^[[:space:]]*dhcp-option[[:space:]]+([^[:space:]]+)([[:space:]]+(.*))?$ ]]; then
+      "$@" "${BASH_REMATCH[1]}" "${BASH_REMATCH[3]:-}" || return
+    fi
   done
 }
 
@@ -308,9 +317,9 @@ _up() {
   local -i dns_server_count=0 dns_domain_count=0 dns_search_count=0 dns_routed_count=0
   local dns_sec=""
 
-  while read -r setting; do
-    setting_type="${setting%% *}"
-    setting_value="${setting#* }"
+  _dispatch_dhcp_setting() {
+    local setting_type="${1?}"
+    local setting_value="${2?}"
 
     process_setting_function="${setting_type,,}"
     process_setting_function="process_${process_setting_function//-/_}"
@@ -318,9 +327,11 @@ _up() {
     if declare -f "$process_setting_function" &>/dev/null; then
       "$process_setting_function" "$setting_value" || return $?
     else
-      warning "Not a recognized DHCP setting: '${setting}'"
+      warning "Not a recognized DHCP setting: '${setting_type}'"
     fi
-  done < <(dhcp_settings)
+  }
+
+  each_dhcp_setting _dispatch_dhcp_setting || return
 
   if [[ -n "${dns_sec}" ]]; then
     if [[ "${dns_sec}" == "default" ]]; then

@@ -176,8 +176,14 @@
             polkitRules = mkPolkitRulesForService config.systemd.services.${serviceAttrName};
           in {
             networking.useNetworkd = true;
-            services.resolved.enable = true;
-            services.resolved.dnssec = "false";
+
+            services.resolved = {
+              enable = true;
+              dnssec = "false";
+              extraConfig = ''
+                MulticastDNS=no
+              '';
+            };
 
             users.users.openvpn = {
               description = "openvpn client user";
@@ -220,6 +226,18 @@
 
                 dhcp-option DNS ${resolverIP}
                 dhcp-option DOMAIN ${vpnDomain}
+
+                dhcp-option FLUSH-CACHES yes
+                dhcp-option RESET-SERVER-FEATURES true
+                dhcp-option RESET-STATISTICS yes
+
+                dhcp-option DEFAULT-ROUTE yes
+                dhcp-option DNS-OVER-TLS no
+                dhcp-option LLMNR resolve
+                dhcp-option MULTICAST-DNS default
+
+                dhcp-option DNSSEC opportunistic
+                dhcp-option DNSSEC-NEGATIVE-TRUST-ANCHORS ${vpnDomain}
               '';
             };
 
@@ -292,6 +310,11 @@
               machine.execute('systemctl status -l {0} 1>&2'.format(unit))
               raise(e)
 
+          def dump_resolved_info(machine):
+            with machine.nested('printing resolved status and statistics'):
+              machine.succeed('resolvectl status 1>&2')
+              machine.succeed('resolvectl statistics 1>&2')
+
           def assert_hostname_match(machine, expected, *args):
             cmd = shlex.join(['dig', '+short', *args])
 
@@ -312,6 +335,24 @@
 
             with machine.nested('checking that hostname resolves to expected address "{0}" from {1}'.format(expected, machine.name)):
               retry(hostname_matches)
+
+          def extract_interface_property(machine, interface, property, *args):
+            with machine.nested('extracting property "{0}" of interface "{1}"'.format(property, interface)):
+              cmd = shlex.join(['resolvectl', *args, property, interface])
+              return machine.succeed("{0} | grep -m1 -Po '(?<=:\s).*'".format(cmd)).rstrip()
+
+          def assert_interface_property(machine, interface, property, expected, *args):
+            def interface_property_matches(_):
+              actual = extract_interface_property(machine, interface, property, *args)
+              machine.log('property "{0}" of interface "{1}" is "{2}"'.format(property, interface, actual))
+              if actual == expected:
+                return True
+              else:
+                machine.log('expected property "{0}" of interface "{1}" to be "{2}", but got "{3}"'.format(property, interface, expected, actual))
+                return False
+
+            with machine.nested('checking that property "{0}" of interface "{1}" is "{2}"'.format(property, interface, expected)):
+              retry(interface_property_matches)
 
           # Machine.wait_for_open_port only checks ports on localhost
           def wait_for_open_host_port(machine, host, port, extra=[]):
@@ -344,6 +385,19 @@
 
           assert_hostname_match(client, '${resolverIP}', 'resolver-cname.${vpnDomain}')
           assert_hostname_match(client, '${serverIP}', 'server-cname.${vpnDomain}')
+
+          dump_resolved_info(client)
+
+          assert_interface_property(client, '${interface}', 'default-route', 'yes')
+          assert_interface_property(client, '${interface}', 'llmnr', 'resolve')
+          assert_interface_property(client, '${interface}', 'mdns', 'no')
+          assert_interface_property(client, '${interface}', 'dnsovertls', 'no')
+          assert_interface_property(client, '${interface}', 'dnssec', 'opportunistic')
+
+          client.succeed('systemctl restart ${serviceName}')
+          wait_for_unit_with_output(client, '${serviceName}')
+
+          dump_resolved_info(client)
         '';
       };
   };

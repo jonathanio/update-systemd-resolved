@@ -315,7 +315,7 @@ _up() {
   # functions.
   local -a dns_servers=() dns_domain=() dns_search=() dns_routed=()
   local -i dns_server_count=0 dns_domain_count=0 dns_search_count=0 dns_routed_count=0
-  local dns_sec=""
+  local dns_sec
 
   _dispatch_dhcp_setting() {
     local setting_type="${1?}"
@@ -333,15 +333,9 @@ _up() {
 
   each_dhcp_setting _dispatch_dhcp_setting || return
 
-  if [[ -n "${dns_sec}" ]]; then
-    if [[ "${dns_sec}" == "default" ]]; then
-      # We need to provide an empty string to use the default settings
-      info "SetLinkDNSSEC($if_index '')"
-      busctl_call SetLinkDNSSEC 'is' "$if_index" "" || return $?
-    else
-      info "SetLinkDNSSEC($if_index ${dns_sec})"
-      busctl_call SetLinkDNSSEC 'is' "$if_index" "${dns_sec}" || return $?
-    fi
+  if [[ -n "${dns_sec+x}" ]]; then
+    info "SetLinkDNSSEC(${if_index} '${dns_sec}')"
+    busctl_call SetLinkDNSSEC 'is' "$if_index" "${dns_sec}" || return
   fi
 
   if [[ "${#dns_servers[*]}" -gt 0 ]]; then
@@ -906,26 +900,21 @@ process_domain_route() {
 }
 
 process_dnssec() {
-  local option="$1" setting=""
-  shift
-
-  case "${option,,}" in
+  case "${1,,}" in
     yes|true)
-      setting="yes" ;;
+      dns_sec=yes ;;
     no|false)
-      setting="no" ;;
-    default)
-      setting="default" ;;
+      dns_sec=no ;;
     allow-downgrade)
-      setting="allow-downgrade" ;;
+      dns_sec=allow-downgrade ;;
+    default)
+      dns_sec="" ;;
     *)
-      local message="'$option' is not a valid DNSSEC option"
-      err "${message}"
+      err "'$1' is not a valid DNSSEC option"
       return 1 ;;
   esac
 
-  info "Setting DNSSEC to ${setting}"
-  dns_sec="${setting}"
+  info "Setting DNSSEC to ${dns_sec:-default}"
 }
 
 to_json_array_jq() {

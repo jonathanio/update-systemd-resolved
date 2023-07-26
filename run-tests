@@ -43,6 +43,34 @@ fi
 export PATH="${toplevel}${PATH:+:${PATH}}"
 unset toplevel
 
+function busctl2var {
+  if (( "$#" != 2 )); then
+    printf 1>&2 -- 'usage: %s VARIABLE_NAME BUSCTL_CALL\n' "${FUNCNAME[0]}"
+    return 1
+  fi
+
+  local -n var_ref="$1"
+  shift
+
+  # Compatible with busybox; with GNU sed's `\U` extension we could all the
+  # string-munging work with sed alone and not require `tr` in the pipeline.
+  local varname_suffix
+  varname_suffix="$(
+      printf -- '%s' "$1" \
+    | sed -e '
+      s/[^[:alnum:]]//g
+      s/\([a-z]\)\([A-Z]\)/\1_\2/g
+      s/\([A-Z]\)\([A-Z][a-z]\)/\1_\2/g
+    ' \
+    | tr '[:lower:]' '[:upper:]' \
+    | sed 's/^SET_LINK_//'
+  )"
+
+  # `var_ref` is a reference variable; we use it by assigning to it.
+  # shellcheck disable=SC2034
+  var_ref="TEST_BUSCTL_${varname_suffix}"
+}
+
 function busctl {
   # Short-circuit if we got "busctl status <...>".  If TEST_BUSCTL_STATUS_RC is
   # unset or empty, assume this is the call from the "main" function in
@@ -65,9 +93,72 @@ function busctl {
   # Set that busctl has been called
   busctl_called=1
 
-  case "${1}" in
+  if (( "$#" < 1 )); then
+    _fail "busctl called without arguments"
+    return
+  fi
+
+  local call="$1"
+  shift
+
+  local indir
+  busctl2var indir "$call" || return
+
+  local -a expected
+
+  if [[ -v "$indir" ]]; then
+    local -a expanded
+    read -r -a expanded <<<"${!indir}"
+
+    if (( "$#" > 0 )); then
+      local signature="$1"
+
+      local elem etype
+      local -i i
+      for (( i = 0 ; i < "${#expanded[@]}"; i++ )); do
+        elem="${expanded[${i}]}"
+        etype="${signature:${i}:1}"
+
+        # Support "true" and "false" for boolstrings; we expect these to be
+        # coerced to "yes" and "no", respectively.  Similarly, support "yes"
+        # and "no" for booleans; we expect these to be coerced to "true" and
+        # "false", respectively.
+        case "$elem" in
+          true)
+            if [[ "$etype" == s ]]; then
+              elem=yes
+            fi
+            ;;
+          false)
+            if [[ "$etype" == s ]]; then
+              elem=no
+            fi
+            ;;
+          yes)
+            if [[ "$etype" == b ]]; then
+              elem=true
+            fi
+            ;;
+          no)
+            if [[ "$etype" == b ]]; then
+              elem=false
+            fi
+            ;;
+          default)
+            elem=""
+            ;;
+        esac
+
+        expected+=("$elem")
+      done
+    else
+      expected=("${expanded[@]}")
+    fi
+  fi
+
+  case "$call" in
     SetLinkDNS)
-      shift 2
+      shift
       if [[ "${TEST_BUSCTL_DNS}" == "" ]]; then
         [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${@}" ]] || \
           _fail "SetLinkDNS was called and should not be: '${@}'"
@@ -82,7 +173,7 @@ function busctl {
       fi
       ;;
     SetLinkDomains)
-      shift 2
+      shift
       if [[ "${TEST_BUSCTL_DOMAINS}" == "" ]]; then
         [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "${@}" ]] || \
           _fail "SetLinkDomains was called and should not be: '${@}'"
@@ -95,26 +186,38 @@ function busctl {
       fi
       ;;
     SetLinkDNSSEC)
-      shift 2
+      shift
       [[ "${ip_ifindex} ${TEST_BUSCTL_DNSSEC}x" == "${@}x" ]] && \
         _pass "SetLinkDNSSEC was called correctly" || \
         _fail "SetLinkDNSSEC was not given the correct arguments:\n" \
               "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DNSSEC}'\n" \
               "     Received: '${@}'"
       ;;
-    FlushCaches)
-      shift 1
-      [[ -z "${@}" ]] && \
-        _pass "FlushCaches was called correctly" || \
-        _fail "FlushCaches was given arguments:\n" \
-              "     Expected: '(none)'\n" \
-              "     Received: '${@}'"
+    FlushCaches|ResetServerFeatures|ResetStatistics)
+      if (( "${#expected[@]}" == 0 )); then
+        _fail "${call} was called unexpectedly"
+        return
+      elif (( "$#" != 0 )); then
+        _fail "${call} must be called with no arguments"
+      fi
+      ;;
+    SetLinkDNSOverTLS|SetLinkDefaultRoute|SetLinkLLMNR|SetLinkMulticastDNS)
+      if (( "${#expected[@]}" == 0 )); then
+        _fail "${call} was called unexpectedly"
+        return
+      elif (( "$#" != 3 )); then
+        _fail "${call} must be called with exactly three (3) arguments"
+      elif [[ "${expected[0]}" != "${if_index?}" ]]; then
+        _fail "${call} not called with the expected interface index as first argument: expected ${if_index}, got ${expected[0]}"
+      elif [[ "$3" != "${expected[1]}" ]]; then
+        _fail "${call} not called with the expected setting value: expected ${expected[1]}, got ${3}"
+      fi
       ;;
     RevertLink)
       # Called upon `down` action
       ;;
     *)
-      _fail "Unknown command called on busctl: ${1}"
+      _fail "Unknown command called on busctl: ${call}"
       ;;
   esac
 }
@@ -235,6 +338,7 @@ evaltest() {
   TEST_BUSCTL_DNS=""
   TEST_BUSCTL_DOMAINS=""
   TEST_BUSCTL_DNSSEC=""
+  TEST_BUSCTL_FLUSH_CACHES=1
   TEST_BUSCTL_STATUS_RC=""
   # Keep this random, as we will never know the ifindex up-front
   ip_ifindex=$((RANDOM%=64))

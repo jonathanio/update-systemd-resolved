@@ -235,13 +235,11 @@ evaltest() {
   TEST_BUSCTL_STATUS_RC=""
   # Keep this random, as we will never know the ifindex up-front
   ip_ifindex=$((RANDOM%=64))
+
   # Clear foreign_option_*
-  foreign_option_1=""
-  foreign_option_2=""
-  foreign_option_3=""
-  foreign_option_4=""
-  foreign_option_5=""
-  foreign_option_6=""
+  for foreign_option_varname in "${!foreign_option_@}"; do
+    declare "${foreign_option_varname}="
+  done
 
   # Import the test configuration
   source "${TEST}"

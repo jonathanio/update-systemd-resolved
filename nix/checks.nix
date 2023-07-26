@@ -124,6 +124,9 @@
                   "server-cname,server-cname.${vpnDomain},server"
                   "client-cname,client-cname.${vpnDomain},client"
                 ];
+
+                dnssec = true;
+                trust-anchor = lib.importJSON ./trust-anchor.json;
               };
             };
 
@@ -152,15 +155,19 @@
                     server-key = ./resolver.key;
                   };
                 in {
-                  local-dot = commonConfig // {
-                    protocol = "dot";
-                    resolver = "local-tcp";
-                  };
+                  local-dot =
+                    commonConfig
+                    // {
+                      protocol = "dot";
+                      resolver = "local-tcp";
+                    };
 
-                  local-dtls = commonConfig // {
-                    protocol = "dtls";
-                    resolver = "local-udp";
-                  };
+                  local-dtls =
+                    commonConfig
+                    // {
+                      protocol = "dtls";
+                      resolver = "local-udp";
+                    };
                 };
               };
             };
@@ -218,7 +225,7 @@
 
             services.resolved = {
               enable = true;
-              dnssec = "false";
+              dnssec = "false"; # overridden for VPN interface
               extraConfig = ''
                 MulticastDNS=no
               '';
@@ -275,7 +282,7 @@
                 dhcp-option LLMNR resolve
                 dhcp-option MULTICAST-DNS default
 
-                dhcp-option DNSSEC opportunistic
+                dhcp-option DNSSEC true
                 dhcp-option DNSSEC-NEGATIVE-TRUST-ANCHORS ${vpnDomain}
               '';
             };
@@ -436,7 +443,7 @@
           assert_interface_property(client, '${interface}', 'llmnr', 'resolve')
           assert_interface_property(client, '${interface}', 'mdns', 'no')
           assert_interface_property(client, '${interface}', 'dnsovertls', 'yes')
-          assert_interface_property(client, '${interface}', 'dnssec', 'opportunistic')
+          assert_interface_property(client, '${interface}', 'dnssec', 'yes')
 
           client.succeed('systemctl restart ${serviceName}')
           wait_for_unit_with_output(client, '${serviceName}')

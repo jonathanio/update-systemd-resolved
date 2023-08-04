@@ -8,7 +8,7 @@
     packages.default = config.packages.update-systemd-resolved;
 
     packages.update-systemd-resolved = pkgs.update-systemd-resolved.overrideAttrs (oldAttrs: let
-      buildInputs = with pkgs; [iproute2 systemd util-linux];
+      buildInputs = with pkgs; [coreutils iproute2 systemd util-linux];
     in {
       src = self;
 

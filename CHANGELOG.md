@@ -4,6 +4,10 @@
 
 ### IMPROVEMENTS
 
+- Support additional DBus calls `ResetServerFeatures`, `ResetStatistics`,
+  `DNSDefaultRoute`, `SetLinkDNSOverTLS`, `SetLinkLLMNR`,
+  `SetLinkMulticastDNS`, and `SetLinkNegativeDNSSECTrustAnchors`
+  ([#110](https://github.com/jonathanio/update-systemd-resolved/pull/110])).
 - Check that the `org.freedesktop.resolve1` endpoint is available and
   short-circuit with an error message if not
   ([#105](https://github.com/jonathanio/update-systemd-resolved/pull/105)).

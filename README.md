@@ -50,7 +50,7 @@ Bash routines for this.
 [^iphandling]: Required for translating numerical labels like `1.2.3.4` to the
                byte arrays recognized by [the `SetLinkDNS()` function on
                `systemd-resolved`'s `org.freedesktop.resolve1.Manager` D-Bus
-               interface](https://www.freedesktop.org/software/systemd/man/org.freedesktop.resolve1.html)).
+               interface][resolved]).
 
 ### Logging
 

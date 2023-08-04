@@ -41,7 +41,7 @@ Optional dependencies:
 
 - [`python`](https://python.org).
 **or**
--  [`sipcalc`](https://github.com/sii/sipcalc).
+- [`sipcalc`](https://github.com/sii/sipcalc).
 
 If available, these will be used for IP address parsing and
 validation;[^iphandling] otherwise `update-systemd-resolved` will use native

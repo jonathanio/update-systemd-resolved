@@ -37,8 +37,8 @@
       # dnsmasq settings.
       vpnDomain = "update.systemd.resolved";
 
-      # dnsmasq listening port
-      resolverPort = 53;
+      # RouteDNS listening port
+      resolverPort = 5353;
 
       # Try to infer the IP address assigned to a node in this NixOS test
       # scenario, falling back to the value of "default" if inference failed.
@@ -82,11 +82,17 @@
         nodes = {
           resolver = {
             networking.domain = vpnDomain;
+
+            networking.firewall = {
+              allowedTCPPorts = [resolverPort];
+              allowedUDPPorts = [resolverPort];
+            };
+
             services.dnsmasq = {
               enable = true;
               resolveLocalQueries = false;
               settings = {
-                port = resolverPort;
+                port = 53;
 
                 log-queries = "extra";
                 log-debug = true;
@@ -118,12 +124,52 @@
                   "server-cname,server-cname.${vpnDomain},server"
                   "client-cname,client-cname.${vpnDomain},client"
                 ];
+
+                dnssec = true;
+                trust-anchor = lib.importJSON ./trust-anchor.json;
               };
             };
 
-            networking.firewall = {
-              allowedTCPPorts = [resolverPort];
-              allowedUDPPorts = [resolverPort];
+            services.routedns = {
+              enable = true;
+
+              settings = {
+                resolvers = {
+                  local-tcp = {
+                    address = "127.0.0.1:53";
+                    protocol = "tcp";
+                  };
+
+                  local-udp = {
+                    address = "127.0.0.1:53";
+                    protocol = "udp";
+                  };
+                };
+
+                listeners = let
+                  commonConfig = {
+                    address = ":${toString resolverPort}";
+
+                    # Generated with `mkcert`.
+                    server-crt = ./resolver.crt;
+                    server-key = ./resolver.key;
+                  };
+                in {
+                  local-dot =
+                    commonConfig
+                    // {
+                      protocol = "dot";
+                      resolver = "local-tcp";
+                    };
+
+                  local-dtls =
+                    commonConfig
+                    // {
+                      protocol = "dtls";
+                      resolver = "local-udp";
+                    };
+                };
+              };
             };
           };
 
@@ -176,8 +222,14 @@
             polkitRules = mkPolkitRulesForService config.systemd.services.${serviceAttrName};
           in {
             networking.useNetworkd = true;
-            services.resolved.enable = true;
-            services.resolved.dnssec = "false";
+
+            services.resolved = {
+              enable = true;
+              dnssec = "false"; # overridden for VPN interface
+              extraConfig = ''
+                MulticastDNS=no
+              '';
+            };
 
             users.users.openvpn = {
               description = "openvpn client user";
@@ -218,13 +270,28 @@
 
                 config ${perSystem.config.packages.update-systemd-resolved}/libexec/openvpn/update-systemd-resolved.conf
 
-                dhcp-option DNS ${resolverIP}
+                dhcp-option DNS ${resolverIP}:${toString resolverPort}#resolver
                 dhcp-option DOMAIN ${vpnDomain}
+
+                dhcp-option FLUSH-CACHES yes
+                dhcp-option RESET-SERVER-FEATURES true
+                dhcp-option RESET-STATISTICS yes
+
+                dhcp-option DEFAULT-ROUTE yes
+                dhcp-option DNS-OVER-TLS yes
+                dhcp-option LLMNR resolve
+                dhcp-option MULTICAST-DNS default
+
+                dhcp-option DNSSEC true
+                dhcp-option DNSSEC-NEGATIVE-TRUST-ANCHORS ${vpnDomain}
               '';
             };
 
             # Add our generated ruleset to the system's polkit rules
             environment.etc."polkit-1/rules.d/10-update-systemd-resolved.rules".source = polkitRules;
+
+            # `mkcert` CA
+            security.pki.certificateFiles = [./rootCA.pem];
 
             security.polkit = {
               enable = true;
@@ -292,6 +359,11 @@
               machine.execute('systemctl status -l {0} 1>&2'.format(unit))
               raise(e)
 
+          def dump_resolved_info(machine):
+            with machine.nested('printing resolved status and statistics'):
+              machine.succeed('resolvectl status 1>&2')
+              machine.succeed('resolvectl statistics 1>&2')
+
           def assert_hostname_match(machine, expected, *args):
             cmd = shlex.join(['dig', '+short', *args])
 
@@ -302,16 +374,36 @@
               status, output = machine.execute(cmd)
 
               if status != 0:
+                machine.log('expected query to succeed, but `dig` exited with {0}'.format(status))
                 return False
 
               for line in output.splitlines():
                 if line == expected:
                   return True
 
+              machine.log('expected query to resolve to address "{0}", but got: {1}'.format(expected, output))
               return False
 
             with machine.nested('checking that hostname resolves to expected address "{0}" from {1}'.format(expected, machine.name)):
               retry(hostname_matches)
+
+          def extract_interface_property(machine, interface, property, *args):
+            with machine.nested('extracting property "{0}" of interface "{1}"'.format(property, interface)):
+              cmd = shlex.join(['resolvectl', *args, property, interface])
+              return machine.succeed("{0} | grep -m1 -Po '(?<=:\s).*'".format(cmd)).rstrip()
+
+          def assert_interface_property(machine, interface, property, expected, *args):
+            def interface_property_matches(_):
+              actual = extract_interface_property(machine, interface, property, *args)
+              machine.log('property "{0}" of interface "{1}" is "{2}"'.format(property, interface, actual))
+              if actual == expected:
+                return True
+              else:
+                machine.log('expected property "{0}" of interface "{1}" to be "{2}", but got "{3}"'.format(property, interface, expected, actual))
+                return False
+
+            with machine.nested('checking that property "{0}" of interface "{1}" is "{2}"'.format(property, interface, expected)):
+              retry(interface_property_matches)
 
           # Machine.wait_for_open_port only checks ports on localhost
           def wait_for_open_host_port(machine, host, port, extra=[]):
@@ -330,20 +422,48 @@
 
           resolver.start()
           wait_for_unit_with_output(resolver, 'dnsmasq')
+          wait_for_unit_with_output(resolver, 'routedns')
 
           server.start()
           wait_for_unit_with_output(server, '${serviceName}')
 
           client.start()
+
           wait_for_unit_with_output(client, '${serviceName}')
 
           # Block until we can reach the resolver (or until we hit the retry
           # timeout).  Pass `-u` flag to check UDP port; also check TCP port.
-          wait_for_open_host_port(client, '${resolverIP}', 53, extra=['-u'])
-          wait_for_open_host_port(client, '${resolverIP}', 53)
+          wait_for_open_host_port(client, '${resolverIP}', ${toString resolverPort}, extra=['-u'])
+          wait_for_open_host_port(client, '${resolverIP}', ${toString resolverPort})
 
-          assert_hostname_match(client, '${resolverIP}', 'resolver-cname.${vpnDomain}')
-          assert_hostname_match(client, '${serverIP}', 'server-cname.${vpnDomain}')
+          with subtest('interface info before attempting to resolve names'):
+            assert_interface_property(client, '${interface}', 'default-route', 'yes')
+            assert_interface_property(client, '${interface}', 'llmnr', 'resolve')
+            assert_interface_property(client, '${interface}', 'mdns', 'no')
+            assert_interface_property(client, '${interface}', 'dnsovertls', 'yes')
+            assert_interface_property(client, '${interface}', 'dnssec', 'yes')
+
+          with subtest('resolved info before attempting to resolve names'):
+            dump_resolved_info(client)
+
+          with subtest('attempt to resolve names using settings from OpenVPN'):
+            assert_hostname_match(client, '${resolverIP}', 'resolver-cname.${vpnDomain}')
+            assert_hostname_match(client, '${serverIP}', 'server-cname.${vpnDomain}')
+
+          with subtest('interface info after attempting to resolve names'):
+            assert_interface_property(client, '${interface}', 'default-route', 'yes')
+            assert_interface_property(client, '${interface}', 'llmnr', 'resolve')
+            assert_interface_property(client, '${interface}', 'mdns', 'no')
+            assert_interface_property(client, '${interface}', 'dnsovertls', 'yes')
+            assert_interface_property(client, '${interface}', 'dnssec', 'yes')
+
+          with subtest('resolved info after attempting to resolve names'):
+            dump_resolved_info(client)
+
+          client.succeed('systemctl restart ${serviceName}')
+          wait_for_unit_with_output(client, '${serviceName}')
+
+          dump_resolved_info(client)
         '';
       };
   };

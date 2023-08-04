@@ -293,25 +293,357 @@ openvpn \
   --config /usr/local/bin/update-systemd-resolved.conf
 ```
 
-## Usage
+## :screwdriver: Usage :wrench:
 
 `update-systemd-resolved` works by processing the `dhcp-option` commands set in
-OpenVPN, either through the server, or the client, configuration:
+OpenVPN, either through the server, or the client, configuration.  **Note**
+that there are no local or system options to be configured. All configuration
+for this script is handled through OpenVPN, including, for example, the name of
+the interface to be configured.
+
+### :level_slider: Options :control_knobs:
 
 [resolved]:https://www.freedesktop.org/software/systemd/man/org.freedesktop.resolve1.html
 
-| Option | Examples | Notes | DBus Call |
-|--:|---|---|---|
-| `DNS` | `0.0.0.0`<br />`::1` | This sets the DNS servers for the link and can take any IPv4 or IPv6 address. | [SetLinkDNS][resolved] |
-| `DNS6` | `::1` | This sets the DNS servers for the link and can take only IPv6 addresses. | [SetLinkDNS][resolved] |
-| `DOMAIN` or `ADAPTER_DOMAIN_SUFFIX` | `example.com` | The primary domain for this host. If set multiple times, the first provided is used as the primary search domain for bare hostnames. Any subsequent `DOMAIN` options will be added as the equivalent of `DOMAIN-SEARCH` options. All requests for this domain as well will be routed to the `DNS` servers provided on this link. | [SetLinkDomains][resolved] |
-| `DOMAIN-SEARCH` | `example.com` | Secondary domains which will be used to search for bare hostnames (after any `DOMAIN`, if set) and in the order provided. All requests for this domain will be routed to the `DNS` servers provided on this link. | [SetLinkDomains][resolved] |
-| `DOMAIN-ROUTE` | `example.com` | All requests for these domains will be routed to the `DNS` servers provided on this link. They will *not* be used to search for bare hostnames, only routed. A `DOMAIN-ROUTE` option for `.` (single period) will instruct `systemd-resolved` to route the entire DNS name-space through to the `DNS` servers configured for this connection (unless a more specific route has been offered by another connection for a selected name/name-space). This is useful if you wish to prevent [DNS leakage](#dns-leakage). | [SetLinkDomains][resolved] |
-| `DNSSEC` | `yes`</br >`default` | Control of DNSSEC should be enabled (`yes`) or disabled (`no`), or `allow-downgrade` to switch off DNSSEC only if the server doesn't support it, for any queries over this link only, or use the system default (`default`). | [SetLinkDNSSEC][resolved] |
+#### :gear: `DNS`
 
-**Note**: There are no local or system options to be configured. All configuration
-for this script is handled through OpenVPN, including, for example, the name of
-the interface to be configured.
+<details>
+
+<summary>Setting DNS servers</summary>
+
+##### Examples
+
+- `0.0.0.0`
+- `0.0.0.0:5353`
+- `0.0.0.0#my.resolver.net`
+- `0.0.0.0:5353#my.resolver.net`
+- `::1`
+- `[::1]:5353`
+- `::1#my.resolver.net`
+- `[::1]:5353#my.resolver.net`
+
+##### Description
+
+This sets the DNS servers for the link and can take any IPv4 or IPv6 address.
+
+##### DBus call
+
+[SetLinkDNS][resolved], [SetLinkDNSEx][resolved]
+
+</details>
+
+#### :gear: `DNS6`
+
+<details>
+
+<summary>Setting IPv6-only DNS servers</summary>
+
+##### Examples
+
+- `::1`
+- `[::1]:5353`
+- `::1#my.resolver.net`
+- `[::1]:5353#my.resolver.net`
+
+##### Description
+
+This sets the DNS servers for the link and can take only IPv6 addresses.
+
+##### DBus call
+
+[SetLinkDNS][resolved], [SetLinkDNSEx][resolved]
+
+</details>
+
+#### :gear: `DOMAIN` or `ADAPTER_DOMAIN_SUFFIX`
+
+<details>
+
+<summary>Setting the primary domain</summary>
+
+##### Examples
+
+- `example.com`
+
+##### Description
+
+The primary domain for this host. If set multiple times, the first provided is
+used as the primary search domain for bare hostnames. Any subsequent `DOMAIN`
+options will be added as the equivalent of `DOMAIN-SEARCH` options. All
+requests for this domain as well will be routed to the `DNS` servers provided
+on this link.
+
+##### DBus call
+
+[SetLinkDomains][resolved]
+
+</details>
+
+#### :gear: `DOMAIN-SEARCH`
+
+<details>
+
+<summary>Setting secondary domains</summary>
+
+##### Examples
+
+- `example.com`
+
+##### Description
+
+Secondary domains which will be used to search for bare hostnames (after any
+`DOMAIN`, if set) and in the order provided. All requests for this domain will
+be routed to the `DNS` servers provided on this link.
+
+##### DBus call
+
+[SetLinkDomains][resolved]
+
+</details>
+
+#### :gear: `DOMAIN-ROUTE`
+
+<details>
+
+<summary>Routing DNS queries</summary>
+
+##### Examples
+
+- `example.com`
+
+##### Description
+
+All requests for these domains will be routed to the `DNS` servers provided on
+this link. They will *not* be used to search for bare hostnames, only routed. A
+`DOMAIN-ROUTE` option for `.` (single period) will instruct `systemd-resolved`
+to route the entire DNS name-space through to the `DNS` servers configured for
+this connection (unless a more specific route has been offered by another
+connection for a selected name/name-space). This is useful if you wish to
+prevent [DNS leakage](#dns-leakage).
+
+##### DBus call
+
+[SetLinkDomains][resolved]
+
+</details>
+
+#### :gear: `DNSSEC`
+
+<details>
+
+<summary>Enabling DNSSEC</summary>
+
+##### Examples
+
+- `yes`, `true`
+- `no`, `false`
+- `default`
+- `allow-downgrade`
+
+##### Description
+
+Control of DNSSEC should be enabled (`yes`, `true`) or disabled (`no`,
+`false`), or `allow-downgrade` to switch off DNSSEC only if the server doesn't
+support it, for any queries over this link only, or use the system default
+(`default`).
+
+##### DBus call
+
+[DNSSEC][resolved]
+
+</details>
+
+#### :gear: `FLUSH-CACHES`
+
+<details>
+
+<summary>Flushing DNS caches</summary>
+
+##### Examples
+
+- `yes`, `true`
+- `no`, `false`
+
+##### Description
+
+Whether or not to flush all local DNS caches.  Enabled by default.
+
+##### DBus call
+
+[FlushCaches][resolved]
+
+</details>
+
+#### :gear: `RESET-SERVER-FEATURES`
+
+<details>
+
+<summary>Resetting learnt DNS server feature levels</summary>
+
+##### Examples
+
+- `yes`, `true`
+- `no`, `false`
+
+##### Description
+
+Whether or not to forget learnt DNS server feature levels.
+
+##### DBus call
+
+[ResetServerFeatures][resolved]
+
+</details>
+
+#### :gear: `RESET-STATISTICS`
+
+<details>
+
+<summary>Resetting resolver statistics</summary>
+
+##### Examples
+
+- `yes`, `true`
+- `no`, `false`
+
+##### Description
+
+Whether or not to reset resolver statistics.
+
+##### DBus call
+
+[ResetStatistics][resolved]
+
+</details>
+
+#### :gear: `DEFAULT-ROUTE`
+
+<details>
+
+<summary>Default DNS query routing</summary>
+
+##### Examples
+
+- `yes`, `true`
+- `no`, `false`
+
+##### Description
+
+If true, this link's configured DNS servers are used for resolving domain names
+that do not match any link's configured `Domains=` setting. If false, this
+link's configured DNS servers are never used for such domains, and are
+exclusively used for resolving names that match at least one of the domains
+configured on this link.
+
+##### DBus call
+
+[DNSDefaultRoute][resolved]
+
+</details>
+
+#### :gear: `DNS-OVER-TLS`
+
+<details>
+
+<summary>Enabling DNS-over-TLS</summary>
+
+##### Examples
+
+- `yes`, `true`
+- `no`, `false` • `opportunistic` • `default`
+
+##### Description
+
+If true all connections to the server will be encrypted. Note that this mode
+requires a DNS server that supports DNS-over-TLS and has a valid certificate.
+If the hostname was specified in `DNS=` by using the format
+`address#server_name` it is used to validate its certificate and also to enable
+Server Name Indication (SNI) when opening a TLS connection. Otherwise the
+certificate is checked against the server's IP. If the DNS server does not
+support DNS-over-TLS all DNS requests will fail. When set to `opportunistic`
+DNS request are attempted to send encrypted with DNS-over-TLS. If the DNS
+server does not support TLS, DNS-over-TLS is disabled. Note that this mode
+makes DNS-over-TLS vulnerable to "downgrade" attacks, where an attacker might
+be able to trigger a downgrade to non-encrypted mode by synthesizing a response
+that suggests DNS-over-TLS was not supported. If set to false, DNS lookups are
+send over UDP. If set to `default`, uses the system default.
+
+##### DBus call
+
+[SetLinkDNSOverTLS][resolved]
+
+</details>
+
+#### :gear: `LLMNR`
+
+<details>
+
+<summary>Enabling Link-Local Multicast Name Resolution</summary>
+
+##### Examples
+
+- `yes`, `true`
+- `no`, `false` • `resolve` • `default`
+
+##### Description
+
+When true, enables Link-Local Multicast Name Resolution on the link. When set
+to `resolve`, only resolution is enabled, but not host registration and
+announcement. If set to `default`, uses the system default.
+
+##### DBus call
+
+[SetLinkLLMNR][resolved]
+
+</details>
+
+#### :gear: `MULTICAST-DNS`
+
+<details>
+
+<summary>Enabling Multicast DNS</summary>
+
+##### Examples
+
+- `yes`, `true`
+- `no`, `false` • `resolve` • `default`
+
+##### Description
+
+When true, enables Multicast DNS support on the link. When set to `resolve`,
+only resolution is enabled, but not host or service registration and
+announcement. If set to `default`, uses the system default.
+
+##### DBus call
+
+[SetLinkMulticastDNS][resolved]
+
+</details>
+
+#### :gear: `DNSSEC-NEGATIVE-TRUST-ANCHORS`
+
+<details>
+
+<summary>Configuring DNSSEC Negative Trust Anchors</summary>
+
+##### Examples
+
+- `trusted.org`
+
+##### Description
+
+If specified and DNSSEC is enabled, look-ups done via the interface's DNS
+server will be subject to the list of negative trust anchors, and not require
+authentication for the specified domains, or anything below it. Use this to
+disable DNSSEC authentication for specific private domains, that cannot be
+proven valid using the Internet DNS hierarchy. By default,
+`update-systemd-resolved` does not set any negative trust anchors.
+
+##### DBus call
+
+[SetLinkDNSSECNegativeTrustAnchors][resolved]
+
+</details>
 
 ### Example
 

@@ -374,12 +374,14 @@
               status, output = machine.execute(cmd)
 
               if status != 0:
+                machine.log('expected query to succeed, but `dig` exited with {0}'.format(status))
                 return False
 
               for line in output.splitlines():
                 if line == expected:
                   return True
 
+              machine.log('expected query to resolve to address "{0}", but got: {1}'.format(expected, output))
               return False
 
             with machine.nested('checking that hostname resolves to expected address "{0}" from {1}'.format(expected, machine.name)):
@@ -434,16 +436,29 @@
           wait_for_open_host_port(client, '${resolverIP}', ${toString resolverPort}, extra=['-u'])
           wait_for_open_host_port(client, '${resolverIP}', ${toString resolverPort})
 
-          assert_hostname_match(client, '${resolverIP}', 'resolver-cname.${vpnDomain}')
-          assert_hostname_match(client, '${serverIP}', 'server-cname.${vpnDomain}')
+          with subtest('interface info before attempting to resolve names'):
+            assert_interface_property(client, '${interface}', 'default-route', 'yes')
+            assert_interface_property(client, '${interface}', 'llmnr', 'resolve')
+            assert_interface_property(client, '${interface}', 'mdns', 'no')
+            assert_interface_property(client, '${interface}', 'dnsovertls', 'yes')
+            assert_interface_property(client, '${interface}', 'dnssec', 'yes')
 
-          dump_resolved_info(client)
+          with subtest('resolved info before attempting to resolve names'):
+            dump_resolved_info(client)
 
-          assert_interface_property(client, '${interface}', 'default-route', 'yes')
-          assert_interface_property(client, '${interface}', 'llmnr', 'resolve')
-          assert_interface_property(client, '${interface}', 'mdns', 'no')
-          assert_interface_property(client, '${interface}', 'dnsovertls', 'yes')
-          assert_interface_property(client, '${interface}', 'dnssec', 'yes')
+          with subtest('attempt to resolve names using settings from OpenVPN'):
+            assert_hostname_match(client, '${resolverIP}', 'resolver-cname.${vpnDomain}')
+            assert_hostname_match(client, '${serverIP}', 'server-cname.${vpnDomain}')
+
+          with subtest('interface info after attempting to resolve names'):
+            assert_interface_property(client, '${interface}', 'default-route', 'yes')
+            assert_interface_property(client, '${interface}', 'llmnr', 'resolve')
+            assert_interface_property(client, '${interface}', 'mdns', 'no')
+            assert_interface_property(client, '${interface}', 'dnsovertls', 'yes')
+            assert_interface_property(client, '${interface}', 'dnssec', 'yes')
+
+          with subtest('resolved info after attempting to resolve names'):
+            dump_resolved_info(client)
 
           client.succeed('systemctl restart ${serviceName}')
           wait_for_unit_with_output(client, '${serviceName}')

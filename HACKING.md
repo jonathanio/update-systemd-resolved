@@ -102,7 +102,7 @@ To run the [above-mentioned](#nix-flake-usage) NixOS system test and other
 checks,[^other-checks] execute the following command:[^verbose-output]
 
 ```shell-session
-$ nix flake -L
+$ nix flake check -L
 ```
 
 [^other-checks]: Other checks include linting the Nix source code in this

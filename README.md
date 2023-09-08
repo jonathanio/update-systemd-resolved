@@ -216,13 +216,13 @@ this case, you should use the [Stub Resolver](#stub-resolver) method now.
 
 #### Fedora
 
-[authselect]:https://github.com/pbrezina/authselect
+[authselect]:https://github.com/authselect/authselect
 
 Fedora 28 makes use of `authselect` to manage the NSS settings on the system.
 Directly editing `nsswitch.conf` is not recommended as it may be overwritten at
 any time if `authselect` is run. Proper overrides may not yet be possible - see
-[pbrezina/authselect][authselect] for details. However, like Ubuntu, the [Stub
-Resolver](#stub-resolver) method is recommended here too.
+[the authselect project repository][authselect] for details. However, like
+Ubuntu, the [Stub Resolver](#stub-resolver) method is recommended here too.
 
 ### OpenVPN Configuration
 

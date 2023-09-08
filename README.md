@@ -39,8 +39,7 @@ Optional dependencies:
 
 ### IP Parsing and Validation
 
-- [`python`](https://python.org).
-**or**
+- [`python`](https://python.org), **or**
 - [`sipcalc`](https://github.com/sii/sipcalc).
 
 If available, these will be used for IP address parsing and
@@ -62,10 +61,8 @@ Bash's `printf` builtin.
 
 ### Polkit Rules Generation
 
-- [`jq`](https://jqlang.github.io/jq/).
-**or**
-- [`perl`](https://www.perl.org/), or
-**or**
+- [`jq`](https://jqlang.github.io/jq/), **or**
+- [`perl`](https://www.perl.org/), **or**
 - [`python`](https://python.org).
 
 If available, these will be used for serializing the [names of the users and

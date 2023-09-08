@@ -51,6 +51,8 @@ info:
 	@echo
 	@printf 'or pass --config %s\n' $(CONF)
 	@echo	'in addition to any other --config arguments to your openvpn command.'
+	@echo
+	@printf 'Please also consider putting the polkit rules %s in /etc/polkit-1/rules.d.\n' $(RULES)
 
 test:
 	@./run-tests

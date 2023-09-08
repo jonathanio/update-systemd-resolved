@@ -11,19 +11,6 @@ which allows directly setting the DNS configuration for a link. This script
 makes use of `busctl` from systemd to send DBus messages to `systemd-resolved`
 to update the DNS for the link created by OpenVPN.
 
-## NetworkManager
-
-[nm-helper]:https://git.launchpad.net/ubuntu/+source/network-manager-openvpn/tree/src/nm-openvpn-service-openvpn-helper.c?h=debian/sid
-
-This script may not be compatible with certain versions of NetworkManager. It
-seems that NetworkManager overrides the `up` command to use its own helper
-script ([nm-openvpn-service-openvpn-helper][nm-helper]). The script that ships
-with NetworkManager only supports `DNS` and `DOMAIN` options (not `DNS6`,
-`DOMAIN-SEARCH` and `DOMAIN-ROUTE`, nor `DNSSEC` overrides). It will also set
-the main network interface to route `~.` DNS queries (i.e the whole name-space)
-to the LAN or ISP DNS servers, making it difficult to override using `DOMAIN` -
-see [DNS Leakage](#dns-leakage) below.
-
 ## Prerequisites
 
 This script requires:
@@ -748,6 +735,21 @@ There are a number of known issues relating to some third-party servers and
 services:
 
 ### NetworkManager
+
+#### Compatibility with this script
+
+[nm-helper]:https://git.launchpad.net/ubuntu/+source/network-manager-openvpn/tree/src/nm-openvpn-service-openvpn-helper.c?h=debian/sid
+
+This script may not be compatible with certain versions of NetworkManager. It
+seems that NetworkManager overrides the `up` command to use its own helper
+script ([nm-openvpn-service-openvpn-helper][nm-helper]). The script that ships
+with NetworkManager only supports `DNS` and `DOMAIN` options (not `DNS6`,
+`DOMAIN-SEARCH` and `DOMAIN-ROUTE`, nor `DNSSEC` overrides). It may also be
+liable to set the other network interfaces to route `~.` DNS queries (i.e the
+whole name-space) to the LAN or ISP DNS servers, making it difficult to
+override using `DOMAIN` - see [the DNS leakage section](#managed-interface-dns-leakage).
+
+#### Managed interface DNS leakage
 
 [LP1671606]:https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/1671606
 [LP1688018]:https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/1688018

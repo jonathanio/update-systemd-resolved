@@ -793,10 +793,10 @@ NetworkManager only enables the `DefaultRoute` option on managed interfaces.
 ### DNSSEC Issues
 
 ```shell
-$ resolvectl eu-central-1.console.aws.amazon.com
+$ resolvectl query eu-central-1.console.aws.amazon.com
 eu-central-1.console.aws.amazon.com: resolve call failed: DNSSEC validation failed: no-signature
 # or
-$ resolvectl eu-central-1.console.aws.amazon.com
+$ resolvectl query eu-central-1.console.aws.amazon.com
 eu-central-1.console.aws.amazon.com: resolve call failed: DNSSEC validation failed: incompatible-server
 ```
 

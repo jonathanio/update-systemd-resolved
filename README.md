@@ -677,6 +677,15 @@ Finally, DNSSEC has been enabled for this link (and this link only).
 
 ## DNS Leakage
 
+[resolved-vpns]: https://systemd.io/RESOLVED-VPNS
+
+> **Note**
+> Required reading: [`systemd-resolved.service` and VPNs][resolved-vpns].  This
+> document includes, among other things, an overview of search domains, routing
+> domains, and `systemd-resolved`'s `default-route` boolean.  Understanding
+> these concepts will help you configure your local `systemd-resolved` instance
+> to ensure that DNS queries go where you want them to go.
+
 DNS Leakage is something to be careful of when using any VPN or untrusted
 network, and it can heavily depend on how you configure your normal DNS
 settings as well as how you configure the DNS on your VPN connection.

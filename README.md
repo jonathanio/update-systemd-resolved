@@ -204,26 +204,6 @@ file. This set up can be installed by linking to `stub-resolv.conf`:
 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 ```
 
-### Issues with Ubuntu and Fedora
-
-#### Ubuntu
-
-[LP1685045]:https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1685045
-
-The NSS interface for `systemd-resolved` may be deprecated and has already been
-flagged for deprecation in Ubuntu (see [LP#1685045][LP1685045] for details). In
-this case, you should use the [Stub Resolver](#stub-resolver) method now.
-
-#### Fedora
-
-[authselect]:https://github.com/authselect/authselect
-
-Fedora 28 makes use of `authselect` to manage the NSS settings on the system.
-Directly editing `nsswitch.conf` is not recommended as it may be overwritten at
-any time if `authselect` is run. Proper overrides may not yet be possible - see
-[the authselect project repository][authselect] for details. However, like
-Ubuntu, the [Stub Resolver](#stub-resolver) method is recommended here too.
-
 ### OpenVPN Configuration
 
 Finally, update your OpenVPN configuration file and set the `up` and `down`
@@ -808,6 +788,26 @@ maybe just `allow-downgrade`) in your VPN configuration.
 ```
 dhcp-option DNSSEC allow-downgrade
 ```
+
+### Issues with Ubuntu and Fedora
+
+#### Ubuntu
+
+[LP1685045]:https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1685045
+
+The NSS interface for `systemd-resolved` may be deprecated and has already been
+flagged for deprecation in Ubuntu (see [LP#1685045][LP1685045] for details). In
+this case, you should use the [Stub Resolver](#stub-resolver) method now.
+
+#### Fedora
+
+[authselect]:https://github.com/authselect/authselect
+
+Fedora 28 makes use of `authselect` to manage the NSS settings on the system.
+Directly editing `nsswitch.conf` is not recommended as it may be overwritten at
+any time if `authselect` is run. Proper overrides may not yet be possible - see
+[the authselect project repository][authselect] for details. However, like
+Ubuntu, the [Stub Resolver](#stub-resolver) method is recommended here too.
 
 ## How to help
 

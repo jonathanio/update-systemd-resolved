@@ -26,7 +26,7 @@ $(RULES): $(SRC)
 	@mkdir -p $$(dirname $@)
 	@./$(SRC) print-polkit-rules $(RULES_OPTIONS) > $@
 
-install: $(DEST) $(CONF) $(TEMPLATE_RULES_DEST)
+install: $(DEST) $(CONF) $(RULES)
 
 rules: $(RULES)
 

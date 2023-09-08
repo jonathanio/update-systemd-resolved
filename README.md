@@ -15,7 +15,7 @@ to update the DNS for the link created by OpenVPN.
 
 [nm-helper]:https://git.launchpad.net/ubuntu/+source/network-manager-openvpn/tree/src/nm-openvpn-service-openvpn-helper.c?h=debian/sid
 
-This script may not be compatible with recent versions of NetworkManager. It
+This script may not be compatible with certain versions of NetworkManager. It
 seems that NetworkManager overrides the `up` command to use its own helper
 script ([nm-openvpn-service-openvpn-helper][nm-helper]). The script that ships
 with NetworkManager only supports `DNS` and `DOMAIN` options (not `DNS6`,

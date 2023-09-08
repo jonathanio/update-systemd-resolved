@@ -108,6 +108,10 @@ hosts: files resolve myhostname
 
 The changes will be applied as soon as the file is saved.
 
+Note that [some Linux distributions manage `/etc/nsswitch.conf`](#fedora), so
+manual edits to `/etc/nsswitch.conf` may disappear.  Please consult your
+distribution's documentation for how to configure `/etc/nsswitch.conf`.
+
 ### Polkit Rules
 
 If you run the OpenVPN client as an unprivileged user, you may need to add

@@ -772,9 +772,9 @@ services:
 [LP1671606]:https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/1671606
 [LP1688018]:https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/1688018
 
-There is currently a regression with versions of NetworkManager 1.2.6 or later
-(see [LP#1671606][LP1671606] and [LP#1688018][LP1688018]) which means that it
-will automatically set all normal network interfaces with `~.` for DNS routing.
+There is a regression with versions of NetworkManager 1.2.6 through 1.26.4 (see
+[LP#1671606][LP1671606] and [LP#1688018][LP1688018]) which means that it will
+automatically set all normal network interfaces with `~.` for DNS routing.
 This means that even if you set `dhcp-option DOMAIN-ROUTE .` for your VPN
 connection, you will still leak DNS queries over potentially insecure networks.
 
@@ -784,6 +784,11 @@ If you are concerned by potentially leaking DNS on systems which use
 NetworkManager, you may need to configure an [additional script][issue-59]
 into NetworkManager which change the domain routing settings on all non-VPN
 interfaces.
+
+[fix-1.26.6]:https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/blob/nm-1-26/NEWS#L23-24
+
+This issue was [fixed in NetworkManager version 1.26.6][fix-1.26.6]; now,
+NetworkManager only enables the `DefaultRoute` option on managed interfaces.
 
 ### DNSSEC Issues
 

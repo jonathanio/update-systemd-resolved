@@ -815,6 +815,12 @@ any time if `authselect` is run. Proper overrides may not yet be possible - see
 [the authselect project repository][authselect] for details. However, like
 Ubuntu, the [Stub Resolver](#stub-resolver) method is recommended here too.
 
+[f33-changes-systemd-resolved]:https://fedoraproject.org/wiki/Changes/systemd-resolved
+
+Note that Fedora 33 enables `systemd-resolved` by default and configures
+`/etc/nsswitch.conf` to use the `systemd-resolved` NSS interface; see [the
+Fedora changelog entry](f33-changes-systemd-resolved) for details.
+
 ## How to help
 
 If you can help with any of these areas, or have bug fixes, please fork and

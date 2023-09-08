@@ -258,8 +258,15 @@ Or, you can add the following argument to the command-line arguments of
 
 ```bash
 openvpn \
-  --config /usr/local/bin/update-systemd-resolved.conf
+  --config /usr/local/share/doc/openvpn/update-systemd-resolved.conf
 ```
+
+> **Note**
+> The path to `update-systemd-resolved.conf` may differ depending on how you
+> installed `update-systemd-resolved`.  Additionally, both the file's path and
+> its contents are subject change in future releases.  Rather than using the
+> example configuration file directory, you may want to copy the file to
+> another location and then run `openvpn --config <other-location>/update-systemd-resolved.conf`.
 
 ## :screwdriver: Usage :wrench:
 

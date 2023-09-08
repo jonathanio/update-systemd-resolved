@@ -825,7 +825,7 @@ language.
 GitHub Actions are enabled on this repository: Click the link at the top of this
 README to see the current state of the code and its tests.
 
-### Development notes
+## Development notes
 
 Please see [`HACKING.md`](./HACKING.md) for notes on developing
 `update-systemd-resolved`.

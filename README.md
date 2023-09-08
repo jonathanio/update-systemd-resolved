@@ -210,9 +210,9 @@ ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
 [LP1685045]:https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1685045
 
-The NSS interface for `systemd-resolved` may be deprecated and has
-already been flagged for deprecation in Ubuntu (see [LP#1685045][LP1685045] for
-details). In this case, you should use the Stub Resolver method now.
+The NSS interface for `systemd-resolved` may be deprecated and has already been
+flagged for deprecation in Ubuntu (see [LP#1685045][LP1685045] for details). In
+this case, you should use the [Stub Resolver](#stub-resolver) method now.
 
 #### Fedora
 

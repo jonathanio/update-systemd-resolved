@@ -11,19 +11,6 @@ which allows directly setting the DNS configuration for a link. This script
 makes use of `busctl` from systemd to send DBus messages to `systemd-resolved`
 to update the DNS for the link created by OpenVPN.
 
-## NetworkManager
-
-[nm-helper]:https://git.launchpad.net/ubuntu/+source/network-manager-openvpn/tree/src/nm-openvpn-service-openvpn-helper.c?h=debian/sid
-
-This script may not be compatible with recent versions of NetworkManager. It
-seems that NetworkManager overrides the `up` command to use its own helper
-script ([nm-openvpn-service-openvpn-helper][nm-helper]). The script that ships
-with NetworkManager only supports `DNS` and `DOMAIN` options (not `DNS6`,
-`DOMAIN-SEARCH` and `DOMAIN-ROUTE`, nor `DNSSEC` overrides). It will also set
-the main network interface to route `~.` DNS queries (i.e the whole name-space)
-to the LAN or ISP DNS servers, making it difficult to override using `DOMAIN` -
-see [DNS Leakage](#dns-leakage) below.
-
 ## Prerequisites
 
 This script requires:
@@ -121,6 +108,10 @@ hosts: files resolve myhostname
 
 The changes will be applied as soon as the file is saved.
 
+Note that [some Linux distributions manage `/etc/nsswitch.conf`](#fedora), so
+manual edits to `/etc/nsswitch.conf` may disappear.  Please consult your
+distribution's documentation for how to configure `/etc/nsswitch.conf`.
+
 ### Polkit Rules
 
 If you run the OpenVPN client as an unprivileged user, you may need to add
@@ -203,26 +194,6 @@ file. This set up can be installed by linking to `stub-resolv.conf`:
 ```bash
 ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 ```
-
-### Issues with Ubuntu and Fedora
-
-#### Ubuntu
-
-[LP1685045]:https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1685045
-
-The NSS interface for `systemd-resolved` may be deprecated and has
-already been flagged for deprecation in Ubuntu (see [LP#1685045][LP1685045] for
-details). In this case, you should use the Stub Resolver method now.
-
-#### Fedora
-
-[authselect]:https://github.com/pbrezina/authselect
-
-Fedora 28 makes use of `authselect` to manage the NSS settings on the system.
-Directly editing `nsswitch.conf` is not recommended as it may be overwritten at
-any time if `authselect` is run. Proper overrides may not yet be possible - see
-[pbrezina/authselect][authselect] for details. However, like Ubuntu, the [Stub
-Resolver](#stub-resolver) method is recommended here too.
 
 ### OpenVPN Configuration
 
@@ -769,12 +740,27 @@ services:
 
 ### NetworkManager
 
+#### Compatibility with this script
+
+[nm-helper]:https://git.launchpad.net/ubuntu/+source/network-manager-openvpn/tree/src/nm-openvpn-service-openvpn-helper.c?h=debian/sid
+
+This script may not be compatible with certain versions of NetworkManager. It
+seems that NetworkManager overrides the `up` command to use its own helper
+script ([nm-openvpn-service-openvpn-helper][nm-helper]). The script that ships
+with NetworkManager only supports `DNS` and `DOMAIN` options (not `DNS6`,
+`DOMAIN-SEARCH` and `DOMAIN-ROUTE`, nor `DNSSEC` overrides). It may also be
+liable to set the other network interfaces to route `~.` DNS queries (i.e the
+whole name-space) to the LAN or ISP DNS servers, making it difficult to
+override using `DOMAIN` - see [the DNS leakage section](#managed-interface-dns-leakage).
+
+#### Managed interface DNS leakage
+
 [LP1671606]:https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/1671606
 [LP1688018]:https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/1688018
 
-There is currently a regression with versions of NetworkManager 1.2.6 or later
-(see [LP#1671606][LP1671606] and [LP#1688018][LP1688018]) which means that it
-will automatically set all normal network interfaces with `~.` for DNS routing.
+There is a regression with versions of NetworkManager 1.2.6 through 1.26.4 (see
+[LP#1671606][LP1671606] and [LP#1688018][LP1688018]) which means that it will
+automatically set all normal network interfaces with `~.` for DNS routing.
 This means that even if you set `dhcp-option DOMAIN-ROUTE .` for your VPN
 connection, you will still leak DNS queries over potentially insecure networks.
 
@@ -785,13 +771,18 @@ NetworkManager, you may need to configure an [additional script][issue-59]
 into NetworkManager which change the domain routing settings on all non-VPN
 interfaces.
 
+[fix-1.26.6]:https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/blob/nm-1-26/NEWS#L23-24
+
+This issue was [fixed in NetworkManager version 1.26.6][fix-1.26.6]; now,
+NetworkManager only enables the `DefaultRoute` option on managed interfaces.
+
 ### DNSSEC Issues
 
 ```shell
-$ resolvectl eu-central-1.console.aws.amazon.com
+$ resolvectl query eu-central-1.console.aws.amazon.com
 eu-central-1.console.aws.amazon.com: resolve call failed: DNSSEC validation failed: no-signature
 # or
-$ resolvectl eu-central-1.console.aws.amazon.com
+$ resolvectl query eu-central-1.console.aws.amazon.com
 eu-central-1.console.aws.amazon.com: resolve call failed: DNSSEC validation failed: incompatible-server
 ```
 
@@ -803,6 +794,32 @@ maybe just `allow-downgrade`) in your VPN configuration.
 ```
 dhcp-option DNSSEC allow-downgrade
 ```
+
+### Issues with Ubuntu and Fedora
+
+#### Ubuntu
+
+[LP1685045]:https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1685045
+
+The NSS interface for `systemd-resolved` may be deprecated and has already been
+flagged for deprecation in Ubuntu (see [LP#1685045][LP1685045] for details). In
+this case, you should use the [Stub Resolver](#stub-resolver) method now.
+
+#### Fedora
+
+[authselect]:https://github.com/authselect/authselect
+
+Fedora 28 makes use of `authselect` to manage the NSS settings on the system.
+Directly editing `nsswitch.conf` is not recommended as it may be overwritten at
+any time if `authselect` is run. Proper overrides may not yet be possible - see
+[the authselect project repository][authselect] for details. However, like
+Ubuntu, the [Stub Resolver](#stub-resolver) method is recommended here too.
+
+[f33-changes-systemd-resolved]:https://fedoraproject.org/wiki/Changes/systemd-resolved
+
+Note that Fedora 33 enables `systemd-resolved` by default and configures
+`/etc/nsswitch.conf` to use the `systemd-resolved` NSS interface; see [the
+Fedora changelog entry](f33-changes-systemd-resolved) for details.
 
 ## How to help
 
@@ -820,7 +837,7 @@ language.
 GitHub Actions are enabled on this repository: Click the link at the top of this
 README to see the current state of the code and its tests.
 
-### Development notes
+## Development notes
 
 Please see [`HACKING.md`](./HACKING.md) for notes on developing
 `update-systemd-resolved`.

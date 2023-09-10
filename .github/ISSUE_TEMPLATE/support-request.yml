@@ -1,0 +1,69 @@
+name: 'Support Request'
+description: 'Request support'
+title: '[Help]: '
+labels:
+  - 'Help Wanted'
+body:
+  - type: markdown
+    attributes:
+      value: 'Thank you for reporting this issue.'
+  - type: input
+    id: version
+    attributes:
+      label: 'Version in use.'
+      description: 'What version of `update-systemd-resolved` are you using?'
+      placeholder: '1.2.0, master, 8d184d8'
+  - type: input
+    id: distribution
+    attributes:
+      label: 'Your Linux distribution.'
+      description: >-
+        What is the name and, if applicable, release of the Linux distro on the affected machine?
+      placeholder: 'Ubuntu 22.04.3 LTS, Arch Linux, NixOS 23.05'
+  - type: input
+    id: systemd-version
+    attributes:
+      label: 'Your systemd version.'
+      description: 'What version of systemd are you running on the affected machine?'
+      placeholder: 'First line of the output of `systemctl --version`'
+  - type: dropdown
+    id: network-managment
+    attributes:
+      label: 'Your network management software.'
+      description: 'What are you using to manage networking on the affected machine?'
+      options:
+        - 'systemd-networkd'
+        - 'NetworkManager'
+        - 'Something else (please give details in the issue description text field)'
+      default: 2
+  - type: textarea
+    id: description
+    attributes:
+      label: 'Please describe the issue.'
+      description: 'What happened, and what did you expect to happen?'
+      placeholder: 'What went wrong?'
+  - type: textarea
+    id: resolvectl-status
+    attributes:
+      label: 'Output of `resolvectl --status`.'
+      description: >-
+        Please run `resolvectl --status` on the affected machine and post the
+        output here, redacting any sensitive information.
+  - type: textarea
+    id: miscellaneous
+    attributes:
+      label: 'Other helpful details.'
+      description: >-
+        Please share anything else that may help in diagnosing this issue.
+      placeholder: 'For instance, `journalctl -xeu my-openvpn-client.service`'
+  - type: checkboxes
+    id: averrals
+    attributes:
+      label: 'I have read and followed relevant documentation.'
+      options:
+        - label: >-
+            (If reporting DNS leakage) I have read [the "DNS Leakage" README
+            section](https://github.com/jonathanio/update-systemd-resolved#dns-leakage).
+        - label: >-
+            (If you are using NetworkManager) I have read the [known issues
+            with NetworkManager](https://github.com/jonathanio/update-systemd-resolved#networkmanager).

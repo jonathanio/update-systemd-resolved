@@ -45,9 +45,9 @@ body:
   - type: textarea
     id: resolvectl-status
     attributes:
-      label: 'Output of `resolvectl --status`.'
+      label: 'Output of `resolvectl status`.'
       description: >-
-        Please run `resolvectl --status` on the affected machine and post the
+        Please run `resolvectl status` on the affected machine and post the
         output here, redacting any sensitive information.
   - type: textarea
     id: miscellaneous

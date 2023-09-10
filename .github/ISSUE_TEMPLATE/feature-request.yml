@@ -1,0 +1,19 @@
+name: 'Feature Request'
+description: 'Request a new feature or improvement'
+title: '[Idea]: '
+labels:
+  - 'Enhancement'
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: 'Your request.'
+      description: 'How could `update-systemd-resolved` improve?'
+  - type: markdown
+    attributes:
+      value: >-
+        Thank you for your feedback.
+
+        `update-systemd-resolved` welcomes pull requests.  If you would like to
+        contribute, please see [the README's "How to help" section](https://github.com/jonathanio/update-systemd-resolved#how-to-help)
+        and [the development notes](https://github.com/jonathanio/update-systemd-resolved/blob/master/HACKING.md).

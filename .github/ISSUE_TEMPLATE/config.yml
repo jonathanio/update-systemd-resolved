@@ -1,2 +1,2 @@
 # Allow users to create issues without using one of the templates
-blank_issues_enabled: false
+blank_issues_enabled: true

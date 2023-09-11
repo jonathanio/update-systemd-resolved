@@ -203,11 +203,14 @@ before the device is closed:
 
 ```conf
 script-security 2
-setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 up /usr/local/bin/update-systemd-resolved
 up-restart
 down /usr/local/bin/update-systemd-resolved
 down-pre
+
+# If needed, to permit `update-systemd-resolved` to find utilities it depends
+# on.  Adjust to suit your system.
+#setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
 
 #### up-restart
@@ -252,6 +255,12 @@ openvpn \
   --up /usr/local/bin/update-systemd-resolved --up-restart \
   --down /usr/local/bin/update-systemd-resolved --down-pre
 ```
+
+> **Note**
+> The `--setenv PATH` option shown above is intended to allow
+> `update-systemd-resolved` to find [its prerequisites](#prerequisites).
+> Depending on your system's configuration, you may not need `--setenv PATH`,
+> or you may need to specify a different `PATH` value than the one shown above.
 
 Or, you can add the following argument to the command-line arguments of
 `openvpn`, which will use the `update-systemd-resolve.conf` file instead:

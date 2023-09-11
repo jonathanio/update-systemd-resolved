@@ -42,12 +42,15 @@ info:
 	@echo
 	@echo   'You should also update your OpenVPN configuration:'
 	@echo
-	@echo   '  setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 	@echo   '  script-security 2'
 	@printf '  up %s\n' $(DEST)
 	@echo   '  up-restart'
 	@printf '  down %s\n' $(DEST)
 	@echo   '  down-pre'
+	@echo
+	@echo   '  # If needed, to permit `update-systemd-resolved` to find utilities it depends'
+	@echo   '  # on.  Adjust to suit your system.'
+	@echo   '  #setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 	@echo
 	@printf 'or pass --config %s\n' $(CONF)
 	@echo	'in addition to any other --config arguments to your openvpn command.'

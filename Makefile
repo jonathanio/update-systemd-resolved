@@ -1,8 +1,15 @@
-PREFIX ?= /usr/local/bin
+# Similar to the directory variables specified here:
+# https://www.gnu.org/prep/standards/html_node/Directory-Variables.html
+PREFIX ?= /usr/local
+EXEC_PREFIX ?= $(PREFIX)
+LIBEXECDIR ?= $(EXEC_PREFIX)/libexec
+DATAROOTDIR ?= $(PREFIX)/share
+DATADIR ?= $(DATAROOTDIR)
 
 SRC = update-systemd-resolved
-DEST = $(DESTDIR)$(PREFIX)/$(SRC)
-RULES = $(DESTDIR)/etc/polkit-1/rules.d/10-$(SRC).rules
+DEST = $(DESTDIR)/$(LIBEXECDIR)/openvpn/$(SRC)
+CONF = $(DESTDIR)/$(DATADIR)/doc/openvpn/$(SRC).conf
+RULES = $(DESTDIR)/$(DATADIR)/polkit-1/rules.d/10-$(SRC).rules
 RULES_OPTIONS ?= --polkit-allowed-user=openvpn --polkit-allowed-group=network
 
 .PHONY: all install info rules
@@ -12,14 +19,14 @@ all: install info
 $(DEST): $(SRC)
 	@install -Dm750 $< $@
 
-$(DEST).conf: $(SRC).conf
+$(CONF): $(SRC).conf
 	@install -Dm644 $< $@
 
 $(RULES): $(SRC)
 	@mkdir -p $$(dirname $@)
 	@./$(SRC) print-polkit-rules $(RULES_OPTIONS) > $@
 
-install: $(DEST) $(DEST).conf $(TEMPLATE_RULES_DEST)
+install: $(DEST) $(CONF) $(RULES)
 
 rules: $(RULES)
 
@@ -35,15 +42,20 @@ info:
 	@echo
 	@echo   'You should also update your OpenVPN configuration:'
 	@echo
-	@printf '  setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n'
 	@echo   '  script-security 2'
 	@printf '  up %s\n' $(DEST)
 	@echo   '  up-restart'
 	@printf '  down %s\n' $(DEST)
 	@echo   '  down-pre'
 	@echo
-	@printf 'or pass --config %s.conf\n' $(DEST)
-	@echo 'in addition to any other --config arguments to your openvpn command.'
+	@echo   '  # If needed, to permit `update-systemd-resolved` to find utilities it depends'
+	@echo   '  # on.  Adjust to suit your system.'
+	@echo   '  #setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+	@echo
+	@printf 'or pass --config %s\n' $(CONF)
+	@echo	'in addition to any other --config arguments to your openvpn command.'
+	@echo
+	@printf 'Please also consider putting the polkit rules %s in /etc/polkit-1/rules.d.\n' $(RULES)
 
 test:
 	@./run-tests

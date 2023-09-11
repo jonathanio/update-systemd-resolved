@@ -268,7 +268,7 @@
 
                 providers legacy default
 
-                config ${perSystem.config.packages.update-systemd-resolved}/libexec/openvpn/update-systemd-resolved.conf
+                config ${perSystem.config.packages.update-systemd-resolved}/share/doc/openvpn/update-systemd-resolved.conf
 
                 dhcp-option DNS ${resolverIP}:${toString resolverPort}#resolver
                 dhcp-option DOMAIN ${vpnDomain}

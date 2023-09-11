@@ -19,23 +19,17 @@
       # `make test`.
       doCheck = true;
 
-      # Rewrite update-systemd-resolved.conf to:
-      #   1. Remove "setenv PATH ..." (setting PATH is unnecessary here, where
-      #      nixpkgs' update-systemd-resolved derivation builder replaces
-      #      update-systemd-resolved with a wrapper script that defines a PATH
-      #      that makes all of update-systemd-resolved's dependencies
-      #      available), and
-      #   2. Replace the preset path to update-systemd-resolved with the Nix
-      #      store path of the update-systemd-resolved script (so that doing
-      #      "config <nix-store-path-of>/update-systemd-resolved.conf" from
-      #      within an OpenVPN config file will work properly).
-      postInstall = ''
-        ${oldAttrs.postInstall or ""}
+      PREFIX = placeholder "out";
 
+      # Rewrite update-systemd-resolved.conf to replace the preset path to
+      # update-systemd-resolved with the Nix store path of the
+      # update-systemd-resolved script (so that doing "config
+      # <nix-store-path-of>/update-systemd-resolved.conf" from within an
+      # OpenVPN config file will work properly).
+      postInstall = ''
         sed -i -e "
-          /^setenv[[:space:]]\+PATH/d
           s|\([[:space:]]\)[^[[:space:]]*\(/update-systemd-resolved\)|\1''${out}/libexec/openvpn\2|
-        " "''${out}/libexec/openvpn/update-systemd-resolved.conf"
+        " "''${out}/share/doc/openvpn/update-systemd-resolved.conf"
 
         wrapProgram "''${out}/libexec/openvpn/update-systemd-resolved" \
           --suffix PATH : ${lib.makeBinPath buildInputs}
@@ -49,8 +43,10 @@
       #
       #   /nix/store/<...>/bin/bash: line 1: ./run-tests: cannot execute: required file not found
       #
+      # Additionally, update the shebang of `update-systemd-resolved` itself in
+      # order to permit running the `--print-polkit-rules` action.
       patchPhase = ''
-        patchShebangs ./run-tests
+        patchShebangs ./run-tests ./update-systemd-resolved
       '';
 
       passthru = {

@@ -1,7 +1,10 @@
 script_type="up"
-foreign_option_1="dhcp-option DNS 1.23.4.56"
-foreign_option_2="dhcp-option DNS 5.6.7.89"
-foreign_option_3="dhcp-option DNS 34.5.67.8"
+
+foreign_options=(
+  "dhcp-option DNS 1.23.4.56"
+  "dhcp-option DNS 5.6.7.89"
+  "dhcp-option DNS 34.5.67.8"
+)
 
 TEST_TITLE="Multiple IPv4 DNS Servers (Part 2)"
 TEST_BUSCTL_CALLED=1

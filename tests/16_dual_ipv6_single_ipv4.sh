@@ -1,6 +1,9 @@
 script_type="up"
-foreign_option_1="dhcp-option DNS 1234:567:89::ab:cdef"
-foreign_option_2="dhcp-option DNS 1.23.4.56"
+
+foreign_options=(
+  "dhcp-option DNS 1234:567:89::ab:cdef"
+  "dhcp-option DNS 1.23.4.56"
+)
 
 TEST_TITLE="Single IPv6 and Single IPv4 DNS Servers"
 TEST_BUSCTL_CALLED=1

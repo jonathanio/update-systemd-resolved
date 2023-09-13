@@ -357,14 +357,24 @@ evaltest() {
   dev="tun${RANDOM}"
 
   # Clear foreign_option_*
-  for foreign_option_varname in "${!foreign_option_@}"; do
-    declare "${foreign_option_varname}="
-  done
+  unset "${!foreign_option_@}"
 
   # Import the test configuration
-  source "${TEST}"
+  source "${TEST}" || return
 
-  (( RUNTEST_CALLED > 0 )) || runtest
+  if (( RUNTEST_CALLED > 0 )); then
+    return
+  fi
+
+  declare -a foreign_options || return
+
+  local i=0
+  local opt
+  for opt in "${foreign_options[@]}" in; do
+    declare "foreign_option_$(( i += 1 ))=${opt}"
+  done
+
+  runtest
 }
 
 echo "update-systemd-resolved Test Suite"

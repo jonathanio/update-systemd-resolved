@@ -1,7 +1,6 @@
 source "${BASH_SOURCE[0]%/*}/helpers/ipv4.sh"
 
 script_type="up"
-dev="tun19"
 
 # busctl should not be called for any test in here
 TEST_BUSCTL_CALLED=0

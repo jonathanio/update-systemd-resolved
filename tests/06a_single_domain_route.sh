@@ -1,6 +1,6 @@
 script_type="up"
-dev="tun06"
-foreign_option_1="dhcp-option DOMAIN-ROUTE example.com"
+
+foreign_options=("dhcp-option DOMAIN-ROUTE example.com")
 
 TEST_TITLE="Single DNS Route"
 TEST_BUSCTL_CALLED=1

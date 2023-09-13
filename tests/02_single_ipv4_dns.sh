@@ -1,6 +1,6 @@
 script_type="up"
-dev="tun02"
-foreign_option_1="dhcp-option DNS 1.23.4.56"
+
+foreign_options=("dhcp-option DNS 1.23.4.56")
 
 TEST_TITLE="Single IPv4 DNS Server"
 TEST_BUSCTL_CALLED=1

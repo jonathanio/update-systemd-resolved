@@ -1,11 +1,13 @@
 script_type="up"
-dev="tun18"
-foreign_option_1="dhcp-option DNS 1.23.4.56"
-foreign_option_2="dhcp-option DNS 2.34.56.7"
-foreign_option_3="dhcp-option DNS 1234:567:89::ab:cdef"
-foreign_option_4="dhcp-option DNS 1234:567:89::ba:cdef"
-foreign_option_5="dhcp-option DOMAIN example.com"
-foreign_option_6="dhcp-option DOMAIN-SEARCH example.co"
+
+foreign_options=(
+  "dhcp-option DNS 1.23.4.56"
+  "dhcp-option DNS 2.34.56.7"
+  "dhcp-option DNS 1234:567:89::ab:cdef"
+  "dhcp-option DNS 1234:567:89::ba:cdef"
+  "dhcp-option DOMAIN example.com"
+  "dhcp-option DOMAIN-SEARCH example.co"
+)
 
 TEST_TITLE="DNS IPv4 and IPv6 Servers, plus Domain and Search"
 TEST_BUSCTL_CALLED=1

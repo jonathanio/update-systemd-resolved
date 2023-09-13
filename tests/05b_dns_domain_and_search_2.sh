@@ -1,8 +1,10 @@
 script_type="up"
-dev="tun05"
-foreign_option_1="dhcp-option DOMAIN example.com"
-foreign_option_2="dhcp-option DOMAIN-SEARCH example.org"
-foreign_option_3="dhcp-option DOMAIN-SEARCH example.net"
+
+foreign_options=(
+  "dhcp-option DOMAIN example.com"
+  "dhcp-option DOMAIN-SEARCH example.org"
+  "dhcp-option DOMAIN-SEARCH example.net"
+)
 
 TEST_TITLE="DNS Single Domain and Dual Search"
 TEST_BUSCTL_CALLED=1

@@ -1,5 +1,4 @@
 script_type="up"
-dev="tun20"
 
 TEST_BUSCTL_CALLED=1
 

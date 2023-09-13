@@ -1,6 +1,6 @@
 script_type="up"
-dev="tun13"
-foreign_option_1="dhcp-option DNS 1234:567:89::ab:cdef"
+
+foreign_options=("dhcp-option DNS 1234:567:89::ab:cdef")
 
 TEST_TITLE="Single IPv6 DNS Server (Compact) (Part 2)"
 TEST_BUSCTL_CALLED=1

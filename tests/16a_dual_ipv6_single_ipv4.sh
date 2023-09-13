@@ -1,5 +1,4 @@
 script_type="up"
-dev="tun16"
 foreign_option_1="dhcp-option DNS6 1234:567:89::ab:cdef"
 foreign_option_2="dhcp-option DNS 1.23.4.56"
 

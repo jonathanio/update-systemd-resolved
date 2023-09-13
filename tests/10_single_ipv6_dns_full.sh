@@ -1,5 +1,4 @@
 script_type="up"
-dev="tun10"
 foreign_option_1="dhcp-option DNS 1234:5678:90ab:cdef:4321:8765:ba09:fedc"
 
 TEST_TITLE="Single IPv6 DNS Server (Full)"

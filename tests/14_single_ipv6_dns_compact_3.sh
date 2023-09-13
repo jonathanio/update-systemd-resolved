@@ -1,5 +1,4 @@
 script_type="up"
-dev="tun14"
 foreign_option_1="dhcp-option DNS 20a0::1"
 
 TEST_TITLE="Single IPv6 DNS Server (Compact) (Part 3)"

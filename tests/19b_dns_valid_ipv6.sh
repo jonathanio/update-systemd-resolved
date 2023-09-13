@@ -1,7 +1,6 @@
 source "${BASH_SOURCE[0]%/*}/helpers/ipv6.sh"
 
 script_type="up"
-dev="tun19"
 
 TEST_BUSCTL_CALLED=1
 TEST_BUSCTL_DNS=SKIP

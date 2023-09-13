@@ -1,5 +1,4 @@
 script_type="up"
-dev="tun23"
 
 run_custom_foreign_option_test() {
   local TEST_TITLE foreign_option_1 suffix varname

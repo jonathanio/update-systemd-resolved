@@ -1,5 +1,4 @@
 script_type="up"
-dev="tun23"
 
 TEST_TITLE='Error if "busctl status org.freedesktop.resolve1" fails'
 TEST_BUSCTL_CALLED=1

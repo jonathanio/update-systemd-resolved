@@ -1,5 +1,4 @@
 script_type="up"
-dev="tun21"
 
 TEST_BUSCTL_CALLED=0
 EXPECT_FAILURE=1

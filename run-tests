@@ -353,6 +353,8 @@ evaltest() {
   TEST_BUSCTL_STATUS_RC=""
   # Keep this random, as we will never know the ifindex up-front
   ip_ifindex=$((RANDOM%=64))
+  # Same for the device
+  dev="tun${RANDOM}"
 
   # Clear foreign_option_*
   for foreign_option_varname in "${!foreign_option_@}"; do

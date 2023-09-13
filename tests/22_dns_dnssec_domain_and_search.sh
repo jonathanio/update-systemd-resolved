@@ -1,5 +1,4 @@
 script_type="up"
-dev="tun22"
 foreign_option_1="dhcp-option DNS 1.23.4.56"
 foreign_option_2="dhcp-option DNS 1234:567:89::ab:cdef"
 foreign_option_3="dhcp-option DOMAIN example.com"

@@ -34,9 +34,14 @@ fi
 # Set Pass/Fail signatures
 PASS="✓"
 FAIL="✗"
+
 # Counters
 COUNT_PASS=0
 COUNT_FAIL=0
+
+# Names of files in which test cases failed
+declare -A FAILED
+
 # Flag for determining whether a test script called the `runtest' function
 RUNTEST_CALLED=0
 
@@ -295,6 +300,9 @@ function _pass {
 
 function _fail {
   COUNT_FAIL=$((COUNT_FAIL+1))
+  if [[ -v TEST ]]; then
+    FAILED["$TEST"]=1
+  fi
   ( >&2 echo -e "  ${RED}${FAIL} ${@}${RESET}" )
 }
 
@@ -398,6 +406,14 @@ done
 
 echo -e "  ${GREEN}${PASS} ${COUNT_PASS} Passed${RESET}"
 echo -e "  ${RED}${FAIL} ${COUNT_FAIL} Failed${RESET}"
+
+if (( "${#FAILED[@]}" > 0 )); then
+  echo -e "\n  ${YELLOW}The following files have failing test cases:${RESET}"
+
+  for failed in "${!FAILED[@]}"; do
+    echo -e "    ${ORANGE}${failed}${RESET}"
+  done
+fi
 
 # Make sure we fail if there are failed tests
 [[ ${COUNT_FAIL} -eq 0 ]]

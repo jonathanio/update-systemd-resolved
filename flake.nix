@@ -17,7 +17,9 @@
     flake-parts.lib.mkFlake {inherit inputs;} ({lib, ...}: {
       systems = lib.subtractLists [
         "armv5tel-linux"
+        "armv6l-linux"
         "mipsel-linux"
+        "riscv64-linux"
       ] (lib.intersectLists lib.systems.flakeExposed lib.platforms.linux);
 
       imports = [

@@ -341,12 +341,12 @@ function runtest {
   checktest
 
   if [[ "${TEST_BUSCTL_CALLED:-}" = 0 ]]; then
-    if [[ ${busctl_called} -eq 0 ]]; then
+    if (( busctl_called == 0 )); then
       _pass "busctl was not called, as expected"
     else
       _fail "busctl was called, not expected"
     fi
-  elif [[ ${busctl_called} -eq 0 ]]; then
+  elif (( busctl_called == 0 )); then
     _fail "busctl was not called, not expected"
   fi
 
@@ -424,4 +424,4 @@ if [[ -v FAILED ]] && (( "${#FAILED[@]}" > 0 )); then
 fi
 
 # Make sure we fail if there are failed tests
-[[ ${COUNT_FAIL} -eq 0 ]]
+(( COUNT_FAIL == 0 ))

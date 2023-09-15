@@ -221,6 +221,10 @@
             };
             polkitRules = mkPolkitRulesForService config.systemd.services.${serviceAttrName};
           in {
+            imports = [
+              self.nixosModules.update-systemd-resolved
+            ];
+
             networking.useNetworkd = true;
 
             services.resolved = {
@@ -258,6 +262,30 @@
               dnsutils # for "dig"
             ];
 
+            programs.update-systemd-resolved.servers.${instanceName} = {
+              includeAutomatically = true;
+
+              settings = {
+                dns.resolver = {name, ...}: {
+                  address = resolverIP;
+                  port = resolverPort;
+                  sni = name;
+                };
+
+                domain = vpnDomain;
+
+                defaultRoute = true;
+                dnsOverTLS = "yes";
+                dnssec = true;
+                dnssecNegativeTrustAnchors = [vpnDomain];
+                flushCaches = "yes";
+                llmnr = "resolve";
+                multicastDNS = "default";
+                resetServerFeatures = true;
+                resetStatistics = "yes";
+              };
+            };
+
             services.openvpn.servers.${instanceName} = {
               config = ''
                 remote server
@@ -267,23 +295,6 @@
                 ifconfig ${clientEndpoint} ${serverEndpoint}
 
                 providers legacy default
-
-                config ${perSystem.config.packages.update-systemd-resolved}/share/doc/openvpn/update-systemd-resolved.conf
-
-                dhcp-option DNS ${resolverIP}:${toString resolverPort}#resolver
-                dhcp-option DOMAIN ${vpnDomain}
-
-                dhcp-option FLUSH-CACHES yes
-                dhcp-option RESET-SERVER-FEATURES true
-                dhcp-option RESET-STATISTICS yes
-
-                dhcp-option DEFAULT-ROUTE yes
-                dhcp-option DNS-OVER-TLS yes
-                dhcp-option LLMNR resolve
-                dhcp-option MULTICAST-DNS default
-
-                dhcp-option DNSSEC true
-                dhcp-option DNSSEC-NEGATIVE-TRUST-ANCHORS ${vpnDomain}
               '';
             };
 

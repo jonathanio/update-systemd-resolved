@@ -28,6 +28,7 @@
         inputs.flake-parts.flakeModules.easyOverlay
         ./nix/checks.nix
         ./nix/devshells.nix
+        ./nix/nixos-modules.nix
         ./nix/packages.nix
       ];
     });

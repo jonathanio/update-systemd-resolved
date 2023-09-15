@@ -34,6 +34,8 @@ all_pairs() {
 
   local last
 
+  # This is called indirectly.
+  # shellcheck disable=SC2317
   __all_pairs_cond() {
     if [[ -v last ]]; then
         "$all_pairs_cond" "$last" "${1?internal error}" || return

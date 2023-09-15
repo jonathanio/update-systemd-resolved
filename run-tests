@@ -107,7 +107,7 @@ function busctl {
   esac
 
   shift 4
-  _log "busctl called with: ${@}"
+  _log "busctl called with: ${*@Q}"
   # Set that busctl has been called
   busctl_called=1
 
@@ -178,38 +178,40 @@ function busctl {
     SetLinkDNS)
       shift
       if [[ "${TEST_BUSCTL_DNS}" == "" ]]; then
-        [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${@}" ]] || \
-          _fail "SetLinkDNS was called and should not be: '${@}'"
+        [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "$*" ]] || \
+          _fail "SetLinkDNS was called and should not be: ${*@Q}"
       elif [[ "${TEST_BUSCTL_DNS}" == SKIP ]]; then
           :
+      elif [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${*}" ]]; then
+        _pass "SetLinkDNS was called correctly"
       else
-        [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${@}" ]] && \
-          _pass "SetLinkDNS was called correctly" || \
-          _fail "SetLinkDNS was not given the correct arguments:\n" \
-                "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DNS}'\n" \
-                "     Received: '${@}'"
+        _fail "SetLinkDNS was not given the correct arguments:\n" \
+              "     Expected: ${ip_ifindex@Q} ${TEST_BUSCTL_DNS@Q}\n" \
+              "     Received: ${*@Q}"
       fi
       ;;
     SetLinkDomains)
       shift
       if [[ "${TEST_BUSCTL_DOMAINS}" == "" ]]; then
-        [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "${@}" ]] || \
-          _fail "SetLinkDomains was called and should not be: '${@}'"
+        [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "$*" ]] || \
+          _fail "SetLinkDomains was called and should not be: ${*@Q}"
+      elif [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "$*" ]]; then
+          _pass "SetLinkDomains was called correctly"
       else
-        [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "${@}" ]] && \
-          _pass "SetLinkDomains was called correctly" || \
           _fail "SetLinkDomains was not given the correct arguments:\n" \
-                "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DOMAINS}'\n" \
-                "     Received: '${@}'"
+                "     Expected: ${ip_ifindex@Q} ${TEST_BUSCTL_DOMAINS@Q}\n" \
+                "     Received: ${*@Q}"
       fi
       ;;
     SetLinkDNSSEC)
       shift
-      [[ "${ip_ifindex} ${TEST_BUSCTL_DNSSEC}x" == "${@}x" ]] && \
-        _pass "SetLinkDNSSEC was called correctly" || \
+      if [[ "${ip_ifindex} ${TEST_BUSCTL_DNSSEC}" == "$*" ]]; then
+        _pass "SetLinkDNSSEC was called correctly"
+      else
         _fail "SetLinkDNSSEC was not given the correct arguments:\n" \
-              "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DNSSEC}'\n" \
-              "     Received: '${@}'"
+              "     Expected: ${ip_ifindex@Q} ${TEST_BUSCTL_DNSSEC@Q}\n" \
+              "     Received: ${*@Q}"
+      fi
       ;;
     FlushCaches|ResetServerFeatures|ResetStatistics)
       if (( "${#expected[@]}" == 0 )); then
@@ -241,11 +243,13 @@ function busctl {
 }
 
 function ip {
-  _log "ip called with: ${@}"
+  _log "ip called with: ${*@Q}"
 
-  [[ "${1} ${2} ${3} ${4}" == "link show dev ${dev}" ]] && \
-    _pass "ip was called correctly" || \
+  if [[ "${1} ${2} ${3} ${4}" == "link show dev ${dev}" ]]; then
+    _pass "ip was called correctly"
+  else
     _fail "ip was called with incorrect or unknown arguments"
+  fi
 
   # Return fake ip statement
   echo -e "${ip_ifindex}: ${dev}: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP>" \
@@ -254,7 +258,7 @@ function ip {
 }
 
 function resolvectl {
-  _log "resolvectl called with: ${@}"
+  _log "resolvectl called with: ${*@Q}"
 }
 
 function logger {
@@ -292,12 +296,12 @@ function exit {
 }
 
 function _log {
-  ( >&2 echo -e "    ${DARK}${@}${RESET}" )
+  ( >&2 echo -e "    ${DARK}${*}${RESET}" )
 }
 
 function _pass {
   COUNT_PASS=$((COUNT_PASS+1))
-  ( >&2 echo -e "  ${GREEN}${PASS}${RESET} ${@}" )
+  ( >&2 echo -e "  ${GREEN}${PASS}${RESET} ${*}" )
 }
 
 function _fail {
@@ -305,7 +309,7 @@ function _fail {
   if [[ -v TEST ]]; then
     FAILED["$TEST"]=1
   fi
-  ( >&2 echo -e "  ${RED}${FAIL} ${@}${RESET}" )
+  ( >&2 echo -e "  ${RED}${FAIL} ${*}${RESET}" )
 }
 
 function checktest() {
@@ -337,12 +341,13 @@ function runtest {
   checktest
 
   if [[ "${TEST_BUSCTL_CALLED:-}" = 0 ]]; then
-    [[ ${busctl_called} -eq 0 ]] && \
-      _pass "busctl was not called, as expected" || \
+    if [[ ${busctl_called} -eq 0 ]]; then
+      _pass "busctl was not called, as expected"
+    else
       _fail "busctl was called, not expected"
-  else
-    [[ ${busctl_called} -eq 0 ]] && \
-      _fail "busctl was not called, not expected"
+    fi
+  elif [[ ${busctl_called} -eq 0 ]]; then
+    _fail "busctl was not called, not expected"
   fi
 
   echo
@@ -370,7 +375,8 @@ evaltest() {
   unset "${!foreign_option_@}"
 
   # Import the test configuration
-  source "${TEST}" || return
+  # shellcheck source-path=SCRIPTDIR source=tests/01_no_updates.sh
+  source "$TEST" || return
 
   if (( RUNTEST_CALLED > 0 )); then
     return

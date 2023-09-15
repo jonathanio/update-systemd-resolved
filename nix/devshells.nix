@@ -68,6 +68,16 @@
 
     treefmt = {
       programs.alejandra.enable = true;
+      programs.shellcheck.enable = true;
+
+      settings.formatter.shellcheck = {
+        includes = [
+          "update-systemd-resolved"
+          "run-tests"
+          "tests"
+        ];
+      };
+
       flakeFormatter = true;
       projectRootFile = "flake.nix";
     };

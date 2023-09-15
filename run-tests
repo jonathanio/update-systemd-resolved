@@ -415,7 +415,7 @@ done
 echo -e "  ${GREEN}${PASS} ${COUNT_PASS} Passed${RESET}"
 echo -e "  ${RED}${FAIL} ${COUNT_FAIL} Failed${RESET}"
 
-if (( "${#FAILED[@]}" > 0 )); then
+if [[ -v FAILED ]] && (( "${#FAILED[@]}" > 0 )); then
   echo -e "\n  ${YELLOW}The following files have failing test cases:${RESET}"
 
   for failed in "${!FAILED[@]}"; do

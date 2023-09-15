@@ -82,6 +82,9 @@
       settings.formatter.shfmt = {
         inherit (config.treefmt.settings.formatter.shellcheck) includes;
 
+        # XXX This duplicates settings in `.editorconfig`, as at the moment the
+        # `shfmt` process launched by `treefmt` doesn't seem to pick up on the
+        # settings in `.editorconfig`.
         options = [
           "-case-indent"
           "-space-redirects"

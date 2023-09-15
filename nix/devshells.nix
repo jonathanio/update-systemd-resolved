@@ -69,12 +69,22 @@
     treefmt = {
       programs.alejandra.enable = true;
       programs.shellcheck.enable = true;
+      programs.shfmt.enable = true;
 
       settings.formatter.shellcheck = {
         includes = [
           "update-systemd-resolved"
           "run-tests"
           "tests"
+        ];
+      };
+
+      settings.formatter.shfmt = {
+        inherit (config.treefmt.settings.formatter.shellcheck) includes;
+
+        options = [
+          "-case-indent"
+          "-space-redirects"
         ];
       };
 

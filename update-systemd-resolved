@@ -918,7 +918,7 @@ parse_dns_spec() {
   done
 
   # Ensure that port variable is defined if server name variable is. The
-  # default value is `0`, meaning "default port (53" when passed to
+  # default value is `0`, meaning "default port 53" when passed to
   # `SetLinkDNSEx`.
   #
   # NOTE that we do not do any further input validation here; instead we let

@@ -122,9 +122,8 @@ function busctl {
   local indir
   busctl2var indir "$call" || return
 
-  local -a expected
-
   if [[ -v $indir ]]; then
+    local -a expected=()
     local -a expanded
     read -r -a expanded <<< "${!indir}"
 
@@ -141,7 +140,7 @@ function busctl {
         # coerced to "yes" and "no", respectively.  Similarly, support "yes"
         # and "no" for booleans; we expect these to be coerced to "true" and
         # "false", respectively.
-        case "$elem" in
+        case "${elem,,}" in
           true)
             if [[ $etype == s ]]; then
               elem=yes
@@ -175,71 +174,57 @@ function busctl {
   fi
 
   case "$call" in
-    SetLinkDNS)
-      shift
-      if [[ ${TEST_BUSCTL_DNS} == "" ]]; then
-        [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "$*" ]] ||
-          _fail "SetLinkDNS was called and should not be: ${*@Q}"
-      elif [[ ${TEST_BUSCTL_DNS} == SKIP ]]; then
-        :
-      elif [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${*}" ]]; then
-        _pass "SetLinkDNS was called correctly"
-      else
-        _fail "SetLinkDNS was not given the correct arguments:\n" \
-          "     Expected: ${ip_ifindex@Q} ${TEST_BUSCTL_DNS@Q}\n" \
-          "     Received: ${*@Q}"
-      fi
-      ;;
-    SetLinkDomains)
-      shift
-      if [[ ${TEST_BUSCTL_DOMAINS} == "" ]]; then
-        [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "$*" ]] ||
-          _fail "SetLinkDomains was called and should not be: ${*@Q}"
-      elif [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "$*" ]]; then
-        _pass "SetLinkDomains was called correctly"
-      else
-        _fail "SetLinkDomains was not given the correct arguments:\n" \
-          "     Expected: ${ip_ifindex@Q} ${TEST_BUSCTL_DOMAINS@Q}\n" \
-          "     Received: ${*@Q}"
-      fi
-      ;;
-    SetLinkDNSSEC)
-      shift
-      if [[ "${ip_ifindex} ${TEST_BUSCTL_DNSSEC}" == "$*" ]]; then
-        _pass "SetLinkDNSSEC was called correctly"
-      else
-        _fail "SetLinkDNSSEC was not given the correct arguments:\n" \
-          "     Expected: ${ip_ifindex@Q} ${TEST_BUSCTL_DNSSEC@Q}\n" \
-          "     Received: ${*@Q}"
-      fi
-      ;;
+    SetLinkDNS) ;;
     FlushCaches | ResetServerFeatures | ResetStatistics)
-      if (("${#expected[@]}" == 0)); then
-        _fail "${call} was called unexpectedly"
-        return
-      elif (("$#" != 0)); then
-        _fail "${call} must be called with no arguments"
-      fi
+      argdesc=zero
+      argcount=0
       ;;
-    SetLinkDNSOverTLS | SetLinkDefaultRoute | SetLinkLLMNR | SetLinkMulticastDNS)
-      if (("${#expected[@]}" == 0)); then
-        _fail "${call} was called unexpectedly"
-        return
-      elif (("$#" != 3)); then
-        _fail "${call} must be called with exactly three (3) arguments"
-      elif [[ ${expected[0]} != "${if_index?}" ]]; then
-        _fail "${call} not called with the expected interface index as first argument: expected ${if_index}, got ${expected[0]}"
-      elif [[ $3 != "${expected[1]}" ]]; then
-        _fail "${call} not called with the expected setting value: expected ${expected[1]}, got ${3}"
-      fi
+    SetLinkDomains | SetLinkDNSSEC | SetLinkDNSOverTLS | SetLinkDefaultRoute | SetLinkLLMNR | SetLinkMulticastDNS)
+      argdesc=three
+      argcount=3
       ;;
     RevertLink)
       # Called upon `down` action
+      return
       ;;
     *)
       _fail "Unknown command called on busctl: ${call}"
       ;;
   esac
+
+  # XXX *NOT* `[[ -v expected ]]`, which returns a nonzero status when the
+  # `expected` is declared but empty...
+  if ! declare -p expected &> /dev/null; then
+    _fail "${call} was called unexpectedly"
+    return
+  elif [[ ${expected[0]:-} == SKIP ]]; then
+    return
+  elif (("$#" != "${argcount:-${#}}")); then
+    _fail "${call} must be called with exactly ${argdesc?} (${argcount?}) arguments"
+  elif (("${argcount:-0}" > 0)) && [[ ${expected[0]} != "${if_index?}" ]]; then
+    _fail "${call} not called with the expected interface index as first argument: expected ${if_index}, got ${expected[0]}"
+  else
+    local -a actual=("${@:2:$(("$#" - 1))}")
+
+    local actual_size="${#expected[@]}"
+    local expected_size="${#actual[@]}"
+    local max
+
+    if ((actual_size > expected_size)); then
+      max="$actual_size"
+    else
+      max="$expected_size"
+    fi
+
+    local i actual_arg expected_arg
+    for ((i = 0; i < max; i++)); do
+      actual_arg="${actual[i]:-'<undef>'}"
+      expected_arg="${expected[i]:-'<undef>'}"
+      if [[ $actual_arg != "$expected_arg" ]]; then
+        _fail "${call} not called with the expected setting value in position ${i}: expected ${expected_arg@Q}, got ${actual_arg@Q}"
+      fi
+    done
+  fi
 }
 
 function ip {
@@ -361,13 +346,16 @@ evaltest() {
   EXPECT_FAILURE=0
   busctl_called=0
   # Set/Reset expected results
-  TEST_BUSCTL_DNS=""
-  TEST_BUSCTL_DOMAINS=""
-  TEST_BUSCTL_DNSSEC=""
-  TEST_BUSCTL_FLUSH_CACHES=1
-  TEST_BUSCTL_STATUS_RC=""
+  # We don't expect any `busctl` calls by default...
+  unset "${!TEST_BUSCTL_@}"
+  # Except for `FlushCaches`, which should be called with no arguments.
+  TEST_BUSCTL_FLUSH_CACHES=""
+  # Set/Reset expected `busctl` exit status
+  unset TEST_BUSCTL_STATUS_RC
+
   # Keep this random, as we will never know the ifindex up-front
   ip_ifindex=$((RANDOM %= 64))
+
   # Same for the device
   dev="tun${RANDOM}"
 

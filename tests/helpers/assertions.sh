@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # Assert that a condition holds for all supplied arguments
 all() {
   if (("$#" < 2)); then

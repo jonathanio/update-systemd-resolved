@@ -61,7 +61,7 @@ fi
 export PATH="${toplevel}${PATH:+:${PATH}}"
 unset toplevel
 
-function busctl2var {
+busctl2var() {
   if (("$#" != 2)); then
     printf 1>&2 -- 'usage: %s VARIABLE_NAME BUSCTL_CALL\n' "${FUNCNAME[0]}"
     return 1
@@ -89,7 +89,7 @@ function busctl2var {
   var_ref="TEST_BUSCTL_${varname_suffix}"
 }
 
-function busctl {
+busctl() {
   # Short-circuit if we got "busctl status <...>".  If TEST_BUSCTL_STATUS_RC is
   # unset or empty, assume this is the call from the "main" function in
   # update-systemd-resolved, rather than an automated test checking the
@@ -227,7 +227,7 @@ function busctl {
   fi
 }
 
-function ip {
+ip() {
   _log "ip called with: ${*@Q}"
 
   if [[ "${1} ${2} ${3} ${4}" == "link show dev ${dev}" ]]; then
@@ -242,11 +242,11 @@ function ip {
     " 100\n    link/none"
 }
 
-function resolvectl {
+resolvectl() {
   _log "resolvectl called with: ${*@Q}"
 }
 
-function logger {
+logger() {
   # Remove standard options
   if [[ $* == *' --' ]]; then
     set --
@@ -274,22 +274,22 @@ function logger {
   fi
 }
 
-function exit {
+exit() {
   # Override "exit" builtin.  Note that "exit" is equivalent to "exit $?", so
   # handle that case.
   _log "exit called with status ${1:-$?}"
 }
 
-function _log {
+_log() {
   (echo >&2 -e "    ${DARK}${*}${RESET}")
 }
 
-function _pass {
+_pass() {
   COUNT_PASS=$((COUNT_PASS + 1))
   (echo >&2 -e "  ${GREEN}${PASS}${RESET} ${*}")
 }
 
-function _fail {
+_fail() {
   COUNT_FAIL=$((COUNT_FAIL + 1))
   if [[ -v TEST ]]; then
     FAILED["$TEST"]=1
@@ -297,7 +297,7 @@ function _fail {
   (echo >&2 -e "  ${RED}${FAIL} ${*}${RESET}")
 }
 
-function checktest() {
+checktest() {
   # Increment counter so that we don't double-execute if a test script calls
   # this function.
   : ${RUNTEST_CALLED:=0}
@@ -322,7 +322,7 @@ function checktest() {
   fi
 }
 
-function runtest {
+runtest() {
   checktest
 
   if [[ ${TEST_BUSCTL_CALLED-} == 0 ]]; then

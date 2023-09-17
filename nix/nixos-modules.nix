@@ -287,7 +287,7 @@
                             type = enumOrBool null;
                             default = null;
                             description = ''
-                              Whether to flush `systemd-resolved`'s upon
+                              Whether to flush `systemd-resolved`'s cache upon
                               starting the VPN.
 
                               ${mkResolvectlDesc "flush-caches"}

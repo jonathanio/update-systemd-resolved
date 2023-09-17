@@ -454,7 +454,7 @@ null or non-empty string
 
 
 
-Whether to flush ` systemd-resolved `’s upon
+Whether to flush ` systemd-resolved `’s cache upon
 starting the VPN\.
 
 See ` resolvectl(1) `'s coverage of ` flush-caches ` for a

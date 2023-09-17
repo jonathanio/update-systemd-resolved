@@ -5,7 +5,7 @@ source update-systemd-resolved
 declare -a ipv4_expansion_implementations
 
 add_available_ipv4_expansion_implementations() {
-  if (( "$2" == 1 )); then
+  if (("$2" == 1)); then
     ipv4_expansion_implementations+=("$1")
   else
     warning "IPv4 expansion implementation '$1' is not available"

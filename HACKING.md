@@ -150,7 +150,13 @@ shell.
 
 #### Summary of available commands
 
-- `fmt`: format all Nix code in this project using [`alejandra`](https://github.com/kamadorueda/alejandra).
+[`alejandra`]:https://github.com/kamadorueda/alejandra
+[`shellcheck`]: https://shellcheck.net
+[`shfmt`]: https://github.com/mvdan/sh
+
+- `fmt`: format all shell and Nix code in this project using, respectively,
+  [`shfmt`][] and [`alejandra`][].  Additionally, lint shell code with
+  [`shellcheck`][].
 - `mkdotcert`: regenerate the keypair used for encrypting DNS-over-TLS in the
   NixOS system test.
 - `mkanchor`: regenerate the DNSSEC trust anchors configuration used with

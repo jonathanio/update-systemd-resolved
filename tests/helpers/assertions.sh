@@ -1,8 +1,6 @@
-#!/usr/bin/env bash
-
 # Assert that a condition holds for all supplied arguments
 all() {
-  if (( "$#" < 2 )); then
+  if (("$#" < 2)); then
     printf 1>&2 -- 'Usage: %s <command> <arg> [<arg> ...]\n' "${FUNCNAME[0]}"
     return 64 # EX_USAGE
   fi
@@ -18,7 +16,7 @@ all() {
 
 # Assert that a binary comparison holds across all pairs within a list
 all_pairs() {
-  if (( "$#" < 2 )); then
+  if (("$#" < 2)); then
     printf 1>&2 -- 'Usage: %s <command> [<arg> ...]\n' "${FUNCNAME[0]}"
     return 64 # EX_USAGE
   fi
@@ -28,15 +26,17 @@ all_pairs() {
 
   # If the list is empty or has only one element, then the comparison condition
   # cannot fail
-  if (( "$#" < 2 )); then
+  if (("$#" < 2)); then
     return 0
   fi
 
   local last
 
+  # This is called indirectly.
+  # shellcheck disable=SC2317
   __all_pairs_cond() {
     if [[ -v last ]]; then
-        "$all_pairs_cond" "$last" "${1?internal error}" || return
+      "$all_pairs_cond" "$last" "${1?internal error}" || return
     fi
 
     last="$1"
@@ -47,12 +47,12 @@ all_pairs() {
 
 # Assert that the provided arguments are (stringly) equal
 equal() {
-  if (( "$#" != 2 )); then
+  if (("$#" != 2)); then
     printf 1>&2 -- 'Usage: %s <arg> <arg>\n' "${FUNCNAME[0]}"
     return 64 # EX_USAGE
   fi
 
-  [[ "$1" = "$2" ]]
+  [[ $1 == "$2" ]]
 }
 
 # Assert that all elements in a list are (stringly) equal

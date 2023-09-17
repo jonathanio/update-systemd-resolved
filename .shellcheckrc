@@ -1,0 +1,25 @@
+# Test suite `source`-es a bunch of files; those files declare (without the
+# `export` builtin) a number of variables recognized by `run-tests` and/or
+# `update-systemd-resolved` itself.  We therefore disable `SC2034` globally --
+# this is the check that complains:
+#
+#   SC2034 (warning): <some-variable> appears unused Verify use (or export if used externally)
+#
+# This is more convenient than disabling it at every location where shellcheck
+# would otherwise complain, and avoids the useless/misleading use of the
+# `export` builtin.
+disable=SC2034
+
+# Follow `source` statements even if they refer to files not specified as
+# inputs to the `shellcheck` command.
+external-sources=true
+
+# Scripts in `./tests` don't have shebangs.  Tell shellcheck that we're
+# targeting Bash.
+shell=bash
+
+# Tell shellcheck to resolve paths like `./foo/bar.sh` relative to the sourcing
+# script.  That is, if `/corge/grault/quux.sh` contains the command `source
+# ./foo/bar.sh`, `source-path=SCRIPTDIR` makes shellcheck treat this as
+# equivalent to `source /corge/grault/foo/bar.sh`.
+source-path=SCRIPTDIR

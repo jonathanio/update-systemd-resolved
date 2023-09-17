@@ -5,7 +5,7 @@ source update-systemd-resolved
 declare -a ipv6_expansion_implementations
 
 add_available_ipv6_expansion_implementations() {
-  if (( "$2" == 1 )); then
+  if (("$2" == 1)); then
     ipv6_expansion_implementations+=("$1")
   else
     warning "IPv6 expansion implementation '$1' is not available"

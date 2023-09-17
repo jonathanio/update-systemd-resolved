@@ -17,7 +17,7 @@
 
 PS4='+ ${BASH_SOURCE:-$0}@${LINENO:-0}${FUNCNAME:+#${FUNCNAME}()}: '
 
-if [[ -n "${NO_COLOR:-}" ]] || ! colors="$(tput colors 2>/dev/null)" || (( "${colors:-0}" < 16 )); then
+if [[ -n ${NO_COLOR-} ]] || ! colors="$(tput colors 2> /dev/null)" || (("${colors:-0}" < 16)); then
   RED=''
   YELLOW=''
   ORANGE=''
@@ -49,8 +49,8 @@ RUNTEST_CALLED=0
 
 AUTOMATED_TESTING=1
 
-if ! toplevel="$(git rev-parse --show-toplevel 2>/dev/null)"; then
-  if ! toplevel="$(readlink -f "${BASH_SOURCE[0]%/*}/.." 2>/dev/null)"; then
+if ! toplevel="$(git rev-parse --show-toplevel 2> /dev/null)"; then
+  if ! toplevel="$(readlink -f "${BASH_SOURCE[0]%/*}/.." 2> /dev/null)"; then
     toplevel="${PWD:-$(pwd)}"
   fi
 fi
@@ -61,8 +61,8 @@ fi
 export PATH="${toplevel}${PATH:+:${PATH}}"
 unset toplevel
 
-function busctl2var {
-  if (( "$#" != 2 )); then
+busctl2var() {
+  if (("$#" != 2)); then
     printf 1>&2 -- 'usage: %s VARIABLE_NAME BUSCTL_CALL\n' "${FUNCNAME[0]}"
     return 1
   fi
@@ -74,14 +74,14 @@ function busctl2var {
   # string-munging work with sed alone and not require `tr` in the pipeline.
   local varname_suffix
   varname_suffix="$(
-      printf -- '%s' "$1" \
-    | sed -e '
+    printf -- '%s' "$1" |
+      sed -e '
       s/[^[:alnum:]]//g
       s/\([a-z]\)\([A-Z]\)/\1_\2/g
       s/\([A-Z]\)\([A-Z][a-z]\)/\1_\2/g
-    ' \
-    | tr '[:lower:]' '[:upper:]' \
-    | sed 's/^SET_LINK_//'
+    ' |
+      tr '[:lower:]' '[:upper:]' |
+      sed 's/^SET_LINK_//'
   )"
 
   # `var_ref` is a reference variable; we use it by assigning to it.
@@ -89,14 +89,14 @@ function busctl2var {
   var_ref="TEST_BUSCTL_${varname_suffix}"
 }
 
-function busctl {
+busctl() {
   # Short-circuit if we got "busctl status <...>".  If TEST_BUSCTL_STATUS_RC is
   # unset or empty, assume this is the call from the "main" function in
   # update-systemd-resolved, rather than an automated test checking the
   # behaviour of "busctl status <...>".
-  case "${1:-}" in
+  case "${1-}" in
     status)
-      if [[ -n "${TEST_BUSCTL_STATUS_RC:-}" ]]; then
+      if [[ -n ${TEST_BUSCTL_STATUS_RC-} ]]; then
         busctl_called=1
         _log "busctl status: returning ${TEST_BUSCTL_STATUS_RC}"
         return "$TEST_BUSCTL_STATUS_RC"
@@ -107,11 +107,11 @@ function busctl {
   esac
 
   shift 4
-  _log "busctl called with: ${@}"
+  _log "busctl called with: ${*@Q}"
   # Set that busctl has been called
   busctl_called=1
 
-  if (( "$#" < 1 )); then
+  if (("$#" < 1)); then
     _fail "busctl called without arguments"
     return
   fi
@@ -122,43 +122,42 @@ function busctl {
   local indir
   busctl2var indir "$call" || return
 
-  local -a expected
-
-  if [[ -v "$indir" ]]; then
+  if [[ -v $indir ]]; then
+    local -a expected=()
     local -a expanded
-    read -r -a expanded <<<"${!indir}"
+    read -r -a expanded <<< "${!indir}"
 
-    if (( "$#" > 0 )); then
+    if (("$#" > 0)); then
       local signature="$1"
 
       local elem etype
       local -i i
-      for (( i = 0 ; i < "${#expanded[@]}"; i++ )); do
+      for ((i = 0; i < "${#expanded[@]}"; i++)); do
         elem="${expanded[${i}]}"
-        etype="${signature:${i}:1}"
+        etype="${signature:i:1}"
 
         # Support "true" and "false" for boolstrings; we expect these to be
         # coerced to "yes" and "no", respectively.  Similarly, support "yes"
         # and "no" for booleans; we expect these to be coerced to "true" and
         # "false", respectively.
-        case "$elem" in
+        case "${elem,,}" in
           true)
-            if [[ "$etype" == s ]]; then
+            if [[ $etype == s ]]; then
               elem=yes
             fi
             ;;
           false)
-            if [[ "$etype" == s ]]; then
+            if [[ $etype == s ]]; then
               elem=no
             fi
             ;;
           yes)
-            if [[ "$etype" == b ]]; then
+            if [[ $etype == b ]]; then
               elem=true
             fi
             ;;
           no)
-            if [[ "$etype" == b ]]; then
+            if [[ $etype == b ]]; then
               elem=false
             fi
             ;;
@@ -175,77 +174,67 @@ function busctl {
   fi
 
   case "$call" in
-    SetLinkDNS)
-      shift
-      if [[ "${TEST_BUSCTL_DNS}" == "" ]]; then
-        [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${@}" ]] || \
-          _fail "SetLinkDNS was called and should not be: '${@}'"
-      elif [[ "${TEST_BUSCTL_DNS}" == SKIP ]]; then
-          :
-      else
-        [[ "${ip_ifindex} ${TEST_BUSCTL_DNS}" == "${@}" ]] && \
-          _pass "SetLinkDNS was called correctly" || \
-          _fail "SetLinkDNS was not given the correct arguments:\n" \
-                "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DNS}'\n" \
-                "     Received: '${@}'"
-      fi
+    SetLinkDNS) ;;
+    FlushCaches | ResetServerFeatures | ResetStatistics)
+      argdesc=zero
+      argcount=0
       ;;
-    SetLinkDomains)
-      shift
-      if [[ "${TEST_BUSCTL_DOMAINS}" == "" ]]; then
-        [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "${@}" ]] || \
-          _fail "SetLinkDomains was called and should not be: '${@}'"
-      else
-        [[ "${ip_ifindex} ${TEST_BUSCTL_DOMAINS}" == "${@}" ]] && \
-          _pass "SetLinkDomains was called correctly" || \
-          _fail "SetLinkDomains was not given the correct arguments:\n" \
-                "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DOMAINS}'\n" \
-                "     Received: '${@}'"
-      fi
-      ;;
-    SetLinkDNSSEC)
-      shift
-      [[ "${ip_ifindex} ${TEST_BUSCTL_DNSSEC}x" == "${@}x" ]] && \
-        _pass "SetLinkDNSSEC was called correctly" || \
-        _fail "SetLinkDNSSEC was not given the correct arguments:\n" \
-              "     Expected: '${ip_ifindex} ${TEST_BUSCTL_DNSSEC}'\n" \
-              "     Received: '${@}'"
-      ;;
-    FlushCaches|ResetServerFeatures|ResetStatistics)
-      if (( "${#expected[@]}" == 0 )); then
-        _fail "${call} was called unexpectedly"
-        return
-      elif (( "$#" != 0 )); then
-        _fail "${call} must be called with no arguments"
-      fi
-      ;;
-    SetLinkDNSOverTLS|SetLinkDefaultRoute|SetLinkLLMNR|SetLinkMulticastDNS)
-      if (( "${#expected[@]}" == 0 )); then
-        _fail "${call} was called unexpectedly"
-        return
-      elif (( "$#" != 3 )); then
-        _fail "${call} must be called with exactly three (3) arguments"
-      elif [[ "${expected[0]}" != "${if_index?}" ]]; then
-        _fail "${call} not called with the expected interface index as first argument: expected ${if_index}, got ${expected[0]}"
-      elif [[ "$3" != "${expected[1]}" ]]; then
-        _fail "${call} not called with the expected setting value: expected ${expected[1]}, got ${3}"
-      fi
+    SetLinkDomains | SetLinkDNSSEC | SetLinkDNSOverTLS | SetLinkDefaultRoute | SetLinkLLMNR | SetLinkMulticastDNS)
+      argdesc=three
+      argcount=3
       ;;
     RevertLink)
       # Called upon `down` action
+      return
       ;;
     *)
       _fail "Unknown command called on busctl: ${call}"
       ;;
   esac
+
+  # XXX *NOT* `[[ -v expected ]]`, which returns a nonzero status when the
+  # `expected` is declared but empty...
+  if ! declare -p expected &> /dev/null; then
+    _fail "${call} was called unexpectedly"
+    return
+  elif [[ ${expected[0]:-} == SKIP ]]; then
+    return
+  elif (("$#" != "${argcount:-${#}}")); then
+    _fail "${call} must be called with exactly ${argdesc?} (${argcount?}) arguments"
+  elif (("${argcount:-0}" > 0)) && [[ ${expected[0]} != "${if_index?}" ]]; then
+    _fail "${call} not called with the expected interface index as first argument: expected ${if_index}, got ${expected[0]}"
+  else
+    local -a actual=("${@:2:$(("$#" - 1))}")
+
+    local actual_size="${#expected[@]}"
+    local expected_size="${#actual[@]}"
+    local max
+
+    if ((actual_size > expected_size)); then
+      max="$actual_size"
+    else
+      max="$expected_size"
+    fi
+
+    local i actual_arg expected_arg
+    for ((i = 0; i < max; i++)); do
+      actual_arg="${actual[i]:-'<undef>'}"
+      expected_arg="${expected[i]:-'<undef>'}"
+      if [[ $actual_arg != "$expected_arg" ]]; then
+        _fail "${call} not called with the expected setting value in position ${i}: expected ${expected_arg@Q}, got ${actual_arg@Q}"
+      fi
+    done
+  fi
 }
 
-function ip {
-  _log "ip called with: ${@}"
+ip() {
+  _log "ip called with: ${*@Q}"
 
-  [[ "${1} ${2} ${3} ${4}" == "link show dev ${dev}" ]] && \
-    _pass "ip was called correctly" || \
+  if [[ "${1} ${2} ${3} ${4}" == "link show dev ${dev}" ]]; then
+    _pass "ip was called correctly"
+  else
     _fail "ip was called with incorrect or unknown arguments"
+  fi
 
   # Return fake ip statement
   echo -e "${ip_ifindex}: ${dev}: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP>" \
@@ -253,16 +242,16 @@ function ip {
     " 100\n    link/none"
 }
 
-function resolvectl {
-  _log "resolvectl called with: ${@}"
+resolvectl() {
+  _log "resolvectl called with: ${*@Q}"
 }
 
-function logger {
+logger() {
   # Remove standard options
-  if [[ "$*" == *' --' ]]; then
+  if [[ $* == *' --' ]]; then
     set --
   else
-    while (( "$#" > 0 )); do
+    while (("$#" > 0)); do
       case "$1" in
         --)
           shift
@@ -275,7 +264,7 @@ function logger {
     done
   fi
 
-  if (( "$#" == 0 )) && ! [[ -t 0 ]]; then
+  if (("$#" == 0)) && ! [[ -t 0 ]]; then
     local message
     while read -r message; do
       _log "-- ${message}"
@@ -285,38 +274,38 @@ function logger {
   fi
 }
 
-function exit {
+exit() {
   # Override "exit" builtin.  Note that "exit" is equivalent to "exit $?", so
   # handle that case.
   _log "exit called with status ${1:-$?}"
 }
 
-function _log {
-  ( >&2 echo -e "    ${DARK}${@}${RESET}" )
+_log() {
+  (echo >&2 -e "    ${DARK}${*}${RESET}")
 }
 
-function _pass {
-  COUNT_PASS=$((COUNT_PASS+1))
-  ( >&2 echo -e "  ${GREEN}${PASS}${RESET} ${@}" )
+_pass() {
+  COUNT_PASS=$((COUNT_PASS + 1))
+  (echo >&2 -e "  ${GREEN}${PASS}${RESET} ${*}")
 }
 
-function _fail {
-  COUNT_FAIL=$((COUNT_FAIL+1))
+_fail() {
+  COUNT_FAIL=$((COUNT_FAIL + 1))
   if [[ -v TEST ]]; then
     FAILED["$TEST"]=1
   fi
-  ( >&2 echo -e "  ${RED}${FAIL} ${@}${RESET}" )
+  (echo >&2 -e "  ${RED}${FAIL} ${*}${RESET}")
 }
 
-function checktest() {
+checktest() {
   # Increment counter so that we don't double-execute if a test script calls
   # this function.
   : ${RUNTEST_CALLED:=0}
-  (( RUNTEST_CALLED += 1 ))
+  ((RUNTEST_CALLED += 1))
 
   echo -e "${GREEN}- Testing ${TEST_TITLE:-a nameless test}${RESET}"
 
-  if (( $# < 1 )); then
+  if (($# < 1)); then
     set -- source update-systemd-resolved
   fi
 
@@ -326,23 +315,24 @@ function checktest() {
   "$@" || exit_status="$?"
   exit_message="script exited with a ${exit_status} exit status"
 
-  if [[ "$(( exit_status > 0 ))" == "${EXPECT_FAILURE:-0}" ]]; then
-      _pass "$exit_message"
+  if [[ "$((exit_status > 0))" == "${EXPECT_FAILURE:-0}" ]]; then
+    _pass "$exit_message"
   else
-      _fail "$exit_message"
+    _fail "$exit_message"
   fi
 }
 
-function runtest {
+runtest() {
   checktest
 
-  if [[ "${TEST_BUSCTL_CALLED:-}" = 0 ]]; then
-    [[ ${busctl_called} -eq 0 ]] && \
-      _pass "busctl was not called, as expected" || \
+  if [[ ${TEST_BUSCTL_CALLED-} == 0 ]]; then
+    if ((busctl_called == 0)); then
+      _pass "busctl was not called, as expected"
+    else
       _fail "busctl was called, not expected"
-  else
-    [[ ${busctl_called} -eq 0 ]] && \
-      _fail "busctl was not called, not expected"
+    fi
+  elif ((busctl_called == 0)); then
+    _fail "busctl was not called, not expected"
   fi
 
   echo
@@ -356,13 +346,16 @@ evaltest() {
   EXPECT_FAILURE=0
   busctl_called=0
   # Set/Reset expected results
-  TEST_BUSCTL_DNS=""
-  TEST_BUSCTL_DOMAINS=""
-  TEST_BUSCTL_DNSSEC=""
-  TEST_BUSCTL_FLUSH_CACHES=1
-  TEST_BUSCTL_STATUS_RC=""
+  # We don't expect any `busctl` calls by default...
+  unset "${!TEST_BUSCTL_@}"
+  # Except for `FlushCaches`, which should be called with no arguments.
+  TEST_BUSCTL_FLUSH_CACHES=""
+  # Set/Reset expected `busctl` exit status
+  unset TEST_BUSCTL_STATUS_RC
+
   # Keep this random, as we will never know the ifindex up-front
-  ip_ifindex=$((RANDOM%=64))
+  ip_ifindex=$((RANDOM %= 64))
+
   # Same for the device
   dev="tun${RANDOM}"
 
@@ -370,9 +363,10 @@ evaltest() {
   unset "${!foreign_option_@}"
 
   # Import the test configuration
-  source "${TEST}" || return
+  # shellcheck source-path=SCRIPTDIR source=tests/01_no_updates.sh
+  source "$TEST" || return
 
-  if (( RUNTEST_CALLED > 0 )); then
+  if ((RUNTEST_CALLED > 0)); then
     return
   fi
 
@@ -381,7 +375,7 @@ evaltest() {
   local i=0
   local opt
   for opt in "${foreign_options[@]}" in; do
-    declare "foreign_option_$(( i += 1 ))=${opt}"
+    declare "foreign_option_$((i += 1))=${opt}"
   done
 
   runtest
@@ -390,14 +384,14 @@ evaltest() {
 echo "update-systemd-resolved Test Suite"
 echo
 
-if (( "$#" < 1 )); then
+if (("$#" < 1)); then
   set -- ./tests
 fi
 
 for path in "$@"; do
-  if [[ -d "$path" ]]; then
+  if [[ -d $path ]]; then
     for test in "$path"/*.sh; do
-      if [[ -f "$test" ]]; then
+      if [[ -f $test ]]; then
         evaltest "$test"
       fi
     done
@@ -409,7 +403,7 @@ done
 echo -e "  ${GREEN}${PASS} ${COUNT_PASS} Passed${RESET}"
 echo -e "  ${RED}${FAIL} ${COUNT_FAIL} Failed${RESET}"
 
-if (( "${#FAILED[@]}" > 0 )); then
+if [[ -v FAILED ]] && (("${#FAILED[@]}" > 0)); then
   echo -e "\n  ${YELLOW}The following files have failing test cases:${RESET}"
 
   for failed in "${!FAILED[@]}"; do
@@ -418,4 +412,4 @@ if (( "${#FAILED[@]}" > 0 )); then
 fi
 
 # Make sure we fail if there are failed tests
-[[ ${COUNT_FAIL} -eq 0 ]]
+((COUNT_FAIL == 0))

@@ -1,16 +1,10 @@
+source "${BASH_SOURCE[0]%/*}/helpers/foreign_options.sh"
+
 script_type="up"
 
 TEST_BUSCTL_CALLED=0
 EXPECT_FAILURE=1
 
-declare -a test_invalids=(
-  '1'
-  '0'
-  'DOWNGRADE'
-)
-
-for test_option in "${test_invalids[@]}"; do
-  TEST_TITLE="DNSSEC Set to $test_option"
-  foreign_option_1="dhcp-option DNSSEC $test_option"
-  runtest
+for test_value in 1 0 DOWNGRADE; do
+  run_custom_foreign_option_test_with_ip_ifindex DNSSEC "$test_value" "$test_value"
 done

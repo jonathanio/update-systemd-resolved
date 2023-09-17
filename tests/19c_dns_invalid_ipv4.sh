@@ -32,13 +32,13 @@ all_ipv4_addresses_invalid() {
     fi
   done
 
-  if (( ${#improperly_accepted_ipv4[@]} > 0 )); then
+  if ((${#improperly_accepted_ipv4[@]} > 0)); then
     printf 1>&2 -- 'improperly accepted the following ipv4 addresses:\n'
     printf 1>&2 -- '  %s\n' "${improperly_accepted_ipv4[@]}"
     status=1
   fi
 
-  if (( ${#wrongly_parsed_ipv4[@]} > 0 )); then
+  if ((${#wrongly_parsed_ipv4[@]} > 0)); then
     printf 1>&2 -- 'parse for the following ipv4 addresses wrongly succeeded:\n'
 
     for bad in "${wrongly_parsed_ipv4[@]}"; do

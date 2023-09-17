@@ -109,16 +109,16 @@ all_ipv6_addresses_valid() {
       if ! bad="$(all_ipv6_expansion_implementations "$ipv6")"; then
         wrongly_parsed_ipv6+=("$bad")
       fi
-    } 1>/dev/null
+    } 1> /dev/null
   done
 
-  if (( ${#improperly_rejected_ipv6[@]} > 0 )); then
+  if ((${#improperly_rejected_ipv6[@]} > 0)); then
     printf 1>&2 -- 'Improperly rejected the following IPv6 addresses:\n'
     printf 1>&2 -- '  %s\n' "${improperly_rejected_ipv6[@]}"
     status=1
   fi
 
-  if (( ${#wrongly_parsed_ipv6[@]} > 0 )); then
+  if ((${#wrongly_parsed_ipv6[@]} > 0)); then
     printf 1>&2 -- 'Parse for the following IPv6 addresses failed:\n'
 
     for bad in "${wrongly_parsed_ipv6[@]}"; do

@@ -1,6 +1,5 @@
 script_type="up"
 
-
 foreign_options=(
   "dhcp-option DNS 1.23.4.56"
   "dhcp-option DNS 5.6.7.89"

@@ -68,6 +68,29 @@
 
     treefmt = {
       programs.alejandra.enable = true;
+      programs.shellcheck.enable = true;
+      programs.shfmt.enable = true;
+
+      settings.formatter.shellcheck = {
+        includes = [
+          "update-systemd-resolved"
+          "run-tests"
+          "tests"
+        ];
+      };
+
+      settings.formatter.shfmt = {
+        inherit (config.treefmt.settings.formatter.shellcheck) includes;
+
+        # XXX This duplicates settings in `.editorconfig`, as at the moment the
+        # `shfmt` process launched by `treefmt` doesn't seem to pick up on the
+        # settings in `.editorconfig`.
+        options = [
+          "-case-indent"
+          "-space-redirects"
+        ];
+      };
+
       flakeFormatter = true;
       projectRootFile = "flake.nix";
     };

@@ -56,13 +56,13 @@ all_ipv6_addresses_invalid() {
     fi
   done
 
-  if (( ${#improperly_accepted_ipv6[@]} > 0 )); then
+  if ((${#improperly_accepted_ipv6[@]} > 0)); then
     printf 1>&2 -- 'improperly accepted the following IPv6 addresses:\n'
     printf 1>&2 -- '  %s\n' "${improperly_accepted_ipv6[@]}"
     status=1
   fi
 
-  if (( ${#wrongly_parsed_ipv6[@]} > 0 )); then
+  if ((${#wrongly_parsed_ipv6[@]} > 0)); then
     printf 1>&2 -- 'parse for the following IPv6 addresses wrongly succeeded:\n'
 
     for bad in "${wrongly_parsed_ipv6[@]}"; do

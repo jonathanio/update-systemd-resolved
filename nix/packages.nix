@@ -1,11 +1,63 @@
-{self, ...}: {
+{
+  self,
+  inputs,
+  ...
+}: {
   perSystem = {
     config,
     pkgs,
     lib,
+    system,
     ...
   }: {
     packages.default = config.packages.update-systemd-resolved;
+
+    packages.docs = let
+      # Use a full NixOS system rather than (say) the result of
+      # `lib.evalModules`.  This is because our NixOS module refers to
+      # `services.openvpn`, which may itself refer to any number of other NixOS
+      # options, which may themselves... etc.  Without this, then, we'd get an
+      # evaluation error generating documentation.
+      eval = inputs.nixpkgs.lib.nixosSystem {
+        inherit system;
+        modules = [
+          {system.stateVersion = "23.11";}
+          self.nixosModules.update-systemd-resolved
+        ];
+      };
+
+      allDocs = pkgs.nixosOptionsDoc {
+        inherit (eval) options;
+
+        # Default is currently "appendix".
+        documentType = "none";
+
+        # We only want Markdown
+        allowDocBook = false;
+        markdownByDefault = true;
+
+        # Only include our own options.
+        transformOptions = let
+          ourPrefix = "${toString self}/";
+          nixosModules = "nix/nixos-modules.nix";
+          link = {
+            url = "/${nixosModules}";
+            name = nixosModules;
+          };
+        in
+          opt:
+            opt
+            // {
+              visible = opt.visible && (lib.any (lib.hasPrefix ourPrefix) opt.declarations);
+              declarations = map (decl:
+                if lib.hasPrefix ourPrefix decl
+                then link
+                else decl)
+              opt.declarations;
+            };
+      };
+    in
+      allDocs.optionsCommonMark;
 
     packages.update-systemd-resolved = pkgs.update-systemd-resolved.overrideAttrs (oldAttrs: let
       buildInputs = with pkgs; [coreutils iproute2 systemd util-linux];

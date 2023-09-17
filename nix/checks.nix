@@ -7,22 +7,23 @@
   }: {
     checks.default = config.checks.update-systemd-resolved;
 
-    checks.docs = pkgs.runCommand "update-systemd-resolved-docs-check" {
-      src = self;
-    } ''
-      current="''${src}/docs/nixos-modules.md"
-      target=${config.packages.docs}
+    checks.docs =
+      pkgs.runCommand "update-systemd-resolved-docs-check" {
+        src = self;
+      } ''
+        current="''${src}/docs/nixos-modules.md"
+        target=${config.packages.docs}
 
-      if ! [ -f "$current" ]; then
-        printf 1>&2 -- 'missing "%s"; please generate documentation with `mkoptdocs`.\n' "$current"
-        exit 1
-      elif ! ${pkgs.diffutils}/bin/cmp "$current" "$target"; then
-        printf 1>&2 -- '"%s" and "%s" differ; please generate documentation with `mkoptdocs`.\n' "$current" "$target"
-        exit 1
-      else
-        touch "$out"
-      fi
-    '';
+        if ! [ -f "$current" ]; then
+          printf 1>&2 -- 'missing "%s"; please generate documentation with `mkoptdocs`.\n' "$current"
+          exit 1
+        elif ! ${pkgs.diffutils}/bin/cmp "$current" "$target"; then
+          printf 1>&2 -- '"%s" and "%s" differ; please generate documentation with `mkoptdocs`.\n' "$current" "$target"
+          exit 1
+        else
+          touch "$out"
+        fi
+      '';
 
     checks.update-systemd-resolved = let
       # Name of the test script

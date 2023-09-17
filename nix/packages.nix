@@ -1,4 +1,8 @@
-{self, inputs, ...}: {
+{
+  self,
+  inputs,
+  ...
+}: {
   perSystem = {
     config,
     pkgs,
@@ -17,12 +21,12 @@
       eval = inputs.nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
-          { system.stateVersion = "23.11"; }
+          {system.stateVersion = "23.11";}
           self.nixosModules.update-systemd-resolved
         ];
       };
 
-      allDocs =  pkgs.nixosOptionsDoc {
+      allDocs = pkgs.nixosOptionsDoc {
         inherit (eval) options;
 
         # Default is currently "appendix".
@@ -41,12 +45,19 @@
             name = nixosModules;
           };
         in
-          opt: opt // {
-            visible = opt.visible && (lib.any (lib.hasPrefix ourPrefix) opt.declarations);
-            declarations = map (decl: if lib.hasPrefix ourPrefix decl then link else decl) opt.declarations;
-          };
+          opt:
+            opt
+            // {
+              visible = opt.visible && (lib.any (lib.hasPrefix ourPrefix) opt.declarations);
+              declarations = map (decl:
+                if lib.hasPrefix ourPrefix decl
+                then link
+                else decl)
+              opt.declarations;
+            };
       };
-    in allDocs.optionsCommonMark;
+    in
+      allDocs.optionsCommonMark;
 
     packages.update-systemd-resolved = pkgs.update-systemd-resolved.overrideAttrs (oldAttrs: let
       buildInputs = with pkgs; [coreutils iproute2 systemd util-linux];

@@ -59,6 +59,27 @@
               exit 1
             '');
         }
+
+        {
+          name = "mkoptdocs";
+          category = "maintenance";
+          help = "Generate NixOS module options documentation";
+          command = ''
+            docs="$(${pkgs.nix}/bin/nix "$@" build --print-out-paths --no-link "''${PRJ_ROOT}#docs")" || exit
+
+            seen=0
+            while read -r path; do
+              seen="$((seen + 1))"
+              if [ "$seen" -gt 1 ]; then
+                printf 1>&2 -- 'error: more than one output path...\n'
+                exit 1
+              fi
+              install -Dm0644 "$path" "''${PRJ_ROOT}/docs/nixos-modules.md"
+            done <<DOCS
+            $docs
+            DOCS
+          '';
+        }
       ];
 
       devshell = {

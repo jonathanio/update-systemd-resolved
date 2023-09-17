@@ -167,6 +167,7 @@
                       type = types.path;
                       readOnly = true;
                       default = pkgs.writeText "update-systemd-resolved-${name}.conf" config.config;
+                      defaultText = "${toString builtins.storeDir}/<hash>-update-systemd-resolved-<name>.conf";
                       description = ''
                         A configuration file containing
                         {option}`programs.update-systemd-resolved.servers.<name>.config`

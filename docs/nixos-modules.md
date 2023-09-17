@@ -74,7 +74,7 @@ path *(read only)*
 
 
 *Default:*
-` <derivation update-systemd-resolved--name-.conf> `
+` "/nix/store/<hash>-update-systemd-resolved-<name>.conf" `
 
 *Declared by:*
  - [nix/nixos-modules\.nix](/nix/nixos-modules.nix)

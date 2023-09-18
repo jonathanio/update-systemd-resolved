@@ -496,7 +496,7 @@ the global value for ` LLMNR ` configured in ` resolved.conf `\.
 
 
 *Default:*
-` "default" `
+` null `
 
 *Declared by:*
  - [nix/nixos-modules\.nix](/nix/nixos-modules.nix)
@@ -524,7 +524,7 @@ the global value for ` MulticastDNS ` configured in ` resolved.conf `\.
 
 
 *Default:*
-` "default" `
+` null `
 
 *Declared by:*
  - [nix/nixos-modules\.nix](/nix/nixos-modules.nix)
@@ -549,7 +549,7 @@ description of this feature\.
 
 
 *Default:*
-` true `
+` null `
 
 *Declared by:*
  - [nix/nixos-modules\.nix](/nix/nixos-modules.nix)
@@ -575,7 +575,7 @@ description of this feature\.
 
 
 *Default:*
-` true `
+` null `
 
 *Declared by:*
  - [nix/nixos-modules\.nix](/nix/nixos-modules.nix)

@@ -356,7 +356,7 @@
                         else client;
 
                       maybeRenderDHCPOption = option: value:
-                        lib.optionalString (value != null) renderDHCPOption option value;
+                        lib.optionalString (value != null) (renderDHCPOption option value);
 
                       renderDHCPOptionList = option:
                         lib.concatMapStringsSep "\n" (renderDHCPOption option);

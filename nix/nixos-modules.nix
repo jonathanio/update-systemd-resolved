@@ -297,7 +297,7 @@
 
                           llmnr = mkOption {
                             type = enumOrBool [null "default" "resolve"];
-                            default = "default";
+                            default = null;
                             description = ''
                               Whether to enable LLMNR for this link.
 
@@ -307,7 +307,7 @@
 
                           multicastDNS = mkOption {
                             type = enumOrBool [null "default" "resolve"];
-                            default = "default";
+                            default = null;
                             description = ''
                               Whether to enable multicast DNS for this link.
 
@@ -317,7 +317,7 @@
 
                           resetServerFeatures = mkOption {
                             type = enumOrBool null;
-                            default = true;
+                            default = null;
                             description = ''
                               Whether to reset learned server features when
                               bringing up the VPN link.
@@ -328,7 +328,7 @@
 
                           resetStatistics = mkOption {
                             type = enumOrBool null;
-                            default = true;
+                            default = null;
                             description = ''
                               Whether to reset the statistics counters shown in
                               {command}`resolvectl statistics` to zero when

@@ -21,8 +21,11 @@
 # install, set as the 'up' and 'down' script in your OpenVPN configuration file
 # or via the command-line arguments, alongside setting the 'down-pre' option to
 # run the 'down' script before the device is closed. For example:
-#   up /usr/local/bin/update-systemd-resolved
-#   down /usr/local/bin/update-systemd-resolved
+#
+#   script-security 2
+#   up /usr/local/libexec/openvpn/update-systemd-resolved
+#   up-restart
+#   down /usr/local/libexec/openvpn/update-systemd-resolved
 #   down-pre
 
 # Define what needs to be called via DBus

@@ -203,9 +203,9 @@ before the device is closed:
 
 ```conf
 script-security 2
-up /usr/local/bin/update-systemd-resolved
+up /usr/local/libexec/openvpn/update-systemd-resolved
 up-restart
-down /usr/local/bin/update-systemd-resolved
+down /usr/local/libexec/openvpn/update-systemd-resolved
 down-pre
 
 # If needed, to permit `update-systemd-resolved` to find utilities it depends
@@ -252,8 +252,8 @@ the following options to your `openvpn` command:
 openvpn \
   --script-security 2 \
   --setenv PATH '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
-  --up /usr/local/bin/update-systemd-resolved --up-restart \
-  --down /usr/local/bin/update-systemd-resolved --down-pre
+  --up /usr/local/libexec/openvpn/update-systemd-resolved --up-restart \
+  --down /usr/local/libexec/openvpn/update-systemd-resolved --down-pre
 ```
 
 > **Note**

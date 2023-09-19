@@ -266,8 +266,7 @@ Or, you can add the following argument to the command-line arguments of
 `openvpn`, which will use the `update-systemd-resolve.conf` file instead:
 
 ```bash
-openvpn \
-  --config /usr/local/share/doc/openvpn/update-systemd-resolved.conf
+openvpn --config /usr/local/share/doc/openvpn/update-systemd-resolved.conf
 ```
 
 > **Note**

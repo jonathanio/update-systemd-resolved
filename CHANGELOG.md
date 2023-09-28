@@ -4,6 +4,10 @@
 
 ### IMPROVEMENTS
 
+- Expose a [Nix flake](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake.html).
+  This flake's outputs include [the `update-systemd-resolved` Nix package](/nix/packages.nix), as
+  well as [the `update-systemd-resolved` NixOS module](/nix/nixos-modules.nix)
+  (module docs are [here](/docs/nixos-modules.md)).
 - Support additional DBus calls `ResetServerFeatures`, `ResetStatistics`,
   `DNSDefaultRoute`, `SetLinkDNSOverTLS`, `SetLinkLLMNR`,
   `SetLinkMulticastDNS`, and `SetLinkNegativeDNSSECTrustAnchors`
@@ -38,6 +42,25 @@
 
 ### BACKWARDS INCOMPATIBILITIES
 
+- The use of `setenv PATH ...` in the example `update-systemd-resolved.conf`
+  and elsewhere is now deprecated.  OpenVPN setups that include the example
+  configuration file (`config /path/to/example/update-systemd-resolved.conf`)
+  may break if they rely on this now-deprecated `PATH` definition.
+- The default installation paths have changed.  `update-systemd-resolved` is
+  now installed to `/usr/local/libexec/openvpn/update-systemd-resolved`,
+  the example `update-systemd-resolved.conf` is installed to
+  `/usr/share/doc/openvpn/update-systemd-resolved.conf`.  This reflects, among
+  other things, changes to the Makefile variables that influence installation
+  paths; for instance, `PREFIX` no longer includes a `/bin` component.  The
+  Makefile now additionally defines and uses the variables `EXEC_PREFIX`,
+  `LIBEXECDIR`, `DATAROOTDIR`, and `DATADIR`.
+- `dhcp-option` invocations are now split on  whitespace (the `[[:space:]]`
+  POSIX character class, to be more specific) rather than being split on single
+  space characters.
+- `dhcp-option` invocations without an argument (that is, `dhcp-option FOO`
+  rather than, say, `dhcp-option FOO bar`) are now treated as having the empty
+  string as their value; previously, they were treated as having the option
+  name as their value (`dhcp-option FOO` == `dhcp-option FOO FOO`).
 - `update-systemd-resolved` now requires Bash >= 4.3.
 - `update-systemd-resolved` no longer uses the `emerg` log level with the
   for logging with the `logger` command, so certain messages are no longer

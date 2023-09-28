@@ -77,6 +77,53 @@ cd update-systemd-resolved
 make
 ```
 
+### Nix and NixOS
+
+[Nix flake]:https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake.html
+
+`update-systemd-resolved` exposes a [Nix flake][].  You can incorporate this
+flake into your flake by adding it to your inputs:
+
+```nix
+# Your flake.nix
+{
+  inputs = {
+    # Other inputs here...
+
+    update-systemd-resolved.url = "github:jonathanio/update-systemd-resolved";
+    update-systemd-resolved.inputs.nixpkgs.follows = "nixpkgs"; # optional
+  };
+
+  # Etc.
+}
+```
+
+This flake provides the `update-systemd-resolved` package for several Linux
+architectures.  It also provides the `update-systemd-resolved` NixOS module:
+
+```nix
+# Your flake.nix
+{
+  outputs = {nixpkgs, update-systemd-resolved, ...}: {
+    nixosConfigurations.my-system = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        update-systemd-resolved.nixosModules.update-systemd-resolved
+      ];
+    };
+  };
+}
+```
+
+Please see [the NixOS module documentation](/docs/nixos-modules.md) for
+available options.
+
+To view all outputs provided by this flake, run the following command:
+
+```shell-session
+$ nix flake show 'github:jonathanio/update-systemd-resolved'
+```
+
 ## How to Enable
 
 Make sure that you have `systemd-resolved` enabled and running. First, make sure

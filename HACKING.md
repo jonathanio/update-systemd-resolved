@@ -55,7 +55,7 @@ and features, exposed as a Nix flake check.
 
 Please see the NixOS manual's ["Testing with NixOS" section](https://nixos.org/manual/nixos/stable/index.html#sec-nixos-tests)
 for information on [writing](https://nixos.org/manual/nixos/stable/index.html#sec-writing-nixos-tests)
-and [running](https://nixos.org/manual/nixos/stable/index.html#sec-writing-nixos-tests)
+and [calling](https://nixos.org/manual/nixos/stable/index.html#sec-calling-nixos-tests)
 NixOS tests, as well as information on [running them interactively](https://nixos.org/manual/nixos/stable/index.html#sec-running-nixos-tests-interactively)
 and [linking them to Nix packages](https://nixos.org/manual/nixos/stable/index.html#sec-linking-nixos-tests-to-packages).
 

@@ -22,9 +22,9 @@ This script requires:
   `ip` command).
 - [systemd](https://systemd.io/) (for the `busctl` and `resolvectl` commands).
 
-Optional dependencies:
+### Optional dependencies:
 
-### IP Parsing and Validation
+#### IP Parsing and Validation
 
 - [`python`](https://python.org), **or**
 - [`sipcalc`](https://github.com/sii/sipcalc).
@@ -38,7 +38,7 @@ Bash routines for this.
                `systemd-resolved`'s `org.freedesktop.resolve1.Manager` D-Bus
                interface][resolved]).
 
-### Logging
+#### Logging
 
 - [util-linux](https://en.wikipedia.org/wiki/Util-linux)
 
@@ -46,7 +46,7 @@ If available, the `logger` command included in the `util-linux` distribution
 will be used for logging.  Otherwise, all logs will go to standard error using
 Bash's `printf` builtin.
 
-### Polkit Rules Generation
+#### Polkit Rules Generation
 
 - [`jq`](https://jqlang.github.io/jq/), **or**
 - [`perl`](https://www.perl.org/), **or**

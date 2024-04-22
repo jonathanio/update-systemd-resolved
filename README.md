@@ -319,7 +319,7 @@ openvpn --config /usr/local/share/doc/openvpn/update-systemd-resolved.conf
 > [!NOTE]
 > The path to `update-systemd-resolved.conf` may differ depending on how you
 > installed `update-systemd-resolved`.  Additionally, both the file's path and
-> its contents are subject change in future releases.  Rather than using the
+> its contents are subject to change in future releases.  Rather than using the
 > example configuration file directory, you may want to copy the file to
 > another location and then run `openvpn --config <other-location>/update-systemd-resolved.conf`.
 
@@ -712,9 +712,10 @@ Finally, DNSSEC has been enabled for this link (and this link only).
 > [!IMPORTANT]
 > Required reading: [`systemd-resolved.service` and VPNs][resolved-vpns].  This
 > document includes, among other things, an overview of search domains, routing
-> domains, and `systemd-resolved`'s `default-route` boolean.  Understanding
-> these concepts will help you configure your local `systemd-resolved` instance
-> to ensure that DNS queries go where you want them to go.
+> domains, and `systemd-resolved`'s `default-route` boolean settings.
+> Understanding these concepts will help you configure your local
+> `systemd-resolved` instance to ensure that DNS queries go where you want them
+> to go.
 
 DNS Leakage is something to be careful of when using any VPN or untrusted
 network, and it can heavily depend on how you configure your normal DNS

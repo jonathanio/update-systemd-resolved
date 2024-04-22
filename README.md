@@ -171,7 +171,7 @@ file `/etc/polkit-1/rules.d/10-update-systemd-resolved.rules`.
 
 #### Generating Polkit Rules
 
-> **Note**
+> [!WARNING]
 > `update-systemd-resolved` strives to generate polkit rules with the smallest
 > scope consistent with its proper functioning.  Nonetheless, in order to avoid
 > security risks, you are encouraged to review the generated polkit rules
@@ -303,7 +303,7 @@ openvpn \
   --down /usr/local/libexec/openvpn/update-systemd-resolved --down-pre
 ```
 
-> **Note**
+> [!TIP]
 > The `--setenv PATH` option shown above is intended to allow
 > `update-systemd-resolved` to find [its prerequisites](#prerequisites).
 > Depending on your system's configuration, you may not need `--setenv PATH`,
@@ -316,7 +316,7 @@ Or, you can add the following argument to the command-line arguments of
 openvpn --config /usr/local/share/doc/openvpn/update-systemd-resolved.conf
 ```
 
-> **Note**
+> [!NOTE]
 > The path to `update-systemd-resolved.conf` may differ depending on how you
 > installed `update-systemd-resolved`.  Additionally, both the file's path and
 > its contents are subject change in future releases.  Rather than using the
@@ -709,7 +709,7 @@ Finally, DNSSEC has been enabled for this link (and this link only).
 
 [resolved-vpns]: https://systemd.io/RESOLVED-VPNS
 
-> **Note**
+> [!IMPORTANT]
 > Required reading: [`systemd-resolved.service` and VPNs][resolved-vpns].  This
 > document includes, among other things, an overview of search domains, routing
 > domains, and `systemd-resolved`'s `default-route` boolean.  Understanding

@@ -12,7 +12,7 @@ CONF = $(DESTDIR)/$(DATADIR)/doc/openvpn/$(SRC).conf
 RULES = $(DESTDIR)/$(DATADIR)/polkit-1/rules.d/10-$(SRC).rules
 RULES_OPTIONS ?= --polkit-allowed-user=openvpn --polkit-allowed-group=network
 
-.PHONY: all install info rules
+.PHONY: all install info rules test nixos-test nixos-test-driver
 
 all: install info
 

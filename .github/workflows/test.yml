@@ -6,7 +6,7 @@ on:
 jobs:
   native:
     name: Run tests on native architecture
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Install testing dependencies
@@ -31,7 +31,7 @@ jobs:
         name: Run tests
         with:
           arch: ${{ matrix.arch }}
-          distro: ubuntu20.04
+          distro: ubuntu22.04
           githubToken: ${{ github.token }}
           install: |
             apt-get -y update

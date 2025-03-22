@@ -10,7 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install testing dependencies
-        run: sudo apt-get -y install python3 sipcalc
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install python3 sipcalc
       - name: Run tests
         run: ./run-tests
 

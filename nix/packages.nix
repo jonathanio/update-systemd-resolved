@@ -32,10 +32,6 @@
         # Default is currently "appendix".
         documentType = "none";
 
-        # We only want Markdown
-        allowDocBook = false;
-        markdownByDefault = true;
-
         # Only include our own options.
         transformOptions = let
           ourPrefix = "${toString self}/";

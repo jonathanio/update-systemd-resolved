@@ -69,7 +69,7 @@ via the ` config ` directive\.
 
 
 *Type:*
-path *(read only)*
+absolute path *(read only)*
 
 
 
@@ -179,7 +179,7 @@ this link to resolve queries for domains not
 explicitly assigned to the servers on any other
 link\.
 
-See ` resolvectl(1) `'s coverage of ` default-route ` for a
+See [` resolvectl(1) `](https://www.freedesktop.org/software/systemd/man/resolvectl.html)'s coverage of ` default-route ` for a
 description of this feature\.
 
 
@@ -204,7 +204,7 @@ description of this feature\.
 Attribute set naming DNS servers to configure for
 this VPN’s link\.
 
-See the description of ` DNS ` in ` resolved.conf(5) ` for
+See the description of ` DNS ` in [` resolved.conf(5) `](https://www.freedesktop.org/software/systemd/man/resolved.conf.html) for
 the meaning of this option and its available values\.
 
 
@@ -284,7 +284,7 @@ non-empty string
 
 
 Network interface name or index (note that this is as
-detailed as ` resolved.conf(5) ` gets about the
+detailed as [` resolved.conf(5) `](https://www.freedesktop.org/software/systemd/man/resolved.conf.html) gets about the
 meaning of the interface component of a DNS server
 specification)\.
 
@@ -351,7 +351,7 @@ null or non-empty string
 
 Whether to enable DNS-over-TLS for this link\.
 
-See the description of ` DNSOverTLS ` in ` resolved.conf(5) ` for
+See the description of ` DNSOverTLS ` in [` resolved.conf(5) `](https://www.freedesktop.org/software/systemd/man/resolved.conf.html) for
 the meaning of this option and its available values\.
 
 In addition to the values documented there, this option also
@@ -379,7 +379,7 @@ the global value for ` DNSOverTLS ` configured in ` resolved.conf `\.
 
 Whether to enable DNSSEC for this link\.
 
-See the description of ` DNSSEC ` in ` resolved.conf(5) ` for
+See the description of ` DNSSEC ` in [` resolved.conf(5) `](https://www.freedesktop.org/software/systemd/man/resolved.conf.html) for
 the meaning of this option and its available values\.
 
 In addition to the values documented there, this option also
@@ -432,7 +432,7 @@ list of non-empty string
 
 Main domain to configure for this link\.
 
-See the description of ` Domains ` in ` resolved.conf(5) ` for
+See the description of ` Domains ` in [` resolved.conf(5) `](https://www.freedesktop.org/software/systemd/man/resolved.conf.html) for
 the meaning of this option and its available values\.
 
 
@@ -457,7 +457,7 @@ null or non-empty string
 Whether to flush ` systemd-resolved `’s cache upon
 starting the VPN\.
 
-See ` resolvectl(1) `'s coverage of ` flush-caches ` for a
+See [` resolvectl(1) `](https://www.freedesktop.org/software/systemd/man/resolvectl.html)'s coverage of ` flush-caches ` for a
 description of this feature\.
 
 
@@ -481,7 +481,7 @@ description of this feature\.
 
 Whether to enable LLMNR for this link\.
 
-See the description of ` LLMNR ` in ` resolved.conf(5) ` for
+See the description of ` LLMNR ` in [` resolved.conf(5) `](https://www.freedesktop.org/software/systemd/man/resolved.conf.html) for
 the meaning of this option and its available values\.
 
 In addition to the values documented there, this option also
@@ -509,7 +509,7 @@ the global value for ` LLMNR ` configured in ` resolved.conf `\.
 
 Whether to enable multicast DNS for this link\.
 
-See the description of ` MulticastDNS ` in ` resolved.conf(5) ` for
+See the description of ` MulticastDNS ` in [` resolved.conf(5) `](https://www.freedesktop.org/software/systemd/man/resolved.conf.html) for
 the meaning of this option and its available values\.
 
 In addition to the values documented there, this option also
@@ -538,7 +538,7 @@ the global value for ` MulticastDNS ` configured in ` resolved.conf `\.
 Whether to reset learned server features when
 bringing up the VPN link\.
 
-See ` resolvectl(1) `'s coverage of ` reset-server-features ` for a
+See [` resolvectl(1) `](https://www.freedesktop.org/software/systemd/man/resolvectl.html)'s coverage of ` reset-server-features ` for a
 description of this feature\.
 
 
@@ -564,7 +564,7 @@ Whether to reset the statistics counters shown in
 ` resolvectl statistics ` to zero when
 bringing up the VPN link\.
 
-See ` resolvectl(1) `'s coverage of ` reset-statistics ` for a
+See [` resolvectl(1) `](https://www.freedesktop.org/software/systemd/man/resolvectl.html)'s coverage of ` reset-statistics ` for a
 description of this feature\.
 
 
@@ -589,7 +589,7 @@ description of this feature\.
 List of route-only domains to configure for this
 link\.
 
-See the description of ` Domains ` in ` resolved.conf(5) ` for
+See the description of ` Domains ` in [` resolved.conf(5) `](https://www.freedesktop.org/software/systemd/man/resolved.conf.html) for
 the meaning of this option and its available values\.
 
 
@@ -614,7 +614,7 @@ list of non-empty string
 List of search domains to configure for this
 link\.
 
-See the description of ` Domains ` in ` resolved.conf(5) ` for
+See the description of ` Domains ` in [` resolved.conf(5) `](https://www.freedesktop.org/software/systemd/man/resolved.conf.html) for
 the meaning of this option and its available values\.
 
 

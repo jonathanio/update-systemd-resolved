@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.0.0 (2025.03.23)
 
 ### IMPROVEMENTS
 

@@ -161,3 +161,4 @@ shell.
   NixOS system test.
 - `mkanchor`: regenerate the DNSSEC trust anchors configuration used with
   dnsmasq in the NixOS system test.
+- `mkoptdocs`: regenerate the [NixOS module options documentation](/docs/nixos-modules.md)
